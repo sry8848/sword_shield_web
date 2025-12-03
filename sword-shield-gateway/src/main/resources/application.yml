@@ -1,0 +1,44 @@
+server:
+  port: 8080
+  max-http-request-header-size: 10MB
+spring:
+
+  application:
+    name: sword-shield-gateway
+  codec:
+    max-in-memory-size: 50MB
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+        server-addr: 172.25.255.76:8848
+      config:
+        enabled: false
+    gateway:
+      default-filters: []
+      routes:
+        - id: user
+          uri: http://localhost:8101
+          predicates:
+            - Path=/api/user/**
+        - id: activity
+          uri: http://localhost:8102
+          predicates:
+            - Path=/api/activity/**
+        - id: content
+          uri: http://localhost:8103
+          predicates:
+            - Path=/api/content/**
+        - id: file
+          uri: http://localhost:8105
+          predicates:
+            - Path=/api/file/**
+        - id: interaction
+          uri: http://localhost:8104
+          predicates:
+            - Path=/api/interaction/**
+        - id: admin
+          uri: http://localhost:8106
+          predicates:
+            - Path=/api/admin/**
+

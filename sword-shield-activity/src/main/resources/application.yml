@@ -1,0 +1,30 @@
+server:
+  port: 8102
+spring:
+  application:
+    name: sword-shield-activity
+  datasource:
+    url: jdbc:mysql://172.25.255.76:3306/sword_shield?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+        server-addr: 172.25.255.76:8848
+      config:
+        import-check:
+          enabled: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+

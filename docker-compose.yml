@@ -1,0 +1,100 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ss_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: "sword_shield"
+      TZ: "Asia/Shanghai"
+      MYSQL_INITDB_SKIP_TZINFO: 1
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --explicit_defaults_for_timestamp=1
+      - --skip-ssl
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+
+  nacos:
+    image: nacos/nacos-server:v2.3.2-slim
+    container_name: ss_nacos
+    environment:
+      MODE: standalone
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - ./data/nacos:/home/nacos/data
+
+  redis:
+    image: redis:7.2.4
+    container_name: ss_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+
+  minio:
+    image: minio/minio:latest
+    container_name: ss_minio
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123456
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./data/minio:/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: ss_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - action.auto_create_index=true
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    restart: always
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: ss_logstash
+    ports:
+      - "5000:5000"
+      - "9600:9600"
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    environment:
+      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
+    depends_on:
+      - elasticsearch
+    restart: always
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: ss_kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - I18N_LOCALE=zh-CN
+    depends_on:
+      - elasticsearch
+    restart: always
+
+volumes:
+  mysql_data:
+    driver: local

@@ -1,0 +1,8 @@
+.serena
+.idea
+data
+logs
+db
+target
+.vscode
+*.class

@@ -1,0 +1,61 @@
+package com.swordshield.file.service;
+
+import com.swordshield.file.domain.AssetFile;
+import com.swordshield.file.repository.AssetFileRepository;
+import io.minio.*;
+import io.minio.http.Method;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import java.io.InputStream;
+import java.time.Instant;
+
+@Service
+public class FileService {
+    private final MinioClient minio;
+    private final AssetFileRepository repo;
+    private final String bucket;
+
+    public FileService(MinioClient minio, AssetFileRepository repo, @Value("${minio.bucket}") String bucket) {
+        this.minio = minio;
+        this.repo = repo;
+        this.bucket = bucket;
+    }
+
+    public AssetFile putObject(String objectName, String originalName, String contentType, long size, InputStream stream, Long ownerId) throws Exception {
+        ensureBucket();
+        PutObjectArgs args = PutObjectArgs.builder()
+                .bucket(bucket)
+                .object(objectName)
+                .contentType(contentType)
+                .stream(stream, size, -1)
+                .build();
+        minio.putObject(args);
+        AssetFile f = new AssetFile();
+        f.setBucket(bucket);
+        f.setObjectName(objectName);
+        f.setOriginalName(originalName);
+        f.setContentType(contentType);
+        f.setSize(size);
+        f.setOwnerId(ownerId);
+        f.setCreatedAt(Instant.now());
+        return repo.save(f);
+    }
+
+    public String presignedGet(String objectName, int expireSeconds) throws Exception {
+        ensureBucket();
+        GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
+                .bucket(bucket)
+                .object(objectName)
+                .method(Method.GET)
+                .expiry(expireSeconds)
+                .build();
+        return minio.getPresignedObjectUrl(args);
+    }
+
+    private void ensureBucket() throws Exception {
+        boolean exists = minio.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
+        if (!exists) {
+            minio.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
+        }
+    }
+}
