@@ -4,7 +4,7 @@ spring:
   application:
     name: sword-shield-admin
   datasource:
-    url: jdbc:mysql://172.25.255.76:3306/sword_shield?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/sword_shield?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
   jpa:
@@ -15,7 +15,7 @@ spring:
     nacos:
       discovery:
         enabled: true
-        server-addr: 172.25.255.76:8848
+        server-addr: localhost:8848
       config:
         enabled: false
 management:

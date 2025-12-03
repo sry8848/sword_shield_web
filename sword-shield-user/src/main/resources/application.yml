@@ -5,7 +5,7 @@ spring:
   application:
     name: sword-shield-user
   datasource:
-    url: jdbc:mysql://172.25.255.76:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456
@@ -16,8 +16,8 @@ spring:
   cloud:
     nacos:
       discovery:
-        enabled: false
-        server-addr: 172.25.255.76:8848
+        enabled: true
+        server-addr: localhost:8848
       config:
         enabled: false
 management:

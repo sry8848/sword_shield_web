@@ -2,7 +2,6 @@ server:
   port: 8080
   max-http-request-header-size: 10MB
 spring:
-
   application:
     name: sword-shield-gateway
   codec:
@@ -10,35 +9,42 @@ spring:
   cloud:
     nacos:
       discovery:
-        enabled: false
-        server-addr: 172.25.255.76:8848
+        enabled: true
+        server-addr: localhost:8848
       config:
         enabled: false
     gateway:
       default-filters: []
       routes:
         - id: user
-          uri: http://localhost:8101
+          uri: lb://sword-shield-user
           predicates:
             - Path=/api/user/**
         - id: activity
-          uri: http://localhost:8102
+          uri: lb://sword-shield-activity
           predicates:
             - Path=/api/activity/**
         - id: content
-          uri: http://localhost:8103
+          uri: lb://sword-shield-content
           predicates:
             - Path=/api/content/**
         - id: file
-          uri: http://localhost:8105
+          uri: lb://sword-shield-file
           predicates:
             - Path=/api/file/**
         - id: interaction
-          uri: http://localhost:8104
+          uri: lb://sword-shield-interaction
           predicates:
             - Path=/api/interaction/**
         - id: admin
-          uri: http://localhost:8106
+          uri: lb://sword-shield-admin
           predicates:
             - Path=/api/admin/**
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always

@@ -6,3 +6,5 @@ db
 target
 .vscode
 *.class
+node_modules
+.DS_Store

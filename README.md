@@ -1,6 +1,6 @@
 # sword-shield-web
 
-基于 Java 17 的 Spring Boot 3.2 微服务套件，配合 Vue 3 + Vite 前端。服务通过 Spring Cloud Gateway 暴露，依赖 MySQL、Redis、MinIO，可选接入 Nacos。
+基于 Java 17 的 Spring Boot 3.2 微服务套件，配合 Vue 3 + Vite 前端。服务通过 Spring Cloud Gateway 暴露，依赖 MySQL、Redis、MinIO，并使用 Nacos 进行注册发现（网关通过 `lb://` 路由到各服务）。
 
 ## 模块与端口
 - Gateway：`sword-shield-gateway`（8080），将 `/api/{service}/**` 路由到本地服务。
@@ -35,13 +35,18 @@ mvn clean package      # 如需跳过测试，加 -DskipTests
 
 运行单个服务（示例 user）：
 ```sh
-mvn spring-boot:run -pl sword-shield-user -am
+cd sword-shield-user && mvn spring-boot:run
 ```
-端口如上；网关 8080。Nacos 依赖存在但在默认 `application.yml` 中关闭，路由静态指向本地端口。
+端口如上；网关 8080。各服务默认会注册到 Nacos（`spring.cloud.nacos.discovery.enabled: true`），网关路由使用 `lb://sword-shield-*` 通过 Nacos 发现实例。
 
-配置说明：`src/main/resources/application.yml` 默认的 DB/Nacos/MinIO 地址为 `172.25.255.76`，本地运行请改为 `localhost` 或环境对应地址，或通过环境变量/启动参数覆盖。
+配置说明：`src/main/resources/application.yml` 默认 DB/Nacos/MinIO 地址均为 `localhost`。如在容器或远程环境运行，请改为对应地址，或通过环境变量/启动参数覆盖（例如 `--spring.cloud.nacos.discovery.server-addr=...`）。
 
-健康检查与指标（若模块开启 actuator）：`/actuator/health`、`/actuator/info`、`/actuator/prometheus`。
+健康检查与指标：`/actuator/health`、`/actuator/info`、`/actuator/prometheus`。网关额外暴露 `/actuator/gateway/routes` 用于查看路由。
+
+Nacos 验证：
+- 查看注册实例：`curl "http://localhost:8848/nacos/v1/ns/instance/list?serviceName=sword-shield-user"`
+- 网关健康：`curl http://localhost:8080/actuator/health`
+- 如果未看到实例，先确保 Nacos 已启动，再重启对应服务/网关。
 
 ## 前端（sword-shield-web-ui）
 ```sh
@@ -52,8 +57,8 @@ npm run build    # 生产构建
 ```
 
 ## 开发流程建议
-1) `docker-compose up -d` 启动依赖。
-2) 按需修改各服务 `application.yml` 的 DB/Nacos/MinIO 地址/凭据。
-3) `mvn spring-boot:run -pl <module> -am` 启动需要的服务；网关在 8080。
-4) 前端 `npm run dev`，默认端口 5173。
-5) 验证：`curl http://localhost:8080/actuator/health`。
+1) 把解压包的data、db、logs文件夹复制到当前目录并运行`docker-compose up -d` 启动依赖。
+2) 后端`cd <module> &&mvn spring-boot:run` 依次启动所有服务，最后启动网关。（上面`模块与端口`带有端口的就是可以启动的服务）
+3) 前端 `cd sword-shield-web-ui && npm i && npm run dev`，默认端口 5173。
+4) 验证：浏览器访问`http://localhost:5173`。
+
