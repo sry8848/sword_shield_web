@@ -31,6 +31,7 @@ docker-compose up -d
 构建所有模块：
 ```sh
 mvn clean package      # 如需跳过测试，加 -DskipTests
+mvn clean install      #
 ```
 
 运行单个服务（示例 user）：
@@ -57,8 +58,11 @@ npm run build    # 生产构建
 ```
 
 ## 开发流程建议
-1) 把解压包的data、db、logs文件夹复制到当前目录并运行`docker-compose up -d` 启动依赖。
-2) 后端`cd <module> &&mvn spring-boot:run` 依次启动所有服务，最后启动网关。（上面`模块与端口`带有端口的就是可以启动的服务）
-3) 前端 `cd sword-shield-web-ui && npm i && npm run dev`，默认端口 5173。
-4) 验证：浏览器访问`http://localhost:5173`。
+1) 拉取仓库`git clone -b dev https://github.com/Penryn/sword_shield_web.git`
+2) 把解压包的data、db、logs文件夹复制到当前目录并运行`docker-compose up -d` 启动依赖。
+3) 后端首先在根目录执行`mvn clean package && mvn clean install`然后`cd <module> &&mvn spring-boot:run` 依次启动所有服务，最后启动网关。（上面`模块与端口`带有端口的就是可以启动的服务）
+4) 前端 `cd sword-shield-web-ui && npm i && npm run dev`，默认端口 5173。
+5) 验证：浏览器访问`http://localhost:5173`。
+6) 保存本地：`git fetch && git add . && git commit -m "本次更改内容" `
+7) 上传github：`git push`
 
