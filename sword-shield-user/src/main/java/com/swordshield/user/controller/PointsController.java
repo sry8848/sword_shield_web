@@ -12,9 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "积分", description = "用户签到与积分查询")
 public class PointsController {
     private final UserPointsRepository userPointsRepo;
     private final CheckinRepository checkinRepo;
@@ -25,7 +30,10 @@ public class PointsController {
     }
 
     @PostMapping("/checkin")
-    public Response<Object> checkin(@RequestHeader("Authorization") String authorization) {
+    @Operation(summary = "每日签到", description = "需携带用户 JWT，成功后自动增加积分")
+    public Response<Object> checkin(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
+            @RequestHeader("Authorization") String authorization) {
         Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
         LocalDate today = LocalDate.now();
         
@@ -61,7 +69,10 @@ public class PointsController {
     }
 
     @GetMapping("/points")
-    public Response<Map<String, Integer>> points(@RequestHeader("Authorization") String authorization) {
+    @Operation(summary = "查询积分", description = "返回用户累计积分，需携带 JWT")
+    public Response<Map<String, Integer>> points(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
+            @RequestHeader("Authorization") String authorization) {
         Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
         
         UserPoints userPoints = userPointsRepo.findByUserId(userId)

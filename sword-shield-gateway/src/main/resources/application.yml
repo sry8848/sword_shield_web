@@ -40,6 +40,22 @@ spring:
           uri: lb://sword-shield-admin
           predicates:
             - Path=/api/admin/**
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: user
+        url: /api/user/v3/api-docs
+      - name: activity
+        url: /api/activity/v3/api-docs
+      - name: content
+        url: /api/content/v3/api-docs
+      - name: file
+        url: /api/file/v3/api-docs
+      - name: interaction
+        url: /api/interaction/v3/api-docs
+      - name: admin
+        url: /api/admin/v3/api-docs
 management:
   endpoints:
     web:

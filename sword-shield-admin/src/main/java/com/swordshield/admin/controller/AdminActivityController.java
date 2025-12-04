@@ -7,9 +7,14 @@ import com.swordshield.common.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/admin/activities")
+@Tag(name = "活动管理（管理员）", description = "管理员查看、创建、修改、删除活动")
 public class AdminActivityController {
     private final AdminActivityService activityService;
 
@@ -32,14 +37,18 @@ public class AdminActivityController {
     }
 
     @GetMapping
+    @Operation(summary = "全部活动列表", description = "管理员查询全部活动")
     public Response<java.util.List<Activity>> getAll(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization) {
         verifyAdmin(authorization);
         return Response.ok(activityService.getAll());
     }
 
     @GetMapping("/list")
+    @Operation(summary = "分页查询活动", description = "管理员分页查询活动列表")
     public Response<Map<String, Object>> list(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
@@ -55,7 +64,9 @@ public class AdminActivityController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "活动详情（管理员）", description = "根据 ID 查询活动详情")
     public Response<Activity> get(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id) {
         verifyAdmin(authorization);
@@ -63,7 +74,9 @@ public class AdminActivityController {
     }
 
     @PostMapping
+    @Operation(summary = "创建活动", description = "管理员创建新活动")
     public Response<Activity> create(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @RequestBody Activity activity) {
         verifyAdmin(authorization);
@@ -72,7 +85,9 @@ public class AdminActivityController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "更新活动", description = "管理员修改活动信息")
     public Response<Activity> update(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id,
             @RequestBody Activity activity) {
@@ -82,7 +97,9 @@ public class AdminActivityController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "删除活动", description = "管理员删除活动")
     public Response<Object> delete(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id) {
         verifyAdmin(authorization);

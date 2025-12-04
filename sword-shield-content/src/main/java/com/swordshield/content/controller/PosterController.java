@@ -12,14 +12,18 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.time.Instant;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/content")
+@Tag(name = "海报", description = "动态生成海报并可上传到文件服务")
 public class PosterController {
     @Autowired(required = false)
     private FileService fileService;
 
     @PostMapping(value = "/poster", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @Operation(summary = "生成海报", description = "根据标题/副标题生成品牌海报，可返回 base64 或上传文件服务")
     public Response<String> poster(@RequestParam(name = "title") String title,
                                    @RequestParam(name = "subtitle") String subtitle) throws Exception {
         BufferedImage img = new BufferedImage(800, 1200, BufferedImage.TYPE_INT_ARGB);

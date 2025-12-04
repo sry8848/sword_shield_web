@@ -26,6 +26,9 @@ spring:
       config:
         import-check:
           enabled: false
+springdoc:
+  api-docs:
+    path: /api/file/v3/api-docs
 minio:
   endpoint: http://localhost:9000
   accessKey: admin

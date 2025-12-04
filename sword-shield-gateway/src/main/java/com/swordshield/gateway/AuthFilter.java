@@ -18,6 +18,9 @@ public class AuthFilter implements GlobalFilter, Ordered {
         String path = req.getURI().getPath();
         System.out.println("[AuthFilter] Request path: " + path);
         if (
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/webjars/swagger-ui") ||
+                path.contains("/v3/api-docs") ||
                 path.startsWith("/api/user/login") ||
                 path.startsWith("/api/user/register") ||
                 path.startsWith("/api/admin/auth/login") ||

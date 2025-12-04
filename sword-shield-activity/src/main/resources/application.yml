@@ -19,6 +19,9 @@ spring:
       config:
         import-check:
           enabled: false
+springdoc:
+  api-docs:
+    path: /api/activity/v3/api-docs
 management:
   endpoints:
     web:

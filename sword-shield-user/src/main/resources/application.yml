@@ -20,6 +20,9 @@ spring:
         server-addr: localhost:8848
       config:
         enabled: false
+springdoc:
+  api-docs:
+    path: /api/user/v3/api-docs
 management:
   endpoints:
     web:

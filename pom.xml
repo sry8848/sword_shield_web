@@ -23,6 +23,7 @@
     <spring.cloud.alibaba.version>2023.0.1.0</spring.cloud.alibaba.version>
     <dubbo.version>3.2.9</dubbo.version>
     <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
+    <springdoc-openapi.version>2.2.0</springdoc-openapi.version>
   </properties>
 
   <dependencyManagement>
@@ -59,6 +60,21 @@
         <groupId>net.logstash.logback</groupId>
         <artifactId>logstash-logback-encoder</artifactId>
         <version>${logstash-logback-encoder.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        <version>${springdoc-openapi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+        <version>${springdoc-openapi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-gateway</artifactId>
+        <version>${springdoc-openapi.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
