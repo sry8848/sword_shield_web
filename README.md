@@ -22,10 +22,12 @@
 ```sh
 docker-compose up -d
 ```
-将启动 MySQL、Nacos、Redis、MinIO、Elasticsearch+Logstash+Kibana。
+将启动 MySQL、Nacos、Redis、MinIO、Elasticsearch+Logstash+Kibana、Jaeger + OTel Collector。
 - MySQL：`root / 123456`，数据库 `sword_shield`，端口 `3306`
 - Nacos：`8848`
 - MinIO：`9000`（API）/ `9001`（Console），账号 `admin / admin123456`
+- OTel Collector：OTLP gRPC `4317` / HTTP `4318`
+- Jaeger UI：`16686`
 
 ## 后端构建与运行
 构建所有模块：
@@ -60,7 +62,7 @@ npm run build    # 生产构建
 ## 开发流程建议
 1) 拉取仓库`git clone -b dev https://github.com/Penryn/sword_shield_web.git`
 2) 把解压包的data、db、logs文件夹复制到当前目录并运行`docker-compose up -d` 启动依赖。
-3) 后端首先在根目录执行`mvn clean package && mvn clean install`然后`cd <module> &&mvn spring-boot:run` 依次启动所有服务，最后启动网关。（上面`模块与端口`带有端口的就是可以启动的服务）
+3) 后端首先在根目录执行`mvn clean package && mvn clean install`然后`./scripts/run-with-otel-agent.sh <module>` 依次启动所有服务，最后启动网关。（上面`模块与端口`带有端口的就是可以启动的服务）
 4) 前端 `cd sword-shield-web-ui && npm i && npm run dev`，默认端口 5173。
 5) 验证：浏览器访问`http://localhost:5173`。
 6) 保存本地：`git fetch && git add . && git commit -m "本次更改内容" `
@@ -71,3 +73,4 @@ npm run build    # 生产构建
 - Nacos 控制台：`http://127.0.0.1:8848/nacos`
 - Kibana（ES 可视化）：`http://127.0.0.1:5601`
 - 网关聚合 Swagger UI：`http://localhost:8080/swagger-ui.html`（汇总各服务 OpenAPI）
+- Jaeger（链路追踪）：`http://localhost:16686`
