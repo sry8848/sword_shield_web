@@ -73,7 +73,7 @@ services:
     image: docker.elastic.co/logstash/logstash:8.11.0
     container_name: ss_logstash
     ports:
-      - "5000:5000"
+      - "15000:5000"
       - "9600:9600"
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
@@ -95,4 +95,3 @@ services:
     depends_on:
       - elasticsearch
     restart: always
-

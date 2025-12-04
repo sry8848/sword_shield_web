@@ -30,7 +30,7 @@
 
     <!-- Logstash Appender -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:5000</destination>
+        <destination>localhost:15000</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"service_name":"${application.name}"}</customFields>
         </encoder>
