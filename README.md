@@ -22,7 +22,7 @@
 ```sh
 docker-compose up -d
 ```
-将启动 MySQL、Nacos、Redis、MinIO、Elasticsearch+Logstash+Kibana、Jaeger + OTel Collector。
+将启动 MySQL、Nacos、Redis、MinIO、Elasticsearch+Logstash+Kibana、Jaeger + OTel Collector、Prometheus + Grafana。
 - MySQL：`root / 123456`，数据库 `sword_shield`，端口 `3306`
 - Nacos：`8848`
 - MinIO：`9000`（API）/ `9001`（Console），账号 `admin / admin123456`
@@ -74,3 +74,5 @@ npm run build    # 生产构建
 - Kibana（ES 可视化）：`http://127.0.0.1:5601`
 - 网关聚合 Swagger UI：`http://localhost:8080/swagger-ui.html`（汇总各服务 OpenAPI）
 - Jaeger（链路追踪）：`http://localhost:16686`
+- Prometheus：`http://localhost:9090`
+- Grafana：`http://localhost:3000`（默认账户 `admin/admin`，已预置 Prometheus 数据源） 可导入常用看板：Spring Boot 3 Micrometer `10280`、JVM `4701`、Gateway `12900`。
