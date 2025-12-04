@@ -9,14 +9,18 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class AuthFilter implements GlobalFilter, Ordered {
+    private static final Logger log = LoggerFactory.getLogger(AuthFilter.class);
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest req = exchange.getRequest();
         String path = req.getURI().getPath();
-        System.out.println("[AuthFilter] Request path: " + path);
+        log.info("[AuthFilter] Request path: {}", path);
         if (
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/webjars/swagger-ui") ||
