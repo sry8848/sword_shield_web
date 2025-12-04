@@ -66,3 +66,8 @@ npm run build    # 生产构建
 6) 保存本地：`git fetch && git add . && git commit -m "本次更改内容" `
 7) 上传github：`git push`
 
+## 常用控制台/可视化地址
+- MinIO 控制台：`http://localhost:9001/browser`（admin / admin123456）
+- Nacos 控制台：`http://127.0.0.1:8848/nacos`
+- Kibana（ES 可视化）：`http://127.0.0.1:5601`
+- 网关聚合 Swagger UI：`http://localhost:8080/swagger-ui.html`（汇总各服务 OpenAPI）
