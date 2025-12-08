@@ -21,7 +21,15 @@ spec:
             - containerPort: 8080
           env:
             - name: JAVA_OPTS
-              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
+            - name: SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
+              value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+              value: "http://otel-collector:4318/v1/traces"
           readinessProbe:
             httpGet:
               path: /actuator/health
@@ -73,7 +81,21 @@ spec:
             - containerPort: 8101
           env:
             - name: JAVA_OPTS
-              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "123456"
+            - name: SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
+              value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+              value: "http://otel-collector:4318/v1/traces"
           readinessProbe:
             httpGet:
               path: /actuator/health
@@ -123,7 +145,21 @@ spec:
             - containerPort: 8102
           env:
             - name: JAVA_OPTS
-              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "123456"
+            - name: SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
+              value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+              value: "http://otel-collector:4318/v1/traces"
           readinessProbe:
             httpGet:
               path: /actuator/health
@@ -173,7 +209,21 @@ spec:
             - containerPort: 8103
           env:
             - name: JAVA_OPTS
-              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "123456"
+            - name: SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
+              value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+              value: "http://otel-collector:4318/v1/traces"
           readinessProbe:
             httpGet:
               path: /actuator/health
@@ -223,7 +273,21 @@ spec:
             - containerPort: 8104
           env:
             - name: JAVA_OPTS
-              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "123456"
+            - name: SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
+              value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+              value: "http://otel-collector:4318/v1/traces"
           readinessProbe:
             httpGet:
               path: /actuator/health
@@ -273,7 +337,23 @@ spec:
             - containerPort: 8105
           env:
             - name: JAVA_OPTS
-              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "123456"
+            - name: SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
+              value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+              value: "http://otel-collector:4318/v1/traces"
+            - name: MINIO_ENDPOINT
+              value: "http://minio:9000"
           readinessProbe:
             httpGet:
               path: /actuator/health
@@ -323,7 +403,28 @@ spec:
             - containerPort: 8106
           env:
             - name: JAVA_OPTS
-              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "123456"
+            - name: SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR
+              value: "nacos:8848"
+            - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
+              value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+              value: "http://otel-collector:4318/v1/traces"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           readinessProbe:
             httpGet:
               path: /actuator/health

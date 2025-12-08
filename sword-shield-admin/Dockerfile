@@ -3,7 +3,8 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS builder
 WORKDIR /workspace
 COPY . .
-RUN mvn -B -pl sword-shield-admin -am package -DskipTests
+RUN mvn -B -pl sword-shield-admin -am install -DskipTests && \
+    cd sword-shield-admin && mvn -B package spring-boot:repackage -DskipTests
 
 FROM eclipse-temurin:17-jre
 ENV TZ=Asia/Shanghai \

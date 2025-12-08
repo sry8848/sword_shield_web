@@ -69,6 +69,9 @@ data:
           grpc:
           http:
 
+    extensions:
+      health_check: {}
+
     processors:
       memory_limiter:
         check_interval: 1s
@@ -85,6 +88,7 @@ data:
         loglevel: warn
 
     service:
+      extensions: [health_check]
       pipelines:
         traces:
           receivers: [otlp]
@@ -173,18 +177,16 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 3306
-            initialDelaySeconds: 15
+            initialDelaySeconds: 45
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
               port: 3306
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 20
       volumes:
         - name: data
-          hostPath:
-            path: /data/host/mysql
-            type: DirectoryOrCreate
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -221,6 +223,16 @@ spec:
           env:
             - name: MODE
               value: "standalone"
+            - name: JVM_XMS
+              value: "512m"
+            - name: JVM_XMX
+              value: "512m"
+            - name: JVM_XMN
+              value: "128m"
+            - name: NACOS_AUTH_ENABLE
+              value: "false"
+            - name: JAVA_OPT_EXT
+              value: "-Djava.net.preferIPv4Stack=true"
           ports:
             - containerPort: 8848
             - containerPort: 9848
@@ -229,21 +241,31 @@ spec:
               mountPath: /home/nacos/data
           readinessProbe:
             httpGet:
-              path: /nacos/v1/console/health/liveness
+              path: /nacos/v1/console/health/readiness
               port: 8848
-            initialDelaySeconds: 20
-            periodSeconds: 10
+            # nacos 启动较慢，适当放宽探针配置，避免频繁重启
+            initialDelaySeconds: 180
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /nacos/v1/console/health/liveness
               port: 8848
-            initialDelaySeconds: 40
-            periodSeconds: 20
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /nacos/v1/console/health/liveness
+              port: 8848
+            # 允许 nacos 最长 15 分钟完成启动
+            failureThreshold: 90
+            periodSeconds: 10
       volumes:
         - name: data
-          hostPath:
-            path: /data/host/nacos
-            type: DirectoryOrCreate
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -255,10 +277,12 @@ spec:
   selector:
     app: nacos
   ports:
-    - port: 8848
+    - name: http
+      port: 8848
       targetPort: 8848
       nodePort: 30848
-    - port: 9848
+    - name: client
+      port: 9848
       targetPort: 9848
 ---
 apiVersion: apps/v1
@@ -296,9 +320,7 @@ spec:
             periodSeconds: 20
       volumes:
         - name: data
-          hostPath:
-            path: /data/host/redis
-            type: DirectoryOrCreate
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -344,9 +366,7 @@ spec:
               mountPath: /data
       volumes:
         - name: data
-          hostPath:
-            path: /data/host/minio
-            type: DirectoryOrCreate
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -408,19 +428,29 @@ spec:
             httpGet:
               path: /
               port: 9200
-            initialDelaySeconds: 20
-            periodSeconds: 10
+            # elasticsearch 启动和恢复索引较慢，放宽探针
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /
               port: 9200
-            initialDelaySeconds: 40
-            periodSeconds: 20
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /
+              port: 9200
+            # 允许 ES 最长 15 分钟完成启动
+            failureThreshold: 90
+            periodSeconds: 10
       volumes:
         - name: data
-          hostPath:
-            path: /data/host/elasticsearch
-            type: DirectoryOrCreate
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -475,14 +505,25 @@ spec:
             httpGet:
               path: /
               port: 9600
-            initialDelaySeconds: 20
-            periodSeconds: 10
+            # logstash 首次启动 pipeline 较慢，放宽探针
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /
               port: 9600
-            initialDelaySeconds: 40
-            periodSeconds: 20
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /
+              port: 9600
+            failureThreshold: 90
+            periodSeconds: 10
       volumes:
         - name: logstash-config
           configMap:
@@ -536,14 +577,26 @@ spec:
             httpGet:
               path: /api/status
               port: 5601
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            # kibana 依赖 ES，插件较多，启动慢，放宽探针
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 8
           livenessProbe:
             httpGet:
               path: /api/status
               port: 5601
-            initialDelaySeconds: 60
-            periodSeconds: 20
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /api/status
+              port: 5601
+            # 允许 kibana 最长 20 分钟完成启动
+            failureThreshold: 120
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -727,9 +780,7 @@ spec:
           configMap:
             name: prometheus-config
         - name: data
-          hostPath:
-            path: /data/host/prometheus
-            type: DirectoryOrCreate
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -786,14 +837,18 @@ spec:
               port: 3000
             initialDelaySeconds: 40
             periodSeconds: 20
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            failureThreshold: 60
+            periodSeconds: 10
       volumes:
         - name: datasources
           configMap:
             name: grafana-datasources
         - name: data
-          hostPath:
-            path: /data/host/grafana
-            type: DirectoryOrCreate
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -836,14 +891,26 @@ spec:
             httpGet:
               path: /
               port: 8858
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            # sentinel-dashboard 为 Spring Boot 应用，启动较慢时容易被探针误杀，这里放宽探针参数
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /
               port: 8858
-            initialDelaySeconds: 20
-            periodSeconds: 20
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8858
+            # 允许 sentinel-dashboard 最长约 15 分钟完成启动
+            failureThreshold: 90
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
