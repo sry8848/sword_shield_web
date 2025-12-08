@@ -1,0 +1,12 @@
+target
+**/target
+node_modules
+dist
+data
+logs
+logstash
+db
+.git
+.idea
+.DS_Store
+*.iml
