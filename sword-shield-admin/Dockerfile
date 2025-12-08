@@ -7,8 +7,10 @@ RUN mvn -B -pl sword-shield-admin -am package -DskipTests
 
 FROM eclipse-temurin:17-jre
 ENV TZ=Asia/Shanghai \
-    JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+    JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0" \
+    JAVA_AGENT_OPTS=""
 WORKDIR /app
 COPY --from=builder /workspace/sword-shield-admin/target/sword-shield-admin-*.jar app.jar
+COPY otel/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar
 EXPOSE 8106
-ENTRYPOINT ["sh","-c","java ${JAVA_OPTS} -jar /app/app.jar"]
+ENTRYPOINT ["sh","-c","java ${JAVA_OPTS} ${JAVA_AGENT_OPTS} -jar /app/app.jar"]
