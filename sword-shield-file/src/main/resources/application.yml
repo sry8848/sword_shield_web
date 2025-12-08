@@ -26,6 +26,17 @@ spring:
       config:
         import-check:
           enabled: false
+    sentinel:
+      transport:
+        dashboard: localhost:8858
+      datasource:
+        flow:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            data-id: ${spring.application.name}-sentinel-flow
+            group-id: SENTINEL_GROUP
+            data-type: json
+            rule-type: flow
 springdoc:
   api-docs:
     path: /api/file/v3/api-docs

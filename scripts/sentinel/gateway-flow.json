@@ -1,0 +1,26 @@
+[
+  {
+    "resource": "/api/user/**",
+    "limitApp": "default",
+    "grade": 1,
+    "count": 50,
+    "strategy": 0,
+    "controlBehavior": 0
+  },
+  {
+    "resource": "/api/activity/**",
+    "limitApp": "default",
+    "grade": 1,
+    "count": 30,
+    "strategy": 0,
+    "controlBehavior": 0
+  },
+  {
+    "resource": "/api/content/**",
+    "limitApp": "default",
+    "grade": 1,
+    "count": 30,
+    "strategy": 0,
+    "controlBehavior": 0
+  }
+]

@@ -22,12 +22,15 @@
 ```sh
 docker-compose up -d
 ```
-将启动 MySQL、Nacos、Redis、MinIO、Elasticsearch+Logstash+Kibana、Jaeger + OTel Collector、Prometheus + Grafana。
+将启动 MySQL、Nacos、Redis、MinIO、Elasticsearch+Logstash+Kibana、Jaeger + OTel Collector、Sentinel、Prometheus + Grafana。
 - MySQL：`root / 123456`，数据库 `sword_shield`，端口 `3306`
 - Nacos：`8848`
 - MinIO：`9000`（API）/ `9001`（Console），账号 `admin / admin123456`
 - OTel Collector：OTLP gRPC `4317` / HTTP `4318`
 - Jaeger UI：`16686`
+- Sentinel Dashboard：`8858`
+- Sentinel 规则：`docker-compose` 启动时 `sentinel-nacos-init` 会把初始网关流控规则写入 Nacos，Data ID `sword-shield-gateway-sentinel-flow`，Group `SENTINEL_GROUP`，内容见 `scripts/sentinel/gateway-flow.json`。
+
 
 ## 后端构建与运行
 构建所有模块：
@@ -71,8 +74,25 @@ npm run build    # 生产构建
 ## 常用控制台/可视化地址
 - MinIO 控制台：`http://localhost:9001/browser`（admin / admin123456）
 - Nacos 控制台：`http://127.0.0.1:8848/nacos`
+- Sentinel Dashboard：`http://localhost:8858`（默认账号/密码 `sentinel/sentinel`）
 - Kibana（ES 可视化）：`http://127.0.0.1:5601`
 - 网关聚合 Swagger UI：`http://localhost:8080/swagger-ui.html`（汇总各服务 OpenAPI）
 - Jaeger（链路追踪）：`http://localhost:16686`
 - Prometheus：`http://localhost:9090`
 - Grafana：`http://localhost:3000`（默认账户 `admin/admin`，已预置 Prometheus 数据源） 可导入常用看板：Spring Boot 3 Micrometer `10280`、JVM `4701`、Gateway `12900`。
+
+## 补充
+Sentinel 规则持久化：
+- Flow 规则存于 Nacos，Group=`SENTINEL_GROUP`，Data ID=`<spring.application.name>-sentinel-flow`（示例：`sword-shield-gateway-sentinel-flow`），格式 `json`。
+- 典型规则 JSON：
+  ```json
+  [{
+    "resource": "/api/user/**",
+    "limitApp": "default",
+    "grade": 1,
+    "count": 50,
+    "strategy": 0,
+    "controlBehavior": 0
+  }]
+  ```
+  `grade=1` 表示 QPS，`count` 为阈值。Dashboard 修改后会写回 Nacos，对应服务热更新。
