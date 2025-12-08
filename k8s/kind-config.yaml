@@ -9,3 +9,30 @@ nodes:
       - containerPort: 30000
         hostPort: 80
         protocol: TCP
+      - containerPort: 30306
+        hostPort: 3306
+        protocol: TCP
+      - containerPort: 30848
+        hostPort: 8848
+        protocol: TCP
+      - containerPort: 30900
+        hostPort: 9000
+        protocol: TCP
+      - containerPort: 30901
+        hostPort: 9001
+        protocol: TCP
+      - containerPort: 30920
+        hostPort: 9200
+        protocol: TCP
+      - containerPort: 30601
+        hostPort: 5601
+        protocol: TCP
+      - containerPort: 30030
+        hostPort: 3000
+        protocol: TCP
+      - containerPort: 31686
+        hostPort: 16686
+        protocol: TCP
+    extraMounts:
+      - hostPath: /Users/phlin/Public/code/java/sword_shield_web/data
+        containerPath: /data/host
