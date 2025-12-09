@@ -177,13 +177,10 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 3306
-            initialDelaySeconds: 45
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 3306
             initialDelaySeconds: 60
-            periodSeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 10
       volumes:
         - name: data
           emptyDir: {}
@@ -244,18 +241,10 @@ spec:
               path: /nacos/v1/console/health/readiness
               port: 8848
             # nacos 启动较慢，适当放宽探针配置，避免频繁重启
-            initialDelaySeconds: 180
-            periodSeconds: 15
-            timeoutSeconds: 5
-            failureThreshold: 6
-          livenessProbe:
-            httpGet:
-              path: /nacos/v1/console/health/liveness
-              port: 8848
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 6
+            initialDelaySeconds: 240
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 15
           startupProbe:
             httpGet:
               path: /nacos/v1/console/health/liveness
@@ -311,13 +300,10 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 6379
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 6379
-            initialDelaySeconds: 20
-            periodSeconds: 20
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 10
       volumes:
         - name: data
           emptyDir: {}
@@ -409,7 +395,7 @@ spec:
             - name: discovery.type
               value: single-node
             - name: ES_JAVA_OPTS
-              value: "-Xms512m -Xmx512m"
+              value: "-Xms256m -Xmx256m"
             - name: xpack.security.enabled
               value: "false"
             - name: xpack.security.enrollment.enabled
@@ -429,18 +415,10 @@ spec:
               path: /
               port: 9200
             # elasticsearch 启动和恢复索引较慢，放宽探针
-            initialDelaySeconds: 120
-            periodSeconds: 15
-            timeoutSeconds: 5
-            failureThreshold: 6
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 9200
             initialDelaySeconds: 180
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 6
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 15
           startupProbe:
             httpGet:
               path: /
@@ -506,23 +484,15 @@ spec:
               path: /
               port: 9600
             # logstash 首次启动 pipeline 较慢，放宽探针
-            initialDelaySeconds: 60
-            periodSeconds: 15
-            timeoutSeconds: 5
-            failureThreshold: 6
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 9600
-            initialDelaySeconds: 90
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 6
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 20
           startupProbe:
             httpGet:
               path: /
               port: 9600
-            failureThreshold: 90
+            failureThreshold: 120
             periodSeconds: 10
       volumes:
         - name: logstash-config
@@ -578,18 +548,10 @@ spec:
               path: /api/status
               port: 5601
             # kibana 依赖 ES，插件较多，启动慢，放宽探针
-            initialDelaySeconds: 120
-            periodSeconds: 15
-            timeoutSeconds: 5
-            failureThreshold: 8
-          livenessProbe:
-            httpGet:
-              path: /api/status
-              port: 5601
-            initialDelaySeconds: 180
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 6
+            initialDelaySeconds: 240
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 20
           startupProbe:
             httpGet:
               path: /api/status
@@ -642,14 +604,10 @@ spec:
             httpGet:
               path: /
               port: 16686
-            initialDelaySeconds: 15
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 16686
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 10
 ---
 apiVersion: v1
 kind: Service
@@ -705,14 +663,10 @@ spec:
             httpGet:
               path: /
               port: 13133
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 13133
-            initialDelaySeconds: 20
+            initialDelaySeconds: 120
             periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 20
       volumes:
         - name: config
           configMap:
@@ -767,14 +721,10 @@ spec:
             httpGet:
               path: /-/ready
               port: 9090
-            initialDelaySeconds: 15
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /-/healthy
-              port: 9090
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 10
       volumes:
         - name: config
           configMap:
@@ -829,19 +779,15 @@ spec:
             httpGet:
               path: /api/health
               port: 3000
-            initialDelaySeconds: 20
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /api/health
-              port: 3000
-            initialDelaySeconds: 40
+            initialDelaySeconds: 120
             periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 20
           startupProbe:
             httpGet:
               path: /api/health
               port: 3000
-            failureThreshold: 60
+            failureThreshold: 120
             periodSeconds: 10
       volumes:
         - name: datasources
@@ -892,18 +838,10 @@ spec:
               path: /
               port: 8858
             # sentinel-dashboard 为 Spring Boot 应用，启动较慢时容易被探针误杀，这里放宽探针参数
-            initialDelaySeconds: 60
-            periodSeconds: 15
-            timeoutSeconds: 5
-            failureThreshold: 6
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8858
             initialDelaySeconds: 120
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 6
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 15
           startupProbe:
             httpGet:
               path: /
@@ -946,7 +884,7 @@ spec:
             - sh
             - -c
             - |
-              for i in $(seq 1 60); do
+              for i in $(seq 1 300); do
                 if curl -s -o /dev/null -w '%{http_code}' http://nacos:8848/nacos/v1/console/health/liveness 2>/dev/null | grep -q '200'; then
                   exit 0
                 fi

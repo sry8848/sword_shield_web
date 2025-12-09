@@ -31,14 +31,40 @@ kind load docker-image ss-admin:latest --name sword-shield
 kind load docker-image ss-web-ui:latest --name sword-shield
 ```
 
-## 4) 应用 Kubernetes 清单
+## 4) 使用 Helm 部署（推荐）
+确保本机已安装 Helm 3，然后在仓库根目录执行：
+```bash
+helm install sword-shield ./helm/sword-shield \
+  -n sword-shield --create-namespace
+```
+
+> 如果需要修改命名空间或镜像等参数，可编辑 `helm/sword-shield/values.yaml`，或通过 `--set` 传入。
+
+## 4') 旧方式：直接应用 Kubernetes 清单
 ```bash
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/deployments.yaml
 kubectl apply -f k8s/infra.yaml
 ```
 
-## 5) 访问方式
+## 5) 查看状态与访问方式
+部署完成后，先检查 Pod 和 Service 状态：
+```bash
+kubectl get pods -n sword-shield
+kubectl get svc -n sword-shield
+```
+
+如需导入内置示例数据（`db/sword_shield.sql`），可在本机通过 NodePort 连接 MySQL：
+```bash
+mysql -h 127.0.0.1 -P 3306 -u root -p123456 sword_shield < db/sword_shield.sql
+```
+
+如需排查某个 Pod 启动异常，可使用：
+```bash
+kubectl describe pod -n sword-shield <pod-name>
+kubectl logs -n sword-shield <pod-name>
+```
+
 - 网关：宿主机 `http://localhost:8080` （NodePort 30080 透出）
 - 前端：宿主机 `http://localhost` （NodePort 30000 透出到 80）
 - Nacos 控制台：`http://localhost:8848`

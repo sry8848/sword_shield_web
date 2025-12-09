@@ -1,0 +1,30 @@
+namespace: sword-shield
+
+image:
+  pullPolicy: IfNotPresent
+  ssGateway: ss-gateway:latest
+  ssUser: ss-user:latest
+  ssActivity: ss-activity:latest
+  ssContent: ss-content:latest
+  ssInteraction: ss-interaction:latest
+  ssFile: ss-file:latest
+  ssAdmin: ss-admin:latest
+  ssWebUi: ss-web-ui:latest
+
+replicaCount:
+  ssGateway: 1
+  ssUser: 1
+  ssActivity: 1
+  ssContent: 1
+  ssInteraction: 1
+  ssFile: 1
+  ssAdmin: 1
+  ssWebUi: 1
+
+dependencies:
+  # 是否在业务服务启动前等待外部依赖服务可用
+  enabled: true
+  mysqlHost: mysql
+  mysqlPort: 3306
+  nacosHost: nacos
+  nacosPort: 8848

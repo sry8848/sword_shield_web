@@ -13,6 +13,43 @@ spec:
       labels:
         app: ss-gateway
     spec:
+      initContainers:
+        - name: wait-dependencies
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "waiting for mysql at mysql:3306..."
+              mysql_ok=0
+              for i in $(seq 1 150); do
+                if nc -z mysql 3306 2>/dev/null; then
+                  echo "mysql is available"
+                  mysql_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$mysql_ok" -ne 1 ]; then
+                echo "mysql not ready in time"
+                exit 1
+              fi
+
+              echo "waiting for nacos at nacos:8848..."
+              nacos_ok=0
+              for i in $(seq 1 150); do
+                if nc -z nacos 8848 2>/dev/null; then
+                  echo "nacos is available"
+                  nacos_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$nacos_ok" -ne 1 ]; then
+                echo "nacos not ready in time"
+                exit 1
+              fi
       containers:
         - name: ss-gateway
           image: ss-gateway:latest
@@ -36,12 +73,6 @@ spec:
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service
@@ -73,6 +104,43 @@ spec:
       labels:
         app: ss-user
     spec:
+      initContainers:
+        - name: wait-dependencies
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "waiting for mysql at mysql:3306..."
+              mysql_ok=0
+              for i in $(seq 1 150); do
+                if nc -z mysql 3306 2>/dev/null; then
+                  echo "mysql is available"
+                  mysql_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$mysql_ok" -ne 1 ]; then
+                echo "mysql not ready in time"
+                exit 1
+              fi
+
+              echo "waiting for nacos at nacos:8848..."
+              nacos_ok=0
+              for i in $(seq 1 150); do
+                if nc -z nacos 8848 2>/dev/null; then
+                  echo "nacos is available"
+                  nacos_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$nacos_ok" -ne 1 ]; then
+                echo "nacos not ready in time"
+                exit 1
+              fi
       containers:
         - name: ss-user
           image: ss-user:latest
@@ -102,12 +170,6 @@ spec:
               port: 8101
             initialDelaySeconds: 15
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8101
-            initialDelaySeconds: 30
-            periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service
@@ -137,6 +199,43 @@ spec:
       labels:
         app: ss-activity
     spec:
+      initContainers:
+        - name: wait-dependencies
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "waiting for mysql at mysql:3306..."
+              mysql_ok=0
+              for i in $(seq 1 150); do
+                if nc -z mysql 3306 2>/dev/null; then
+                  echo "mysql is available"
+                  mysql_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$mysql_ok" -ne 1 ]; then
+                echo "mysql not ready in time"
+                exit 1
+              fi
+
+              echo "waiting for nacos at nacos:8848..."
+              nacos_ok=0
+              for i in $(seq 1 150); do
+                if nc -z nacos 8848 2>/dev/null; then
+                  echo "nacos is available"
+                  nacos_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$nacos_ok" -ne 1 ]; then
+                echo "nacos not ready in time"
+                exit 1
+              fi
       containers:
         - name: ss-activity
           image: ss-activity:latest
@@ -166,12 +265,6 @@ spec:
               port: 8102
             initialDelaySeconds: 15
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8102
-            initialDelaySeconds: 30
-            periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service
@@ -201,6 +294,43 @@ spec:
       labels:
         app: ss-content
     spec:
+      initContainers:
+        - name: wait-dependencies
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "waiting for mysql at mysql:3306..."
+              mysql_ok=0
+              for i in $(seq 1 150); do
+                if nc -z mysql 3306 2>/dev/null; then
+                  echo "mysql is available"
+                  mysql_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$mysql_ok" -ne 1 ]; then
+                echo "mysql not ready in time"
+                exit 1
+              fi
+
+              echo "waiting for nacos at nacos:8848..."
+              nacos_ok=0
+              for i in $(seq 1 150); do
+                if nc -z nacos 8848 2>/dev/null; then
+                  echo "nacos is available"
+                  nacos_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$nacos_ok" -ne 1 ]; then
+                echo "nacos not ready in time"
+                exit 1
+              fi
       containers:
         - name: ss-content
           image: ss-content:latest
@@ -230,12 +360,6 @@ spec:
               port: 8103
             initialDelaySeconds: 15
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8103
-            initialDelaySeconds: 30
-            periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service
@@ -265,6 +389,43 @@ spec:
       labels:
         app: ss-interaction
     spec:
+      initContainers:
+        - name: wait-dependencies
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "waiting for mysql at mysql:3306..."
+              mysql_ok=0
+              for i in $(seq 1 150); do
+                if nc -z mysql 3306 2>/dev/null; then
+                  echo "mysql is available"
+                  mysql_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$mysql_ok" -ne 1 ]; then
+                echo "mysql not ready in time"
+                exit 1
+              fi
+
+              echo "waiting for nacos at nacos:8848..."
+              nacos_ok=0
+              for i in $(seq 1 150); do
+                if nc -z nacos 8848 2>/dev/null; then
+                  echo "nacos is available"
+                  nacos_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$nacos_ok" -ne 1 ]; then
+                echo "nacos not ready in time"
+                exit 1
+              fi
       containers:
         - name: ss-interaction
           image: ss-interaction:latest
@@ -294,12 +455,6 @@ spec:
               port: 8104
             initialDelaySeconds: 15
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8104
-            initialDelaySeconds: 30
-            periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service
@@ -329,6 +484,43 @@ spec:
       labels:
         app: ss-file
     spec:
+      initContainers:
+        - name: wait-dependencies
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "waiting for mysql at mysql:3306..."
+              mysql_ok=0
+              for i in $(seq 1 150); do
+                if nc -z mysql 3306 2>/dev/null; then
+                  echo "mysql is available"
+                  mysql_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$mysql_ok" -ne 1 ]; then
+                echo "mysql not ready in time"
+                exit 1
+              fi
+
+              echo "waiting for nacos at nacos:8848..."
+              nacos_ok=0
+              for i in $(seq 1 150); do
+                if nc -z nacos 8848 2>/dev/null; then
+                  echo "nacos is available"
+                  nacos_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$nacos_ok" -ne 1 ]; then
+                echo "nacos not ready in time"
+                exit 1
+              fi
       containers:
         - name: ss-file
           image: ss-file:latest
@@ -360,12 +552,6 @@ spec:
               port: 8105
             initialDelaySeconds: 15
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8105
-            initialDelaySeconds: 30
-            periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service
@@ -395,6 +581,43 @@ spec:
       labels:
         app: ss-admin
     spec:
+      initContainers:
+        - name: wait-dependencies
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "waiting for mysql at mysql:3306..."
+              mysql_ok=0
+              for i in $(seq 1 150); do
+                if nc -z mysql 3306 2>/dev/null; then
+                  echo "mysql is available"
+                  mysql_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$mysql_ok" -ne 1 ]; then
+                echo "mysql not ready in time"
+                exit 1
+              fi
+
+              echo "waiting for nacos at nacos:8848..."
+              nacos_ok=0
+              for i in $(seq 1 150); do
+                if nc -z nacos 8848 2>/dev/null; then
+                  echo "nacos is available"
+                  nacos_ok=1
+                  break
+                fi
+                sleep 2
+              done
+              if [ "$nacos_ok" -ne 1 ]; then
+                echo "nacos not ready in time"
+                exit 1
+              fi
       containers:
         - name: ss-admin
           image: ss-admin:latest
@@ -431,12 +654,6 @@ spec:
               port: 8106
             initialDelaySeconds: 15
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8106
-            initialDelaySeconds: 30
-            periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service
@@ -478,12 +695,6 @@ spec:
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 20
-            periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service
