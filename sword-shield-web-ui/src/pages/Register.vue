@@ -1,24 +1,24 @@
 <template>
-  <div class="register-container">
-    <el-card class="register-card">
-      <div class="register-header">
-        <div class="register-icon">✨</div>
-        <h2>创建账号</h2>
-        <p class="register-subtitle">加入 Sword Shield 社区</p>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-tag">注册账号</div>
+        <h1 class="auth-title">加入 Sword Shield 平台</h1>
+        <p class="auth-subtitle">创建账号以报名活动、下载大会资料并参与互动。</p>
       </div>
-      <el-form :model="form" @submit.prevent="register" class="register-form">
+      <el-form :model="form" @submit.prevent="register" class="auth-form">
         <el-form-item>
-          <el-input 
-            v-model="form.username" 
+          <el-input
+            v-model="form.username"
             placeholder="请输入用户名"
             size="large"
             prefix-icon="User"
           />
         </el-form-item>
         <el-form-item>
-          <el-input 
-            v-model="form.password" 
-            type="password" 
+          <el-input
+            v-model="form.password"
+            type="password"
             placeholder="请输入密码"
             size="large"
             prefix-icon="Lock"
@@ -26,34 +26,34 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-input 
-            v-model="form.confirmPassword" 
-            type="password" 
-            placeholder="请确认密码"
+          <el-input
+            v-model="form.confirmPassword"
+            type="password"
+            placeholder="请再次输入密码"
             size="large"
             prefix-icon="Lock"
             show-password
           />
         </el-form-item>
         <el-form-item>
-          <el-button 
-            type="primary" 
-            @click="register" 
+          <el-button
+            type="primary"
+            @click="register"
             :loading="loading"
             size="large"
-            class="register-button"
+            class="auth-button"
           >
             注册
           </el-button>
         </el-form-item>
-        <div class="register-footer">
-          <span>已有账号？</span>
+        <div class="auth-footer">
+          <span>已经有账号？</span>
           <el-button link @click="$router.push('/login')" type="primary">
-            立即登录
+            去登录
           </el-button>
         </div>
       </el-form>
-    </el-card>
+    </div>
   </div>
 </template>
 
@@ -96,61 +96,69 @@ async function register() {
 </script>
 
 <style scoped>
-.register-container {
+.auth-page {
   min-height: calc(100vh - 200px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 32px 16px;
 }
 
-.register-card {
+.auth-card {
   width: 100%;
-  max-width: 420px;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
+  max-width: 480px;
+  padding: 32px 32px 28px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
-.register-header {
-  text-align: center;
-  margin-bottom: 32px;
+.auth-header {
+  margin-bottom: 28px;
 }
 
-.register-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
+.auth-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0f766e;
+  background: rgba(209, 250, 229, 0.9);
 }
 
-.register-header h2 {
-  font-size: 28px;
-  color: #333;
-  margin: 0 0 8px 0;
+.auth-title {
+  margin-top: 14px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
 }
 
-.register-subtitle {
-  color: #666;
-  font-size: 14px;
-  margin: 0;
+.auth-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6b7280;
 }
 
-.register-form {
-  margin-top: 24px;
+.auth-form {
+  margin-top: 8px;
 }
 
-.register-button {
+.auth-button {
   width: 100%;
-  background: linear-gradient(135deg, #ff0050 0%, #00f2ea 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 40%, #0f172a 100%);
   border: none;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 
-.register-footer {
+.auth-footer {
   text-align: center;
-  margin-top: 16px;
-  color: #666;
-  font-size: 14px;
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 13px;
 }
 </style>
-

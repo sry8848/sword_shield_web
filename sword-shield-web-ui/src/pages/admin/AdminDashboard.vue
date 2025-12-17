@@ -3,9 +3,11 @@
     <el-container>
       <el-aside width="250px" class="admin-sidebar">
         <div class="sidebar-header">
-          <div class="logo">🛡️</div>
-          <h3>西湖论剑</h3>
-          <p>管理后台</p>
+          <div class="logo-mark">SS</div>
+          <div class="sidebar-brand-text">
+            <h3>西湖论剑</h3>
+            <p>管理后台 · Sword Shield</p>
+          </div>
         </div>
         <el-menu
           :default-active="activeMenu"
@@ -65,14 +67,14 @@ const adminUsername = ref(localStorage.getItem('adminUsername') || '')
 const adminNickname = ref(localStorage.getItem('adminNickname') || '')
 
 const activeMenu = computed(() => {
-  if (route.path.includes('/admin/activities')) return 'activities'
-  if (route.path.includes('/admin/media')) return 'media'
+  if (route.path.includes('/admin/dashboard/activities')) return 'activities'
+  if (route.path.includes('/admin/dashboard/media')) return 'media'
   return 'dashboard'
 })
 
 const pageTitle = computed(() => {
-  if (route.path.includes('/admin/activities')) return '活动管理'
-  if (route.path.includes('/admin/media')) return '媒体资产管理'
+  if (route.path.includes('/admin/dashboard/activities')) return '活动管理'
+  if (route.path.includes('/admin/dashboard/media')) return '媒体资产管理'
   return '仪表盘'
 })
 
@@ -80,9 +82,9 @@ function handleMenuSelect(index: string) {
   if (index === 'dashboard') {
     router.push('/admin/dashboard')
   } else if (index === 'activities') {
-    router.push('/admin/activities')
+    router.push('/admin/dashboard/activities')
   } else if (index === 'media') {
-    router.push('/admin/media')
+    router.push('/admin/dashboard/media')
   }
 }
 
@@ -111,7 +113,7 @@ async function logout() {
 .admin-container {
   min-height: 100vh;
   height: 100vh;
-  background-color: #f5f7fa;
+  background: radial-gradient(circle at top, #e3eeff 0, #f3f6fb 45%, #eef2f7 100%);
   overflow: hidden;
 }
 
@@ -120,79 +122,90 @@ async function logout() {
 }
 
 .admin-sidebar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f5f9ff;
+  color: #111827;
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(191, 219, 254, 0.9);
+  box-shadow: 2px 0 10px rgba(148, 163, 184, 0.2);
 }
 
 .sidebar-header {
-  text-align: center;
-  padding: 32px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(209, 213, 219, 0.7);
 }
 
-.logo {
-  font-size: 48px;
-  margin-bottom: 12px;
+.logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: radial-gradient(circle at 30% 0, #2563eb, #38bdf8 35%, #eff6ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
 }
 
-.sidebar-header h3 {
-  margin: 0 0 4px 0;
-  font-size: 20px;
+.sidebar-brand-text h3 {
+  margin: 0 0 2px 0;
+  font-size: 18px;
   font-weight: 600;
 }
 
-.sidebar-header p {
+.sidebar-brand-text p {
   margin: 0;
   font-size: 12px;
-  opacity: 0.8;
+  color: #6b7280;
 }
 
 .sidebar-menu {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 16px 0;
+  padding: 10px 0 8px;
 }
 
 .sidebar-menu :deep(.el-menu-item) {
-  color: rgba(255, 255, 255, 0.9);
-  margin: 4px 12px;
-  border-radius: 8px;
+  color: #111827;
+  margin: 4px 10px;
+  border-radius: 999px;
+  height: 40px;
+  line-height: 40px;
 }
 
 .sidebar-menu :deep(.el-menu-item:hover) {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #e0ecff;
 }
 
 .sidebar-menu :deep(.el-menu-item.is-active) {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.sidebar-menu :deep(.el-menu-item .el-icon) {
+  font-size: 16px;
 }
 
 .sidebar-footer {
   margin-top: auto;
-  padding: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(0, 0, 0, 0.1);
+  padding: 10px 14px 16px;
+  border-top: 1px solid rgba(209, 213, 219, 0.9);
+  background: #eef2ff;
 }
 
 .admin-info {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.admin-info:hover {
-  background: rgba(255, 255, 255, 0.15);
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  background: #e5edff;
+  border-radius: 12px;
+  font-size: 13px;
 }
 
 .info-icon {
@@ -210,39 +223,39 @@ async function logout() {
 
 .logout-btn {
   width: 100%;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
-  padding: 10px 12px;
+  color: #b91c1c;
+  font-size: 13px;
+  padding: 8px 10px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-start;
-  border-radius: 8px;
-  transition: all 0.3s;
+  border-radius: 999px;
 }
 
 .logout-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(248, 113, 113, 0.08);
 }
 
 .admin-header {
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 1px 6px rgba(148, 163, 184, 0.25);
   display: flex;
   align-items: center;
   padding: 0 32px;
+  border-bottom: 1px solid rgba(209, 213, 219, 0.8);
 }
 
 .admin-header h2 {
   margin: 0;
-  font-size: 20px;
-  color: #333;
+  font-size: 18px;
+  color: #0f172a;
 }
 
 .admin-main {
-  padding: 24px;
+  padding: 20px 24px 22px;
   overflow-y: auto;
   height: calc(100vh - 60px);
+  background: transparent;
 }
 </style>

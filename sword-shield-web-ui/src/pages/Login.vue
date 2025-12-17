@@ -1,24 +1,24 @@
 <template>
-  <div class="login-container">
-    <el-card class="login-card">
-      <div class="login-header">
-        <div class="login-icon">🔒</div>
-        <h2>欢迎回来</h2>
-        <p class="login-subtitle">登录你的账号</p>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-tag">前台登录</div>
+        <h1 class="auth-title">登录 Sword Shield 账号</h1>
+        <p class="auth-subtitle">用于报名活动、下载资料和查看个人信息。</p>
       </div>
-      <el-form :model="form" @submit.prevent="login" class="login-form">
+      <el-form :model="form" @submit.prevent="login" class="auth-form">
         <el-form-item>
-          <el-input 
-            v-model="form.username" 
+          <el-input
+            v-model="form.username"
             placeholder="请输入用户名"
             size="large"
             prefix-icon="User"
           />
         </el-form-item>
         <el-form-item>
-          <el-input 
-            v-model="form.password" 
-            type="password" 
+          <el-input
+            v-model="form.password"
+            type="password"
             placeholder="请输入密码"
             size="large"
             prefix-icon="Lock"
@@ -26,24 +26,24 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button 
-            type="primary" 
-            @click="login" 
+          <el-button
+            type="primary"
+            @click="login"
             :loading="loading"
             size="large"
-            class="login-button"
+            class="auth-button"
           >
             登录
           </el-button>
         </el-form-item>
-        <div class="login-footer">
+        <div class="auth-footer">
           <span>还没有账号？</span>
           <el-button link @click="$router.push('/register')" type="primary">
-            立即注册
+            去注册
           </el-button>
         </div>
       </el-form>
-    </el-card>
+    </div>
   </div>
 </template>
 
@@ -106,60 +106,69 @@ async function login() {
 </script>
 
 <style scoped>
-.login-container {
+.auth-page {
   min-height: calc(100vh - 200px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 32px 16px;
 }
 
-.login-card {
+.auth-card {
   width: 100%;
-  max-width: 420px;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
+  max-width: 480px;
+  padding: 32px 32px 28px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
-.login-header {
-  text-align: center;
-  margin-bottom: 32px;
+.auth-header {
+  margin-bottom: 28px;
 }
 
-.login-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
+.auth-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  background: rgba(219, 234, 254, 0.9);
 }
 
-.login-header h2 {
-  font-size: 28px;
-  color: #333;
-  margin: 0 0 8px 0;
+.auth-title {
+  margin-top: 14px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
 }
 
-.login-subtitle {
-  color: #666;
-  font-size: 14px;
-  margin: 0;
+.auth-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6b7280;
 }
 
-.login-form {
-  margin-top: 24px;
+.auth-form {
+  margin-top: 8px;
 }
 
-.login-button {
+.auth-button {
   width: 100%;
-  background: linear-gradient(135deg, #ff0050 0%, #00f2ea 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 40%, #0f172a 100%);
   border: none;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 
-.login-footer {
+.auth-footer {
   text-align: center;
-  margin-top: 16px;
-  color: #666;
-  font-size: 14px;
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 13px;
 }
 </style>

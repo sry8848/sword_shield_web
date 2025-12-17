@@ -43,8 +43,8 @@ const routes = [
     component: AdminDashboard,
     children: [
       { path: '', component: AdminHome },
-      { path: '/admin/activities', component: AdminActivities },
-      { path: '/admin/media', component: AdminMedia }
+      { path: 'activities', component: AdminActivities },
+      { path: 'media', component: AdminMedia }
     ]
   }
 ]
@@ -52,12 +52,17 @@ const routes = [
 const router = createRouter({ history: createWebHistory(), routes })
 
 router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-  // Admin routes authentication
+  // Admin routes authentication with deep link support
   if (to.path.startsWith('/admin') && to.path !== '/admin/login') {
     const adminToken = localStorage.getItem('adminToken')
-    if (!adminToken) return next('/admin/login')
+    if (!adminToken) {
+      return next({
+        path: '/admin/login',
+        query: { redirect: to.fullPath }
+      })
+    }
   }
-  
+
   // Public routes authentication
   const token = localStorage.getItem('token')
   const action = Array.isArray(to.query.action) ? to.query.action[0] : (to.query.action as string | undefined)
@@ -68,4 +73,3 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
 })
 
 export default router
-

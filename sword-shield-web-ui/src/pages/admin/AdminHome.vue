@@ -58,7 +58,12 @@
       </template>
       <div class="welcome-content">
         <p class="welcome-text">这里是西湖论剑后台管理系统。您可以通过左侧菜单管理活动信息。</p>
-        <el-button type="primary" size="large" @click="$router.push('/admin/activities')" class="action-btn">
+        <el-button
+          type="primary"
+          size="large"
+          @click="$router.push('/admin/dashboard/activities')"
+          class="action-btn"
+        >
           <el-icon><Calendar /></el-icon>
           开始管理活动
         </el-button>
@@ -105,63 +110,68 @@ onMounted(() => {
 
 <style scoped>
 .admin-home {
-  animation: fadeIn 0.3s;
+  padding: 4px 0 8px;
+  animation: fadeIn 0.25s ease-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .stats-row {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .stat-card {
-  background: white;
+  background: #ffffff;
   border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s;
+  padding: 16px 14px;
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.25);
+  border: 1px solid rgba(209, 213, 219, 0.9);
   display: flex;
   align-items: center;
-  gap: 20px;
-  min-height: 120px;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.stat-card-1 .stat-icon {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.stat-card-2 .stat-icon {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
-}
-
-.stat-card-3 .stat-icon {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
-}
-
-.stat-card-4 .stat-icon {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-  color: white;
+  gap: 14px;
+  min-height: 90px;
 }
 
 .stat-icon {
-  width: 72px;
-  height: 72px;
-  border-radius: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: #1d4ed8;
+  background: #e0ecff;
+}
+
+/* 用不同边框/浅色区分四个卡片，整体保持扁平 */
+.stat-card-1 .stat-icon {
+  color: #1d4ed8;
+  background: #e0ecff;
+}
+
+.stat-card-2 .stat-icon {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.stat-card-3 .stat-icon {
+  color: #0369a1;
+  background: #e0f2fe;
+}
+
+.stat-card-4 .stat-icon {
+  color: #b45309;
+  background: #ffedd5;
 }
 
 .stat-content {
@@ -169,37 +179,38 @@ onMounted(() => {
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #999;
-  margin-bottom: 8px;
-  font-weight: 500;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 4px;
 }
 
 .stat-value {
-  font-size: 32px;
+  font-size: 22px;
   font-weight: 700;
-  color: #333;
-  line-height: 1;
+  color: #0f172a;
+  line-height: 1.1;
 }
 
 .welcome-card {
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.3);
+  border: 1px solid rgba(209, 213, 219, 0.9);
+  background: #ffffff;
 }
 
 .welcome-card :deep(.el-card__header) {
   border-bottom: none;
-  padding: 24px 24px 0;
+  padding: 18px 20px 0;
 }
 
 .welcome-card :deep(.el-card__body) {
-  padding: 0 24px 24px;
+  padding: 4px 20px 18px;
 }
 
 .card-header h2 {
   margin: 0;
-  color: #333;
-  font-size: 24px;
+  color: #0f172a;
+  font-size: 20px;
   font-weight: 600;
 }
 
@@ -207,27 +218,34 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 20px;
 }
 
 .welcome-text {
   margin: 0;
-  color: #666;
-  line-height: 1.8;
-  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.7;
+  font-size: 14px;
   flex: 1;
 }
 
 .action-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #2563eb;
   border: none;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 12px 32px;
+  padding: 10px 22px;
   height: auto;
 }
 
 .action-btn:hover {
-  opacity: 0.9;
+  filter: brightness(1.02);
+}
+
+@media (max-width: 1024px) {
+  .welcome-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 </style>
