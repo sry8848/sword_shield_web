@@ -438,6 +438,7 @@ onMounted(() => {
 
 .hero-left {
   padding: 32px 28px;
+  min-height: 640px;
   border-radius: 24px;
   background: #f5f9ff;
   box-shadow: 0 14px 35px rgba(148, 163, 184, 0.3);
@@ -1057,6 +1058,10 @@ onMounted(() => {
 @media (max-width: 960px) {
   .hero-panel {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero-left {
+    min-height: auto;
   }
 
   .hero-right {
