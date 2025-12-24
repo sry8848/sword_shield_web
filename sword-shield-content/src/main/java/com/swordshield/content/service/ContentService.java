@@ -109,7 +109,9 @@ public class ContentService {
 
     public Page<MediaAsset> listMedia(int page, int size, String type) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "createdAt"));
-        // filter by type later with custom query if needed; for now return all
+        if (type != null && !type.isBlank()) {
+            return mediaRepo.findByTypeIgnoreCase(type.trim(), pageable);
+        }
         return mediaRepo.findAll(pageable);
     }
 
