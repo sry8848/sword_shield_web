@@ -171,7 +171,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload, View, Delete } from '@element-plus/icons-vue'
-import api from '../../api'
+import adminApi from '../../adminApi'
 
 const form = reactive({
   title: '',
@@ -220,7 +220,7 @@ async function submitMedia() {
     const formData = new FormData()
     formData.append('file', selectedFile.value)
     
-    const uploadRes = await api.post('/file/upload', formData, {
+    const uploadRes = await adminApi.post('/file/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
     
@@ -241,7 +241,7 @@ async function submitMedia() {
       articleId: form.articleId
     }
     
-    const { data } = await api.post('/content/media', mediaData)
+    const { data } = await adminApi.post('/content/media', mediaData)
     
     if (data.code === 0) {
       ElMessage.success('媒体发布成功！')
@@ -283,7 +283,7 @@ async function loadMedia(page = 1) {
       params.type = filterType.value
     }
     
-    const { data } = await api.get('/content/media', { params })
+    const { data } = await adminApi.get('/content/media', { params })
     
     if (data.code === 0) {
       mediaList.value = data.data.items
@@ -298,7 +298,7 @@ async function loadMedia(page = 1) {
 
 async function loadArticles() {
   try {
-    const { data } = await api.get('/content/articles', {
+    const { data } = await adminApi.get('/content/articles', {
       params: { page: 0, size: 100 }
     })
     if (data.code === 0) {
@@ -316,7 +316,7 @@ function handleSizeChange(size: number) {
 
 async function previewMedia(row: any) {
   try {
-    const { data } = await api.get('/file/presigned', {
+    const { data } = await adminApi.get('/file/presigned', {
       params: {
         objectName: row.objectName,
         expireSeconds: 600

@@ -65,7 +65,7 @@ async function login() {
   
   loading.value = true
   try {
-    const { data } = await adminApi.post('/auth/login', form)
+    const { data } = await adminApi.post('/admin/auth/login', form)
     if (data.code === 0) {
       localStorage.setItem('adminToken', data.data.token)
       localStorage.setItem('adminId', data.data.adminId)

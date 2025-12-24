@@ -185,7 +185,7 @@ function getAuthHeaders() {
 async function loadActivities() {
   loading.value = true
   try {
-    const { data } = await adminApi.get('/activities')
+    const { data } = await adminApi.get('/admin/activities')
     if (data.code === 0) {
       activities.value = data.data
     } else {
@@ -250,7 +250,7 @@ async function submitForm() {
     }
     
     if (isEdit.value) {
-      const { data } = await adminApi.put(`/activities/${form.value.id}`, payload)
+      const { data } = await adminApi.put(`/admin/activities/${form.value.id}`, payload)
       if (data.code === 0) {
         ElMessage.success('活动更新成功')
         dialogVisible.value = false
@@ -259,7 +259,7 @@ async function submitForm() {
         ElMessage.error(data.message || '活动更新失败')
       }
     } else {
-      const { data } = await adminApi.post('/activities', payload)
+      const { data } = await adminApi.post('/admin/activities', payload)
       if (data.code === 0) {
         ElMessage.success('活动创建成功')
         dialogVisible.value = false
@@ -283,7 +283,7 @@ async function deleteActivity(activity: Activity) {
       type: 'warning'
     })
     
-    const { data } = await adminApi.delete(`/activities/${activity.id}`)
+    const { data } = await adminApi.delete(`/admin/activities/${activity.id}`)
     
     if (data.code === 0) {
       ElMessage.success('活动删除成功')

@@ -89,7 +89,7 @@ const stats = ref({
 
 async function loadStats() {
   try {
-    const { data } = await adminApi.get('/activities')
+    const { data } = await adminApi.get('/admin/activities')
     
     if (data.code === 0) {
       const activities = data.data
