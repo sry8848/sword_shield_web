@@ -1,6 +1,7 @@
 <template>
   <div class="auth-page admin-auth-page">
     <div class="auth-card admin-auth-card">
+      <router-link class="auth-switch" to="/login">前台登录</router-link>
       <div class="auth-header">
         <div class="auth-tag admin-tag">后台登录</div>
         <h1 class="auth-title">登录 西湖论剑 管理后台</h1>
@@ -36,11 +37,6 @@
             登录后台
           </el-button>
         </el-form-item>
-        <div class="auth-footer">
-          <el-button link @click="$router.push('/')" type="info">
-            返回前台首页
-          </el-button>
-        </div>
       </el-form>
     </div>
   </div>
@@ -103,6 +99,51 @@ async function login() {
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
   border: 1px solid rgba(148, 163, 184, 0.25);
+  position: relative;
+}
+
+.auth-switch {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px 12px;
+  border-radius: 10px 10px 6px 6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: rgba(219, 234, 254, 0.95);
+  box-shadow: 0 8px 18px rgba(30, 64, 175, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.auth-switch::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  margin: 0 auto;
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 10px solid rgba(219, 234, 254, 0.95);
+}
+
+.auth-switch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(30, 64, 175, 0.26);
+}
+
+.auth-switch:active {
+  transform: translateY(0);
 }
 
 .auth-header {

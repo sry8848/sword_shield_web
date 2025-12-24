@@ -97,11 +97,12 @@ async function register() {
 
 <style scoped>
 .auth-page {
-  min-height: calc(100vh - 200px);
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 32px 16px;
+  background: radial-gradient(circle at top, #e3eeff 0, #f3f6fb 45%, #eef2f7 100%);
 }
 
 .auth-card {

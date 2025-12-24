@@ -1,7 +1,7 @@
 <template>
   <div class="app-shell">
     <template v-if="!isAdminRoute">
-      <header class="app-header">
+      <header v-if="!isAuthRoute" class="app-header">
         <div class="top-bar">
           <div class="top-left">
             <span class="top-label">西湖论剑 数字安全平台</span>
@@ -62,11 +62,11 @@
         </div>
       </header>
 
-      <main class="app-main">
+      <main class="app-main" :class="{ 'auth-main': isAuthRoute }">
         <router-view />
       </main>
 
-      <footer class="app-footer">
+      <footer v-if="!isAuthRoute" class="app-footer">
         <div class="footer-inner">
           <div class="footer-left">
             <div class="footer-title">西湖论剑 数字安全平台</div>
@@ -98,6 +98,7 @@ const token = ref(localStorage.getItem('token') || '')
 
 const isLoggedIn = computed(() => !!token.value)
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const isAuthRoute = computed(() => route.path === '/login' || route.path === '/register')
 
 watch(
   () => route.path,
@@ -357,6 +358,10 @@ body {
 .app-main {
   flex: 1;
   padding: 24px 16px 40px;
+}
+
+.app-main.auth-main {
+  padding: 0;
 }
 
 .app-footer {
