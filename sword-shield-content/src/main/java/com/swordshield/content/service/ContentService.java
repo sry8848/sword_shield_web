@@ -107,6 +107,13 @@ public class ContentService {
         return materialRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found"));
     }
 
+    public void deleteMaterial(Long id) {
+        if (!materialRepo.existsById(id)) {
+            throw new IllegalArgumentException("not found");
+        }
+        materialRepo.deleteById(id);
+    }
+
     public Page<MediaAsset> listMedia(int page, int size, String type) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "createdAt"));
         if (type != null && !type.isBlank()) {

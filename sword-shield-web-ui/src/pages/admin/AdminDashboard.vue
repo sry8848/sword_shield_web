@@ -26,6 +26,10 @@
             <el-icon><Picture /></el-icon>
             <span>媒体管理</span>
           </el-menu-item>
+          <el-menu-item index="materials">
+            <el-icon><Document /></el-icon>
+            <span>资料管理</span>
+          </el-menu-item>
         </el-menu>
         <div class="sidebar-footer">
           <div class="admin-info">
@@ -58,7 +62,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { HomeFilled, Calendar, Picture, User, SwitchButton } from '@element-plus/icons-vue'
+import { HomeFilled, Calendar, Picture, Document, User, SwitchButton } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -69,12 +73,14 @@ const adminNickname = ref(localStorage.getItem('adminNickname') || '')
 const activeMenu = computed(() => {
   if (route.path.includes('/admin/dashboard/activities')) return 'activities'
   if (route.path.includes('/admin/dashboard/media')) return 'media'
+  if (route.path.includes('/admin/dashboard/materials')) return 'materials'
   return 'dashboard'
 })
 
 const pageTitle = computed(() => {
   if (route.path.includes('/admin/dashboard/activities')) return '活动管理'
   if (route.path.includes('/admin/dashboard/media')) return '媒体资产管理'
+  if (route.path.includes('/admin/dashboard/materials')) return '资料管理'
   return '仪表盘'
 })
 
@@ -85,6 +91,8 @@ function handleMenuSelect(index: string) {
     router.push('/admin/dashboard/activities')
   } else if (index === 'media') {
     router.push('/admin/dashboard/media')
+  } else if (index === 'materials') {
+    router.push('/admin/dashboard/materials')
   }
 }
 

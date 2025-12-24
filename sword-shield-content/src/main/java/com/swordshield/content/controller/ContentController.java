@@ -1,6 +1,7 @@
 package com.swordshield.content.controller;
 
 import com.swordshield.common.Response;
+import com.swordshield.common.JwtUtil;
 import com.swordshield.content.domain.ContentArticle;
 import com.swordshield.content.domain.Exhibitor;
 import com.swordshield.content.domain.Achievement;
@@ -20,6 +21,17 @@ public class ContentController {
     private final ContentService service;
 
     public ContentController(ContentService service) { this.service = service; }
+
+    private void verifyAdmin(String authorization) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            throw new SecurityException("未登录，请先登录");
+        }
+        String token = authorization.substring(7);
+        String subject = JwtUtil.parseSubject(token);
+        if (!subject.startsWith("admin_")) {
+            throw new SecurityException("无权限访问，需要管理员权限");
+        }
+    }
 
     @GetMapping("/articles")
     @Operation(summary = "文章列表", description = "按分页、分类、标签筛选文章")
@@ -86,7 +98,10 @@ public class ContentController {
 
     @PostMapping("/material")
     @Operation(summary = "新建资料", description = "创建资料元数据，支持上传后的对象信息对接")
-    public Response<Material> createMaterial(@RequestBody Map<String, Object> body) {
+    public Response<Material> createMaterial(
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestBody Map<String, Object> body) {
+        verifyAdmin(authorization);
         try {
             String title = (String) body.get("title");
             String speaker = (String) body.get("speaker");
@@ -99,6 +114,16 @@ public class ContentController {
             e.printStackTrace();
             return Response.error(500, "保存失败: " + e.getMessage());
         }
+    }
+
+    @DeleteMapping("/material/{id}")
+    @Operation(summary = "删除资料", description = "根据 ID 删除资料元信息")
+    public Response<Object> deleteMaterial(
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @PathVariable("id") Long id) {
+        verifyAdmin(authorization);
+        service.deleteMaterial(id);
+        return Response.ok(null);
     }
 
     @GetMapping("/media")
