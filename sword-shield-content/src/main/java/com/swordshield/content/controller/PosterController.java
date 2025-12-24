@@ -87,10 +87,10 @@ public class PosterController {
         int iconX = (width - iconFm.stringWidth(shieldIcon)) / 2;
         g.drawString(shieldIcon, iconX, 150);
         
-        // Draw "Sword Shield" branding
+        // Draw "西湖论剑" branding
         g.setFont(new Font("SansSerif", Font.BOLD, 32));
         g.setColor(new Color(255, 255, 255, 220));
-        String branding = "SWORD SHIELD";
+        String branding = "西湖论剑";
         FontMetrics brandFm = g.getFontMetrics();
         int brandX = (width - brandFm.stringWidth(branding)) / 2;
         g.drawString(branding, brandX, 200);

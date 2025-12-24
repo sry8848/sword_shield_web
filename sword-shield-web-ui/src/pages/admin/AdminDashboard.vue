@@ -6,7 +6,7 @@
           <div class="logo-mark">SS</div>
           <div class="sidebar-brand-text">
             <h3>西湖论剑</h3>
-            <p>管理后台 · Sword Shield</p>
+            <p>管理后台 · 西湖论剑</p>
           </div>
         </div>
         <el-menu

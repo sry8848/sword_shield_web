@@ -3,7 +3,7 @@
     <div class="auth-card">
       <div class="auth-header">
         <div class="auth-tag">前台登录</div>
-        <h1 class="auth-title">登录 Sword Shield 账号</h1>
+        <h1 class="auth-title">登录 西湖论剑 账号</h1>
         <p class="auth-subtitle">用于报名活动、下载资料和查看个人信息。</p>
       </div>
       <el-form :model="form" @submit.prevent="login" class="auth-form">

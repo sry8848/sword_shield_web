@@ -4,7 +4,7 @@
       <header class="app-header">
         <div class="top-bar">
           <div class="top-left">
-            <span class="top-label">Sword Shield 数字安全平台</span>
+            <span class="top-label">西湖论剑 数字安全平台</span>
             <span class="top-divider" />
             <span class="top-sub">会议 · 活动 · 专家 · 成果</span>
           </div>
@@ -41,7 +41,7 @@
             <div class="brand" @click="$router.push('/')">
               <div class="brand-mark">SS</div>
               <div class="brand-text">
-                <div class="brand-cn">剑盾·数字安全</div>
+                <div class="brand-cn">西湖论剑·数字安全</div>
                 <div class="brand-en">SWORD SHIELD CYBER SECURITY</div>
               </div>
             </div>
@@ -69,11 +69,11 @@
       <footer class="app-footer">
         <div class="footer-inner">
           <div class="footer-left">
-            <div class="footer-title">Sword Shield 数字安全平台</div>
+            <div class="footer-title">西湖论剑 数字安全平台</div>
             <div class="footer-desc">为会议活动提供一站式数字安全支撑与智能运营能力。</div>
           </div>
           <div class="footer-right">
-            <span>© 2025 Sword Shield. All rights reserved.</span>
+            <span>© 2025 西湖论剑. All rights reserved.</span>
           </div>
         </div>
       </footer>

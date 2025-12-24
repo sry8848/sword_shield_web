@@ -3,7 +3,7 @@
     <div class="auth-card">
       <div class="auth-header">
         <div class="auth-tag">注册账号</div>
-        <h1 class="auth-title">加入 Sword Shield 平台</h1>
+        <h1 class="auth-title">加入 西湖论剑 平台</h1>
         <p class="auth-subtitle">创建账号以报名活动、下载大会资料并参与互动。</p>
       </div>
       <el-form :model="form" @submit.prevent="register" class="auth-form">

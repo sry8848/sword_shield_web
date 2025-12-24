@@ -3,7 +3,7 @@
     <div class="auth-card admin-auth-card">
       <div class="auth-header">
         <div class="auth-tag admin-tag">后台登录</div>
-        <h1 class="auth-title">登录 Sword Shield 管理后台</h1>
+        <h1 class="auth-title">登录 西湖论剑 管理后台</h1>
         <p class="auth-subtitle">仅限大会工作人员使用，用于管理活动、媒体与数据。</p>
       </div>
       <el-form :model="form" @submit.prevent="login" class="auth-form">
