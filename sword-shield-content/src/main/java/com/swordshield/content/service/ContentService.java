@@ -149,4 +149,11 @@ public class ContentService {
     public MediaAsset mediaDetail(Long id) {
         return mediaRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found"));
     }
+
+    public void deleteMedia(Long id) {
+        if (!mediaRepo.existsById(id)) {
+            throw new IllegalArgumentException("not found");
+        }
+        mediaRepo.deleteById(id);
+    }
 }

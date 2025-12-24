@@ -28,7 +28,11 @@ public class FileController {
                                       @RequestHeader("Authorization") String authorization,
                                       @RequestPart("file") MultipartFile file) throws Exception {
         String token = authorization != null && authorization.startsWith("Bearer ") ? authorization.substring(7) : null;
-        Long userId = Long.valueOf(JwtUtil.parseSubject(token));
+        String subject = JwtUtil.parseSubject(token);
+        if (subject != null && subject.startsWith("admin_")) {
+            subject = subject.substring("admin_".length());
+        }
+        Long userId = Long.valueOf(subject);
         
         // Generate unique object name: UUID + original extension
         String originalFilename = file.getOriginalFilename();

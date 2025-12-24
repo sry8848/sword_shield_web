@@ -135,4 +135,11 @@ public class ContentController {
     public Response<java.util.List<MediaAsset>> getMediaByArticle(@RequestParam("articleId") Long articleId) {
         return Response.ok(service.getMediaByArticleId(articleId));
     }
+
+    @DeleteMapping("/media/{id}")
+    @Operation(summary = "删除媒体素材", description = "根据 ID 删除媒体资产")
+    public Response<Object> deleteMedia(@PathVariable("id") Long id) {
+        service.deleteMedia(id);
+        return Response.ok(null);
+    }
 }

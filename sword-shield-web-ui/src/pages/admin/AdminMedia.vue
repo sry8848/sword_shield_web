@@ -344,11 +344,19 @@ async function deleteMedia(row: any) {
         type: 'warning'
       }
     )
-    
-    // TODO: Add delete API endpoint
-    ElMessage.info('删除功能待实现')
-  } catch {
-    // User cancelled
+
+    const { data } = await adminApi.delete(`/content/media/${row.id}`)
+
+    if (data.code === 0) {
+      ElMessage.success('媒体删除成功')
+      loadMedia(1)
+    } else {
+      ElMessage.error(data.message || '媒体删除失败')
+    }
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      ElMessage.error(error.response?.data?.message || '媒体删除失败')
+    }
   }
 }
 
