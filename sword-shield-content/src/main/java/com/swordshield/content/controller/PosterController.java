@@ -1,15 +1,15 @@
 package com.swordshield.content.controller;
 
 import com.swordshield.common.Response;
-import com.swordshield.file.service.FileService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.swordshield.content.service.FileServiceClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.time.Instant;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,13 +19,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/content")
 @Tag(name = "海报", description = "动态生成海报并可上传到文件服务")
 public class PosterController {
-    @Autowired(required = false)
-    private FileService fileService;
+    private static final Logger log = LoggerFactory.getLogger(PosterController.class);
+    private final FileServiceClient fileServiceClient;
+
+    public PosterController(FileServiceClient fileServiceClient) {
+        this.fileServiceClient = fileServiceClient;
+    }
 
     @PostMapping(value = "/poster", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @Operation(summary = "生成海报", description = "根据标题/副标题生成品牌海报，可返回 base64 或上传文件服务")
     public Response<String> poster(@RequestParam(name = "title") String title,
-                                   @RequestParam(name = "subtitle") String subtitle) throws Exception {
+                                   @RequestParam(name = "subtitle") String subtitle,
+                                   @RequestHeader(name = "Authorization", required = false) String authorization) throws Exception {
         BufferedImage img = new BufferedImage(800, 1200, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -178,11 +183,18 @@ public class PosterController {
         ImageIO.write(img, "png", baos);
         byte[] bytes = baos.toByteArray();
 
-        if (fileService != null) {
-            String objectName = "poster-" + Instant.now().toEpochMilli() + ".png";
-            fileService.putObject(objectName, objectName, "image/png", bytes.length, new ByteArrayInputStream(bytes), null);
-            String url = fileService.presignedGet(objectName, 600);
-            return Response.ok(url);
+        if (authorization == null || authorization.isBlank()) {
+            String dataUrl = "data:image/png;base64," + java.util.Base64.getEncoder().encodeToString(bytes);
+            return Response.ok(dataUrl);
+        }
+        try {
+            String filename = "poster-" + Instant.now().toEpochMilli() + ".png";
+            String url = fileServiceClient.uploadAndPresign(bytes, filename, authorization, 600);
+            if (url != null && !url.isBlank()) {
+                return Response.ok(url);
+            }
+        } catch (Exception e) {
+            log.warn("Poster upload failed", e);
         }
         String dataUrl = "data:image/png;base64," + java.util.Base64.getEncoder().encodeToString(bytes);
         return Response.ok(dataUrl);

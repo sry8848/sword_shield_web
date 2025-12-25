@@ -15,7 +15,7 @@ spring:
     nacos:
       discovery:
         enabled: true
-        server-addr: localhost:8848
+        server-addr: 127.0.0.1:8848
       config:
         import-check:
           enabled: false
@@ -48,4 +48,10 @@ management:
     tracing:
       endpoint: http://localhost:4318/v1/traces
       protocol: http/protobuf
+
+file:
+  service:
+    name: sword-shield-file
+    base-url:
+    authorization:
 
