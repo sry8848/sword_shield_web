@@ -13,5 +13,5 @@ ENV TZ=Asia/Shanghai \
 WORKDIR /app
 COPY --from=builder /workspace/sword-shield-file/target/sword-shield-file-*.jar app.jar
 COPY otel/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar
-EXPOSE 8105
+EXPOSE 8105 20880
 ENTRYPOINT ["sh","-c","java ${JAVA_OPTS} ${JAVA_AGENT_OPTS} -jar /app/app.jar"]

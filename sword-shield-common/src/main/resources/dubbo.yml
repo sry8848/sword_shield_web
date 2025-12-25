@@ -1,0 +1,21 @@
+dubbo:
+  application:
+    # 避免与 Spring Cloud Nacos 的 serviceName（spring.application.name）冲突：Dubbo 使用独立应用名
+    name: ${spring.application.name}-dubbo
+  registry:
+    # 默认复用 Spring Cloud Nacos 地址；K8s/生产可通过 DUBBO_REGISTRY_ADDRESS 覆盖
+    # 通过 Nacos group 与 Spring Cloud 的 DEFAULT_GROUP 隔离，避免网关误把 Dubbo 实例当 HTTP 实例路由
+    address: ${DUBBO_REGISTRY_ADDRESS:nacos://${spring.cloud.nacos.discovery.server-addr:localhost:8848}?group=${DUBBO_NACOS_GROUP:DUBBO_GROUP}}
+  protocol:
+    name: dubbo
+    # 本地多服务并行启动时建议随机端口避免冲突；K8s/生产通过 DUBBO_PORT 固定端口（例如 20880）
+    port: ${DUBBO_PORT:-1}
+  scan:
+    base-packages: com.swordshield
+  consumer:
+    check: false
+    timeout: 3000
+    filter: traceContextFilter
+  provider:
+    timeout: 3000
+    filter: traceContextFilter

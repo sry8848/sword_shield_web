@@ -56,6 +56,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+            - containerPort: 20880
           env:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
@@ -71,6 +72,8 @@ spec:
               value: "http://otel-collector:4318/v1/traces"
             - name: LOGSTASH_DESTINATION
               value: "logstash:5000"
+            - name: DUBBO_PORT
+              value: "20880"
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -157,6 +160,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8101
+            - containerPort: 20880
           env:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
@@ -178,6 +182,8 @@ spec:
               value: "http://otel-collector:4318/v1/traces"
             - name: LOGSTASH_DESTINATION
               value: "logstash:5000"
+            - name: DUBBO_PORT
+              value: "20880"
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -262,6 +268,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8102
+            - containerPort: 20880
           env:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
@@ -283,6 +290,8 @@ spec:
               value: "http://otel-collector:4318/v1/traces"
             - name: LOGSTASH_DESTINATION
               value: "logstash:5000"
+            - name: DUBBO_PORT
+              value: "20880"
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -367,6 +376,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8103
+            - containerPort: 20880
           env:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
@@ -388,6 +398,8 @@ spec:
               value: "http://otel-collector:4318/v1/traces"
             - name: LOGSTASH_DESTINATION
               value: "logstash:5000"
+            - name: DUBBO_PORT
+              value: "20880"
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -472,6 +484,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8104
+            - containerPort: 20880
           env:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
@@ -493,6 +506,8 @@ spec:
               value: "http://otel-collector:4318/v1/traces"
             - name: LOGSTASH_DESTINATION
               value: "logstash:5000"
+            - name: DUBBO_PORT
+              value: "20880"
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -577,6 +592,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8105
+            - containerPort: 20880
           env:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
@@ -598,6 +614,8 @@ spec:
               value: "http://otel-collector:4318/v1/traces"
             - name: LOGSTASH_DESTINATION
               value: "logstash:5000"
+            - name: DUBBO_PORT
+              value: "20880"
             - name: MINIO_ENDPOINT
               value: "http://minio:9000"
           livenessProbe:
@@ -684,6 +702,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8106
+            - containerPort: 20880
           env:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
@@ -705,6 +724,8 @@ spec:
               value: "http://otel-collector:4318/v1/traces"
             - name: LOGSTASH_DESTINATION
               value: "logstash:5000"
+            - name: DUBBO_PORT
+              value: "20880"
           resources:
             requests:
               cpu: 200m

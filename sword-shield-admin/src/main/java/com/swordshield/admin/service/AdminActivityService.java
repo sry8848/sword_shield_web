@@ -1,11 +1,10 @@
 package com.swordshield.admin.service;
 
-import com.swordshield.admin.client.ActivityAdminDirectClient;
-import com.swordshield.admin.client.ActivityAdminDiscoveryClient;
-import com.swordshield.admin.client.ActivityAdminApi;
 import com.swordshield.common.Response;
 import com.swordshield.api.activity.ActivityDto;
-import org.springframework.beans.factory.ObjectProvider;
+import com.swordshield.api.activity.rpc.ActivityAdminRpcService;
+import com.swordshield.api.common.PageResult;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,77 +12,61 @@ import java.util.Map;
 
 @Service
 public class AdminActivityService {
-    private final ActivityAdminDiscoveryClient discoveryClient;
-    private final ObjectProvider<ActivityAdminDirectClient> directClientProvider;
-
-    public AdminActivityService(ActivityAdminDiscoveryClient discoveryClient,
-                                ObjectProvider<ActivityAdminDirectClient> directClientProvider) {
-        this.discoveryClient = discoveryClient;
-        this.directClientProvider = directClientProvider;
-    }
+    @DubboReference(check = false)
+    private ActivityAdminRpcService activityAdminRpcService;
 
     public Response<List<ActivityDto>> getAll(String authorization, String subjectHeader) {
-        Response<List<ActivityDto>> res;
         try {
-            res = api().getAll(authorization, subjectHeader);
+            return Response.ok(activityAdminRpcService.getAll());
         } catch (Exception e) {
             return Response.error(502, "Activity service unavailable");
         }
-        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
     public Response<Map<String, Object>> list(String authorization, String subjectHeader, int page, int size) {
-        Response<Map<String, Object>> res;
         try {
-            res = api().list(authorization, subjectHeader, page, size);
+            PageResult<ActivityDto> p = activityAdminRpcService.list(page, size);
+            return Response.ok(Map.of(
+                    "items", p.getItems(),
+                    "total", p.getTotal(),
+                    "page", p.getPage(),
+                    "size", p.getSize()
+            ));
         } catch (Exception e) {
             return Response.error(502, "Activity service unavailable");
         }
-        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
     public Response<ActivityDto> getById(String authorization, String subjectHeader, Long id) {
-        Response<ActivityDto> res;
         try {
-            res = api().getById(authorization, subjectHeader, id);
+            return Response.ok(activityAdminRpcService.getById(id));
         } catch (Exception e) {
             return Response.error(502, "Activity service unavailable");
         }
-        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
     public Response<ActivityDto> create(String authorization, String subjectHeader, ActivityDto activity) {
-        Response<ActivityDto> res;
         try {
-            res = api().create(authorization, subjectHeader, activity);
+            return Response.ok(activityAdminRpcService.create(activity));
         } catch (Exception e) {
             return Response.error(502, "Activity service unavailable");
         }
-        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
     public Response<ActivityDto> update(String authorization, String subjectHeader, Long id, ActivityDto activity) {
-        Response<ActivityDto> res;
         try {
-            res = api().update(authorization, subjectHeader, id, activity);
+            return Response.ok(activityAdminRpcService.update(id, activity));
         } catch (Exception e) {
             return Response.error(502, "Activity service unavailable");
         }
-        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
     public Response<Object> delete(String authorization, String subjectHeader, Long id) {
-        Response<Object> res;
         try {
-            res = api().delete(authorization, subjectHeader, id);
+            activityAdminRpcService.delete(id);
+            return Response.ok(null);
         } catch (Exception e) {
             return Response.error(502, "Activity service unavailable");
         }
-        return res == null ? Response.error(502, "Activity service unavailable") : res;
-    }
-
-    private ActivityAdminApi api() {
-        ActivityAdminDirectClient direct = directClientProvider.getIfAvailable();
-        return direct != null ? direct : discoveryClient;
     }
 }

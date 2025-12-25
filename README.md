@@ -4,7 +4,7 @@
 
 ## 项目亮点
 - **技术栈现代**：Java 17 + Spring Boot 3.2 + Spring Cloud Gateway（WebFlux），配套 MVC 微服务与 Maven 多模块工程。
-- **服务通信与治理**：Nacos 注册发现（可选配置中心）+ Sentinel 限流/熔断/规则持久化，网关通过 `lb://` 发现路由，服务间支持 OpenFeign。
+- **服务通信与治理**：Nacos 注册发现（可选配置中心）+ Sentinel 限流/熔断/规则持久化，网关通过 `lb://` 发现路由；服务间内部调用使用 Dubbo RPC（对外仍为 HTTP/Gateway）。
 - **安全与鉴权**：网关集成 Spring Security（OAuth2 Resource Server）并使用 JWT（JJWT）实现统一鉴权入口。
 - **API 文档友好**：基于 springdoc OpenAPI，网关聚合 Swagger UI，一处即可浏览各服务接口。
 - **文件与对象存储**：内置 MinIO 集成（含预签名 URL 场景），适配本地与集群部署。
