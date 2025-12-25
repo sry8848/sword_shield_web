@@ -1,6 +1,6 @@
 package com.swordshield.activity.controller;
 
-import com.swordshield.activity.domain.Activity;
+import com.swordshield.activity.dto.ActivityDto;
 import com.swordshield.activity.service.ActivityAdminService;
 import com.swordshield.common.JwtUtil;
 import com.swordshield.common.Response;
@@ -36,7 +36,7 @@ public class AdminActivityController {
 
     @GetMapping
     @Operation(summary = "全部活动列表", description = "管理员查询全部活动")
-    public Response<java.util.List<Activity>> getAll(
+    public Response<java.util.List<ActivityDto>> getAll(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization) {
         verifyAdmin(authorization);
@@ -51,7 +51,7 @@ public class AdminActivityController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         verifyAdmin(authorization);
-        Page<Activity> p = activityService.list(page, size);
+        Page<ActivityDto> p = activityService.list(page, size);
         return Response.ok(Map.of(
                 "items", p.getContent(),
                 "total", p.getTotalElements(),
@@ -62,7 +62,7 @@ public class AdminActivityController {
 
     @GetMapping("/{id}")
     @Operation(summary = "活动详情（管理员）", description = "根据 ID 查询活动详情")
-    public Response<Activity> get(
+    public Response<ActivityDto> get(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id) {
@@ -72,21 +72,21 @@ public class AdminActivityController {
 
     @PostMapping
     @Operation(summary = "创建活动", description = "管理员创建新活动")
-    public Response<Activity> create(
+    public Response<ActivityDto> create(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
-            @RequestBody Activity activity) {
+            @RequestBody ActivityDto activity) {
         verifyAdmin(authorization);
         return Response.ok(activityService.create(activity));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "更新活动", description = "管理员修改活动信息")
-    public Response<Activity> update(
+    public Response<ActivityDto> update(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id,
-            @RequestBody Activity activity) {
+            @RequestBody ActivityDto activity) {
         verifyAdmin(authorization);
         return Response.ok(activityService.update(id, activity));
     }
@@ -102,4 +102,3 @@ public class AdminActivityController {
         return Response.ok(null);
     }
 }
-

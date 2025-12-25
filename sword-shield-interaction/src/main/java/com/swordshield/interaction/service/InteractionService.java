@@ -1,8 +1,10 @@
 package com.swordshield.interaction.service;
 
+import com.swordshield.common.PageResult;
 import com.swordshield.interaction.domain.Comment;
 import com.swordshield.interaction.domain.Like;
 import com.swordshield.interaction.domain.Share;
+import com.swordshield.interaction.dto.CommentDto;
 import com.swordshield.interaction.repository.CommentRepository;
 import com.swordshield.interaction.repository.LikeRepository;
 import com.swordshield.interaction.repository.ShareRepository;
@@ -25,9 +27,10 @@ public class InteractionService {
         this.shareRepo = shareRepo;
     }
 
-    public Page<Comment> listComments(String targetType, Long targetId, int page, int size) {
+    public PageResult<CommentDto> listComments(String targetType, Long targetId, int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size));
-        return commentRepo.findByTargetTypeAndTargetIdOrderByCreatedAtDesc(targetType, targetId, pageable);
+        Page<Comment> p = commentRepo.findByTargetTypeAndTargetIdOrderByCreatedAtDesc(targetType, targetId, pageable);
+        return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
     public void postComment(Long userId, String targetType, Long targetId, String content) {
@@ -87,5 +90,15 @@ public class InteractionService {
     public long countLikes(String targetType, Long targetId) {
         return likeRepo.countByTargetTypeAndTargetId(targetType, targetId);
     }
-}
 
+    private CommentDto toDto(Comment c) {
+        CommentDto dto = new CommentDto();
+        dto.setId(c.getId());
+        dto.setUserId(c.getUserId());
+        dto.setTargetType(c.getTargetType());
+        dto.setTargetId(c.getTargetId());
+        dto.setContent(c.getContent());
+        dto.setCreatedAt(c.getCreatedAt());
+        return dto;
+    }
+}

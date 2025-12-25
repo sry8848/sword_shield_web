@@ -2,7 +2,7 @@ package com.swordshield.file.controller;
 
 import com.swordshield.common.JwtUtil;
 import com.swordshield.common.Response;
-import com.swordshield.file.domain.AssetFile;
+import com.swordshield.file.dto.AssetFileDto;
 import com.swordshield.file.service.FileService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,7 @@ public class FileController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传文件", description = "需携带 JWT，支持 multipart 文件上传")
-    public Response<AssetFile> upload(
+    public Response<AssetFileDto> upload(
                                       @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                       @RequestHeader("Authorization") String authorization,
                                       @RequestPart("file") MultipartFile file) throws Exception {
@@ -42,7 +42,7 @@ public class FileController {
         }
         String objectName = UUID.randomUUID().toString() + extension;
         
-        AssetFile meta = service.putObject(objectName, originalFilename, file.getContentType(), file.getSize(), file.getInputStream(), userId);
+        AssetFileDto meta = service.putObject(objectName, originalFilename, file.getContentType(), file.getSize(), file.getInputStream(), userId);
         return Response.ok(meta);
     }
 

@@ -1,6 +1,7 @@
 package com.swordshield.file.service;
 
 import com.swordshield.file.domain.AssetFile;
+import com.swordshield.file.dto.AssetFileDto;
 import com.swordshield.file.repository.AssetFileRepository;
 import io.minio.*;
 import io.minio.http.Method;
@@ -21,7 +22,7 @@ public class FileService {
         this.bucket = bucket;
     }
 
-    public AssetFile putObject(String objectName, String originalName, String contentType, long size, InputStream stream, Long ownerId) throws Exception {
+    public AssetFileDto putObject(String objectName, String originalName, String contentType, long size, InputStream stream, Long ownerId) throws Exception {
         ensureBucket();
         PutObjectArgs args = PutObjectArgs.builder()
                 .bucket(bucket)
@@ -38,7 +39,7 @@ public class FileService {
         f.setSize(size);
         f.setOwnerId(ownerId);
         f.setCreatedAt(Instant.now());
-        return repo.save(f);
+        return toDto(repo.save(f));
     }
 
     public String presignedGet(String objectName, int expireSeconds) throws Exception {
@@ -57,5 +58,18 @@ public class FileService {
         if (!exists) {
             minio.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
         }
+    }
+
+    private AssetFileDto toDto(AssetFile f) {
+        AssetFileDto dto = new AssetFileDto();
+        dto.setId(f.getId());
+        dto.setObjectName(f.getObjectName());
+        dto.setBucket(f.getBucket());
+        dto.setContentType(f.getContentType());
+        dto.setSize(f.getSize());
+        dto.setOwnerId(f.getOwnerId());
+        dto.setCreatedAt(f.getCreatedAt());
+        dto.setOriginalName(f.getOriginalName());
+        return dto;
     }
 }

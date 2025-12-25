@@ -2,6 +2,7 @@ package com.swordshield.activity.service;
 
 import com.swordshield.activity.domain.Activity;
 import com.swordshield.activity.domain.ActivityRegistration;
+import com.swordshield.activity.dto.ActivityDto;
 import com.swordshield.activity.repository.ActivityRegistrationRepository;
 import com.swordshield.activity.repository.ActivityRepository;
 import org.springframework.data.domain.Page;
@@ -32,9 +33,9 @@ public class ActivityService {
         return activityRepo.findByStatus(1, pageable);
     }
 
-    public Activity detail(Long id) {
-        return activityRepo.findById(id).orElseThrow(() -> 
-            new IllegalArgumentException("活动不存在"));
+    public ActivityDto detail(Long id) {
+        return toDto(activityRepo.findById(id).orElseThrow(() ->
+            new IllegalArgumentException("活动不存在")));
     }
 
     public boolean isRegistered(Long userId, Long activityId) {
@@ -42,7 +43,8 @@ public class ActivityService {
     }
 
     public void register(Long userId, Long activityId, String channel) {
-        Activity act = detail(activityId);
+        Activity act = activityRepo.findById(activityId).orElseThrow(() ->
+            new IllegalArgumentException("活动不存在"));
         Instant now = Instant.now();
         if (act.getEndTime() != null && now.isAfter(act.getEndTime())) {
             throw new IllegalArgumentException("活动已结束，无法报名");
@@ -66,7 +68,7 @@ public class ActivityService {
     }
 
     public Map<String, Object> getStatistics(Long activityId) {
-        Activity activity = detail(activityId);
+        Activity activity = activityRepo.findById(activityId).orElseThrow(() -> new IllegalArgumentException("活动不存在"));
         long registrationCount = regRepo.countByActivityId(activityId);
         
         Map<String, Object> stats = new java.util.HashMap<>();
@@ -173,5 +175,36 @@ public class ActivityService {
             pageable,
             registrations.getTotalElements()
         );
+    }
+
+    public java.util.List<ActivityDto> listDtos(int page, int size, String orderBy) {
+        Page<Activity> p = list(page, size, orderBy);
+        return p.getContent().stream().map(this::toDto).toList();
+    }
+
+    public org.springframework.data.domain.Page<ActivityDto> listDtoPage(int page, int size, String orderBy) {
+        Page<Activity> p = list(page, size, orderBy);
+        return p.map(this::toDto);
+    }
+
+    private ActivityDto toDto(Activity a) {
+        ActivityDto dto = new ActivityDto();
+        dto.setId(a.getId());
+        dto.setTitle(a.getTitle());
+        dto.setSummary(a.getSummary());
+        dto.setCoverUrl(a.getCoverUrl());
+        dto.setStartTime(a.getStartTime());
+        dto.setEndTime(a.getEndTime());
+        dto.setLocation(a.getLocation());
+        dto.setSpeaker(a.getSpeaker());
+        dto.setLiveUrl(a.getLiveUrl());
+        dto.setReplayUrl(a.getReplayUrl());
+        dto.setMaxRegistrations(a.getMaxRegistrations());
+        dto.setCurrentRegistrations(a.getCurrentRegistrations());
+        dto.setHeat(a.getHeat());
+        dto.setStatus(a.getStatus());
+        dto.setCreatedAt(a.getCreatedAt());
+        dto.setUpdatedAt(a.getUpdatedAt());
+        return dto;
     }
 }

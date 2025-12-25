@@ -26,7 +26,7 @@ public class UserServiceTest {
         u.setPasswordHash(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("p@ss"));
         Mockito.when(repo.findByUsername("alice")).thenReturn(Optional.of(u));
 
-        String token = service.login("alice", "p@ss").get("token");
+        String token = service.login("alice", "p@ss").getToken();
         String sub = JwtUtil.parseSubject(token);
         Assertions.assertEquals("1", sub);
     }

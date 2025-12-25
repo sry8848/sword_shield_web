@@ -1,6 +1,6 @@
 package com.swordshield.activity.controller;
 
-import com.swordshield.activity.domain.Activity;
+import com.swordshield.activity.dto.ActivityDto;
 import com.swordshield.activity.service.ActivityService;
 import com.swordshield.common.JwtUtil;
 import com.swordshield.common.Response;
@@ -26,7 +26,7 @@ public class ActivityController {
     public Response<Map<String, Object>> list(@RequestParam(name = "page", defaultValue = "0") int page,
                                               @RequestParam(name = "size", defaultValue = "10") int size,
                                               @RequestParam(name = "orderBy", required = false) String orderBy) {
-        Page<Activity> p = service.list(page, size, orderBy);
+        Page<ActivityDto> p = service.listDtoPage(page, size, orderBy);
         return Response.ok(Map.of(
                 "items", p.getContent(),
                 "total", p.getTotalElements(),
@@ -37,7 +37,7 @@ public class ActivityController {
 
     @GetMapping("/detail")
     @Operation(summary = "活动详情", description = "根据活动 ID 获取详情")
-    public Response<Activity> detail(@RequestParam("id") Long id) {
+    public Response<ActivityDto> detail(@RequestParam("id") Long id) {
         return Response.ok(service.detail(id));
     }
 

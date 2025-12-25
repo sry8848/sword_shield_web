@@ -1,6 +1,7 @@
 package com.swordshield.activity.service;
 
 import com.swordshield.activity.domain.Activity;
+import com.swordshield.activity.dto.ActivityDto;
 import com.swordshield.activity.repository.ActivityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,45 +19,60 @@ public class ActivityAdminService {
         this.activityRepo = activityRepo;
     }
 
-    public java.util.List<Activity> getAll() {
-        return activityRepo.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    public java.util.List<ActivityDto> getAll() {
+        return activityRepo.findAll(Sort.by(Sort.Direction.DESC, "id")).stream().map(this::toDto).toList();
     }
 
-    public Page<Activity> list(int page, int size) {
+    public Page<ActivityDto> list(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size),
                 Sort.by(Sort.Direction.DESC, "id"));
-        return activityRepo.findAll(pageable);
+        return activityRepo.findAll(pageable).map(this::toDto);
     }
 
-    public Activity getById(Long id) {
-        return activityRepo.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("活动不存在"));
+    public ActivityDto getById(Long id) {
+        return toDto(activityRepo.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("活动不存在")));
     }
 
-    public Activity create(Activity activity) {
-        if (activity.getTitle() == null || activity.getTitle().isBlank()) {
+    public ActivityDto create(ActivityDto activity) {
+        Activity entity = new Activity();
+        entity.setTitle(activity.getTitle());
+        entity.setSummary(activity.getSummary());
+        entity.setCoverUrl(activity.getCoverUrl());
+        entity.setStartTime(activity.getStartTime());
+        entity.setEndTime(activity.getEndTime());
+        entity.setLocation(activity.getLocation());
+        entity.setSpeaker(activity.getSpeaker());
+        entity.setLiveUrl(activity.getLiveUrl());
+        entity.setReplayUrl(activity.getReplayUrl());
+        entity.setMaxRegistrations(activity.getMaxRegistrations());
+        entity.setCurrentRegistrations(activity.getCurrentRegistrations());
+        entity.setHeat(activity.getHeat());
+        entity.setStatus(activity.getStatus());
+
+        if (entity.getTitle() == null || entity.getTitle().isBlank()) {
             throw new IllegalArgumentException("活动标题不能为空");
         }
 
-        activity.setId(null);
-        if (activity.getCurrentRegistrations() == null) {
-            activity.setCurrentRegistrations(0);
+        entity.setId(null);
+        if (entity.getCurrentRegistrations() == null) {
+            entity.setCurrentRegistrations(0);
         }
-        if (activity.getHeat() == null) {
-            activity.setHeat(0);
+        if (entity.getHeat() == null) {
+            entity.setHeat(0);
         }
-        if (activity.getStatus() == null) {
-            activity.setStatus(1);
+        if (entity.getStatus() == null) {
+            entity.setStatus(1);
         }
         Instant now = Instant.now();
-        activity.setCreatedAt(now);
-        activity.setUpdatedAt(now);
+        entity.setCreatedAt(now);
+        entity.setUpdatedAt(now);
 
-        return activityRepo.save(activity);
+        return toDto(activityRepo.save(entity));
     }
 
-    public Activity update(Long id, Activity activity) {
-        Activity existing = getById(id);
+    public ActivityDto update(Long id, ActivityDto activity) {
+        Activity existing = activityRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("活动不存在"));
 
         if (activity.getTitle() != null && !activity.getTitle().isBlank()) {
             existing.setTitle(activity.getTitle());
@@ -99,12 +115,32 @@ public class ActivityAdminService {
         }
 
         existing.setUpdatedAt(Instant.now());
-        return activityRepo.save(existing);
+        return toDto(activityRepo.save(existing));
     }
 
     public void delete(Long id) {
-        Activity activity = getById(id);
+        Activity activity = activityRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("活动不存在"));
         activityRepo.delete(activity);
     }
-}
 
+    private ActivityDto toDto(Activity a) {
+        ActivityDto dto = new ActivityDto();
+        dto.setId(a.getId());
+        dto.setTitle(a.getTitle());
+        dto.setSummary(a.getSummary());
+        dto.setCoverUrl(a.getCoverUrl());
+        dto.setStartTime(a.getStartTime());
+        dto.setEndTime(a.getEndTime());
+        dto.setLocation(a.getLocation());
+        dto.setSpeaker(a.getSpeaker());
+        dto.setLiveUrl(a.getLiveUrl());
+        dto.setReplayUrl(a.getReplayUrl());
+        dto.setMaxRegistrations(a.getMaxRegistrations());
+        dto.setCurrentRegistrations(a.getCurrentRegistrations());
+        dto.setHeat(a.getHeat());
+        dto.setStatus(a.getStatus());
+        dto.setCreatedAt(a.getCreatedAt());
+        dto.setUpdatedAt(a.getUpdatedAt());
+        return dto;
+    }
+}

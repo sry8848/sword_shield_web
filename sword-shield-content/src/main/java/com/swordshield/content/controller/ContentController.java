@@ -1,14 +1,14 @@
 package com.swordshield.content.controller;
 
+import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
 import com.swordshield.common.JwtUtil;
-import com.swordshield.content.domain.ContentArticle;
-import com.swordshield.content.domain.Exhibitor;
-import com.swordshield.content.domain.Achievement;
-import com.swordshield.content.domain.Material;
-import com.swordshield.content.domain.MediaAsset;
+import com.swordshield.content.dto.AchievementDto;
+import com.swordshield.content.dto.ContentArticleDto;
+import com.swordshield.content.dto.ExhibitorDto;
+import com.swordshield.content.dto.MaterialDto;
+import com.swordshield.content.dto.MediaAssetDto;
 import com.swordshield.content.service.ContentService;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,46 +35,43 @@ public class ContentController {
 
     @GetMapping("/articles")
     @Operation(summary = "文章列表", description = "按分页、分类、标签筛选文章")
-    public Response<Map<String, Object>> articles(@RequestParam(name = "page", defaultValue = "0") int page,
+    public Response<PageResult<ContentArticleDto>> articles(@RequestParam(name = "page", defaultValue = "0") int page,
                                                   @RequestParam(name = "size", defaultValue = "10") int size,
                                                   @RequestParam(name = "category", required = false) String category,
                                                   @RequestParam(name = "tags", required = false) String tags) {
-        Page<ContentArticle> p = service.listArticles(page, size, category, tags);
-        return Response.ok(Map.of("items", p.getContent(), "total", p.getTotalElements()));
+        return Response.ok(service.listArticles(page, size, category, tags));
     }
 
     @GetMapping("/article")
     @Operation(summary = "文章详情", description = "根据 ID 获取文章内容")
-    public Response<ContentArticle> article(@RequestParam("id") Long id) { return Response.ok(service.articleDetail(id)); }
+    public Response<ContentArticleDto> article(@RequestParam("id") Long id) { return Response.ok(service.articleDetail(id)); }
 
     @GetMapping("/exhibitors")
     @Operation(summary = "展商列表", description = "分页查询参展企业/机构")
-    public Response<Map<String, Object>> exhibitors(@RequestParam(name = "page", defaultValue = "0") int page,
+    public Response<PageResult<ExhibitorDto>> exhibitors(@RequestParam(name = "page", defaultValue = "0") int page,
                                                     @RequestParam(name = "size", defaultValue = "10") int size) {
-        Page<Exhibitor> p = service.listExhibitors(page, size);
-        return Response.ok(Map.of("items", p.getContent(), "total", p.getTotalElements()));
+        return Response.ok(service.listExhibitors(page, size));
     }
 
     @GetMapping("/exhibitor")
     @Operation(summary = "展商详情", description = "根据 ID 获取展商信息")
-    public Response<Exhibitor> exhibitor(@RequestParam("id") Long id) { return Response.ok(service.exhibitorDetail(id)); }
+    public Response<ExhibitorDto> exhibitor(@RequestParam("id") Long id) { return Response.ok(service.exhibitorDetail(id)); }
 
     @GetMapping("/achievements")
     @Operation(summary = "成就列表", description = "分页查询成果/案例")
-    public Response<Map<String, Object>> achievements(@RequestParam(name = "page", defaultValue = "0") int page,
+    public Response<PageResult<AchievementDto>> achievements(@RequestParam(name = "page", defaultValue = "0") int page,
                                                       @RequestParam(name = "size", defaultValue = "10") int size) {
-        Page<Achievement> p = service.listAchievements(page, size);
-        return Response.ok(Map.of("items", p.getContent(), "total", p.getTotalElements()));
+        return Response.ok(service.listAchievements(page, size));
     }
 
     @GetMapping("/achievement")
     @Operation(summary = "成就详情", description = "根据 ID 获取成就内容")
-    public Response<Achievement> achievement(@RequestParam("id") Long id) { return Response.ok(service.achievementDetail(id)); }
+    public Response<AchievementDto> achievement(@RequestParam("id") Long id) { return Response.ok(service.achievementDetail(id)); }
 
     @PostMapping("/article/submit")
     @Operation(summary = "提交文章", description = "UGC 投稿入口，提交标题、摘要、正文等信息")
-    public Response<ContentArticle> submit(@RequestBody Map<String, String> body) {
-        ContentArticle saved = service.submitArticle(
+    public Response<ContentArticleDto> submit(@RequestBody Map<String, String> body) {
+        ContentArticleDto saved = service.submitArticle(
                 body.get("title"),
                 body.get("summary"),
                 body.get("body"),
@@ -86,19 +83,18 @@ public class ContentController {
 
     @GetMapping("/materials")
     @Operation(summary = "资料列表", description = "分页查询会议资料、幻灯、白皮书等")
-    public Response<Map<String, Object>> materials(@RequestParam(name = "page", defaultValue = "0") int page,
+    public Response<PageResult<MaterialDto>> materials(@RequestParam(name = "page", defaultValue = "0") int page,
                                                    @RequestParam(name = "size", defaultValue = "10") int size) {
-        org.springframework.data.domain.Page<Material> p = service.listMaterials(page, size);
-        return Response.ok(Map.of("items", p.getContent(), "total", p.getTotalElements()));
+        return Response.ok(service.listMaterials(page, size));
     }
 
     @GetMapping("/material")
     @Operation(summary = "资料详情", description = "根据 ID 获取资料元信息")
-    public Response<Material> material(@RequestParam("id") Long id) { return Response.ok(service.materialDetail(id)); }
+    public Response<MaterialDto> material(@RequestParam("id") Long id) { return Response.ok(service.materialDetail(id)); }
 
     @PostMapping("/material")
     @Operation(summary = "新建资料", description = "创建资料元数据，支持上传后的对象信息对接")
-    public Response<Material> createMaterial(
+    public Response<MaterialDto> createMaterial(
             @RequestHeader(name = "Authorization", required = false) String authorization,
             @RequestBody Map<String, Object> body) {
         verifyAdmin(authorization);
@@ -108,7 +104,7 @@ public class ContentController {
             String objectName = (String) body.get("objectName");
             String contentType = (String) body.get("contentType");
             long size = body.get("size") == null ? 0L : ((Number) body.get("size")).longValue();
-            Material saved = service.createMaterial(title, speaker, objectName, contentType, size);
+            MaterialDto saved = service.createMaterial(title, speaker, objectName, contentType, size);
             return Response.ok(saved);
         } catch (Exception e) {
             e.printStackTrace();
@@ -128,20 +124,19 @@ public class ContentController {
 
     @GetMapping("/media")
     @Operation(summary = "媒体素材列表", description = "分页查询视频/音频/图片等媒体资产，可按类型过滤")
-    public Response<Map<String, Object>> mediaList(@RequestParam(name = "page", defaultValue = "0") int page,
+    public Response<PageResult<MediaAssetDto>> mediaList(@RequestParam(name = "page", defaultValue = "0") int page,
                                                    @RequestParam(name = "size", defaultValue = "10") int size,
                                                    @RequestParam(name = "type", required = false) String type) {
-        org.springframework.data.domain.Page<MediaAsset> p = service.listMedia(page, size, type);
-        return Response.ok(Map.of("items", p.getContent(), "total", p.getTotalElements()));
+        return Response.ok(service.listMedia(page, size, type));
     }
 
     @GetMapping("/media/item")
     @Operation(summary = "媒体详情", description = "根据 ID 获取单个媒体资产信息")
-    public Response<MediaAsset> media(@RequestParam("id") Long id) { return Response.ok(service.mediaDetail(id)); }
+    public Response<MediaAssetDto> media(@RequestParam("id") Long id) { return Response.ok(service.mediaDetail(id)); }
 
     @PostMapping("/media")
     @Operation(summary = "创建媒体素材", description = "上传后的媒体元数据登记，可关联文章 ID")
-    public Response<MediaAsset> createMedia(@RequestBody Map<String, Object> body) {
+    public Response<MediaAssetDto> createMedia(@RequestBody Map<String, Object> body) {
         String title = (String) body.get("title");
         String summary = (String) body.get("summary");
         String type = (String) body.get("type");
@@ -157,7 +152,7 @@ public class ContentController {
     
     @GetMapping("/media/by-article")
     @Operation(summary = "按文章查询媒体", description = "通过文章 ID 获取关联媒体列表")
-    public Response<java.util.List<MediaAsset>> getMediaByArticle(@RequestParam("articleId") Long articleId) {
+    public Response<java.util.List<MediaAssetDto>> getMediaByArticle(@RequestParam("articleId") Long articleId) {
         return Response.ok(service.getMediaByArticleId(articleId));
     }
 

@@ -1,10 +1,10 @@
 package com.swordshield.interaction.controller;
 
 import com.swordshield.common.JwtUtil;
+import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
-import com.swordshield.interaction.domain.Comment;
+import com.swordshield.interaction.dto.CommentDto;
 import com.swordshield.interaction.service.InteractionService;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,8 +25,8 @@ public class InteractionController {
                                                   @RequestParam("targetId") Long targetId,
                                                   @RequestParam(name = "page", defaultValue = "0") int page,
                                                   @RequestParam(name = "size", defaultValue = "10") int size) {
-        Page<Comment> p = service.listComments(targetType, targetId, page, size);
-        return Response.ok(Map.of("items", p.getContent(), "total", p.getTotalElements()));
+        PageResult<CommentDto> p = service.listComments(targetType, targetId, page, size);
+        return Response.ok(Map.of("items", p.getItems(), "total", p.getTotal()));
     }
 
     @PostMapping("/comment")

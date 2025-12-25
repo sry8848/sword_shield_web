@@ -60,10 +60,10 @@
         
         <el-form-item label="活动描述">
           <el-input
-            v-model="form.description"
+            v-model="form.summary"
             type="textarea"
             :rows="4"
-            placeholder="请输入活动描述"
+            placeholder="请输入活动摘要"
           />
         </el-form-item>
         
@@ -85,15 +85,6 @@
           />
         </el-form-item>
         
-        <el-form-item label="报名截止时间">
-          <el-date-picker
-            v-model="form.registrationDeadline"
-            type="datetime"
-            placeholder="选择报名截止时间"
-            style="width: 100%"
-          />
-        </el-form-item>
-        
         <el-form-item label="最大报名人数">
           <el-input-number v-model="form.maxRegistrations" :min="0" />
         </el-form-item>
@@ -111,7 +102,7 @@
         </el-form-item>
         
         <el-form-item label="封面图">
-          <el-input v-model="form.coverImage" placeholder="请输入封面图URL" />
+          <el-input v-model="form.coverUrl" placeholder="请输入封面图URL" />
         </el-form-item>
         
         <el-form-item label="状态">
@@ -142,15 +133,14 @@ interface Activity {
   id?: number
   title: string
   speaker?: string
-  description?: string
+  summary?: string
   startTime: string
   endTime: string
-  registrationDeadline?: string
   maxRegistrations?: number
   location?: string
   liveUrl?: string
   replayUrl?: string
-  coverImage?: string
+  coverUrl?: string
   status: number
   currentRegistrations?: number
   heat?: number
@@ -165,15 +155,14 @@ const activities = ref<Activity[]>([])
 const form = ref<Activity>({
   title: '',
   speaker: '',
-  description: '',
+  summary: '',
   startTime: '',
   endTime: '',
-  registrationDeadline: '',
   maxRegistrations: 100,
   location: '',
   liveUrl: '',
   replayUrl: '',
-  coverImage: '',
+  coverUrl: '',
   status: 1
 })
 
@@ -203,15 +192,14 @@ function showCreateDialog() {
   form.value = {
     title: '',
     speaker: '',
-    description: '',
+    summary: '',
     startTime: '',
     endTime: '',
-    registrationDeadline: '',
     maxRegistrations: 100,
     location: '',
     liveUrl: '',
     replayUrl: '',
-    coverImage: '',
+    coverUrl: '',
     status: 1
   }
   dialogVisible.value = true
@@ -220,10 +208,20 @@ function showCreateDialog() {
 function showEditDialog(activity: Activity) {
   isEdit.value = true
   form.value = {
-    ...activity,
+    id: activity.id,
+    title: activity.title,
+    speaker: activity.speaker || '',
+    summary: activity.summary || '',
     startTime: activity.startTime,
     endTime: activity.endTime,
-    registrationDeadline: activity.registrationDeadline || ''
+    maxRegistrations: activity.maxRegistrations ?? 100,
+    location: activity.location || '',
+    liveUrl: activity.liveUrl || '',
+    replayUrl: activity.replayUrl || '',
+    coverUrl: activity.coverUrl || '',
+    status: typeof activity.status === 'number' ? activity.status : 1,
+    currentRegistrations: activity.currentRegistrations,
+    heat: activity.heat
   }
   dialogVisible.value = true
 }
@@ -241,12 +239,17 @@ async function submitForm() {
   submitting.value = true
   try {
     const payload = {
-      ...form.value,
+      title: form.value.title,
+      speaker: form.value.speaker || null,
+      summary: form.value.summary || null,
+      maxRegistrations: form.value.maxRegistrations ?? null,
+      location: form.value.location || null,
+      liveUrl: form.value.liveUrl || null,
+      replayUrl: form.value.replayUrl || null,
+      coverUrl: form.value.coverUrl || null,
+      status: form.value.status,
       startTime: new Date(form.value.startTime).toISOString(),
-      endTime: new Date(form.value.endTime).toISOString(),
-      registrationDeadline: form.value.registrationDeadline 
-        ? new Date(form.value.registrationDeadline).toISOString() 
-        : null
+      endTime: new Date(form.value.endTime).toISOString()
     }
     
     if (isEdit.value) {

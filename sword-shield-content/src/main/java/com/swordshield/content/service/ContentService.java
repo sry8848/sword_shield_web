@@ -1,10 +1,17 @@
 package com.swordshield.content.service;
 
+import com.swordshield.common.PageResult;
 import com.swordshield.content.domain.Achievement;
 import com.swordshield.content.domain.ContentArticle;
 import com.swordshield.content.domain.Exhibitor;
 import com.swordshield.content.domain.Material;
 import com.swordshield.content.domain.MediaAsset;
+import com.swordshield.content.dto.AchievementDto;
+import com.swordshield.content.dto.AdminArticleUpsertRequest;
+import com.swordshield.content.dto.ContentArticleDto;
+import com.swordshield.content.dto.ExhibitorDto;
+import com.swordshield.content.dto.MaterialDto;
+import com.swordshield.content.dto.MediaAssetDto;
 import com.swordshield.content.repository.AchievementRepository;
 import com.swordshield.content.repository.ContentArticleRepository;
 import com.swordshield.content.repository.ExhibitorRepository;
@@ -34,41 +41,45 @@ public class ContentService {
         this.mediaRepo = mediaRepo;
     }
 
-    public Page<ContentArticle> listArticles(int page, int size, String category, String tags) {
+    public PageResult<ContentArticleDto> listArticles(int page, int size, String category, String tags) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "publishedAt"));
+        Page<ContentArticle> p;
         if (category != null && !category.isBlank()) {
-            return articleRepo.findPublishedArticlesByCategory(category, pageable);
+            p = articleRepo.findPublishedArticlesByCategory(category, pageable);
+        } else {
+            // Only return published articles (status = 1 and publishedAt is not null)
+            p = articleRepo.findPublishedArticles(pageable);
         }
-        // Only return published articles (status = 1 and publishedAt is not null)
-        return articleRepo.findPublishedArticles(pageable);
+        return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    public Page<ContentArticle> listAdminArticles(int page, int size, String category, Integer status, String excludeCategory) {
+    public PageResult<ContentArticleDto> listAdminArticles(int page, int size, String category, Integer status, String excludeCategory) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "id"));
 
         boolean hasCategory = category != null && !category.isBlank();
         boolean hasStatus = status != null;
         boolean hasExcludeCategory = excludeCategory != null && !excludeCategory.isBlank();
 
+        Page<ContentArticle> p;
         if (hasCategory && hasStatus) {
-            return articleRepo.findByStatusAndCategory(status, category, pageable);
-        }
-        if (hasStatus) {
+            p = articleRepo.findByStatusAndCategory(status, category, pageable);
+        } else if (hasStatus) {
             if (hasExcludeCategory) {
-                return articleRepo.findByStatusAndCategoryNot(status, excludeCategory, pageable);
+                p = articleRepo.findByStatusAndCategoryNot(status, excludeCategory, pageable);
+            } else {
+                p = articleRepo.findByStatus(status, pageable);
             }
-            return articleRepo.findByStatus(status, pageable);
+        } else if (hasCategory) {
+            p = articleRepo.findByCategory(category, pageable);
+        } else if (hasExcludeCategory) {
+            p = articleRepo.findByCategoryNot(excludeCategory, pageable);
+        } else {
+            p = articleRepo.findAll(pageable);
         }
-        if (hasCategory) {
-            return articleRepo.findByCategory(category, pageable);
-        }
-        if (hasExcludeCategory) {
-            return articleRepo.findByCategoryNot(excludeCategory, pageable);
-        }
-        return articleRepo.findAll(pageable);
+        return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    public ContentArticle createAdminArticle(ContentArticle input, String adminSubject) {
+    public ContentArticleDto createAdminArticle(AdminArticleUpsertRequest input, String adminSubject) {
         if (input == null) {
             throw new IllegalArgumentException("参数不能为空");
         }
@@ -109,10 +120,10 @@ public class ContentService {
             a.setPublishedAt(null);
         }
 
-        return articleRepo.save(a);
+        return toDto(articleRepo.save(a));
     }
 
-    public ContentArticle updateAdminArticle(Long id, ContentArticle input) {
+    public ContentArticleDto updateAdminArticle(Long id, AdminArticleUpsertRequest input) {
         if (id == null) {
             throw new IllegalArgumentException("ID 不能为空");
         }
@@ -155,7 +166,7 @@ public class ContentService {
             existing.setPublishedAt(null);
         }
 
-        return articleRepo.save(existing);
+        return toDto(articleRepo.save(existing));
     }
 
     public void deleteAdminArticle(Long id) {
@@ -168,7 +179,7 @@ public class ContentService {
         articleRepo.deleteById(id);
     }
 
-    public ContentArticle submitArticle(String title, String summary, String body, String coverUrl, String authorCategory) {
+    public ContentArticleDto submitArticle(String title, String summary, String body, String coverUrl, String authorCategory) {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("标题不能为空");
         }
@@ -186,37 +197,40 @@ public class ContentService {
         a.setCategory(authorCategory == null ? "UGC" : authorCategory);
         // 未发布状态，管理员审核后可设置 publishedAt
         a.setPublishedAt(null);
-        return articleRepo.save(a);
+        return toDto(articleRepo.save(a));
     }
 
-    public ContentArticle articleDetail(Long id) {
-        return articleRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found"));
+    public ContentArticleDto articleDetail(Long id) {
+        return toDto(articleRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
-    public Page<Exhibitor> listExhibitors(int page, int size) {
+    public PageResult<ExhibitorDto> listExhibitors(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size));
-        return exhibitorRepo.findAll(pageable);
+        Page<Exhibitor> p = exhibitorRepo.findAll(pageable);
+        return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    public Exhibitor exhibitorDetail(Long id) {
-        return exhibitorRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found"));
+    public ExhibitorDto exhibitorDetail(Long id) {
+        return toDto(exhibitorRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
-    public Page<Achievement> listAchievements(int page, int size) {
+    public PageResult<AchievementDto> listAchievements(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size));
-        return achievementRepo.findAll(pageable);
+        Page<Achievement> p = achievementRepo.findAll(pageable);
+        return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    public Achievement achievementDetail(Long id) {
-        return achievementRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found"));
+    public AchievementDto achievementDetail(Long id) {
+        return toDto(achievementRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
-    public Page<Material> listMaterials(int page, int size) {
+    public PageResult<MaterialDto> listMaterials(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "createdAt"));
-        return materialRepo.findAll(pageable);
+        Page<Material> p = materialRepo.findAll(pageable);
+        return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    public Material createMaterial(String title, String speaker, String objectName, String contentType, long size) {
+    public MaterialDto createMaterial(String title, String speaker, String objectName, String contentType, long size) {
         if (title == null || title.isBlank()) { throw new IllegalArgumentException("标题不能为空"); }
         if (objectName == null || objectName.isBlank()) { throw new IllegalArgumentException("文件对象名不能为空"); }
         Material m = new Material();
@@ -226,11 +240,11 @@ public class ContentService {
         m.setContentType(contentType);
         m.setSize(size);
         m.setCreatedAt(Instant.now());
-        return materialRepo.save(m);
+        return toDto(materialRepo.save(m));
     }
 
-    public Material materialDetail(Long id) {
-        return materialRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found"));
+    public MaterialDto materialDetail(Long id) {
+        return toDto(materialRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
     public void deleteMaterial(Long id) {
@@ -240,15 +254,18 @@ public class ContentService {
         materialRepo.deleteById(id);
     }
 
-    public Page<MediaAsset> listMedia(int page, int size, String type) {
+    public PageResult<MediaAssetDto> listMedia(int page, int size, String type) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<MediaAsset> p;
         if (type != null && !type.isBlank()) {
-            return mediaRepo.findByTypeIgnoreCase(type.trim(), pageable);
+            p = mediaRepo.findByTypeIgnoreCase(type.trim(), pageable);
+        } else {
+            p = mediaRepo.findAll(pageable);
         }
-        return mediaRepo.findAll(pageable);
+        return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    public MediaAsset createMedia(String title, String summary, String type, String objectName, String coverUrl) {
+    public MediaAssetDto createMedia(String title, String summary, String type, String objectName, String coverUrl) {
         if (title == null || title.isBlank()) { throw new IllegalArgumentException("标题不能为空"); }
         if (objectName == null || objectName.isBlank()) { throw new IllegalArgumentException("媒体对象名不能为空"); }
         MediaAsset a = new MediaAsset();
@@ -258,10 +275,10 @@ public class ContentService {
         a.setObjectName(objectName);
         a.setCoverUrl(coverUrl);
         a.setCreatedAt(Instant.now());
-        return mediaRepo.save(a);
+        return toDto(mediaRepo.save(a));
     }
 
-    public MediaAsset createMedia(String title, String summary, String type, String objectName, String coverUrl, Long articleId) {
+    public MediaAssetDto createMedia(String title, String summary, String type, String objectName, String coverUrl, Long articleId) {
         if (title == null || title.isBlank()) { throw new IllegalArgumentException("标题不能为空"); }
         if (objectName == null || objectName.isBlank()) { throw new IllegalArgumentException("媒体对象名不能为空"); }
         MediaAsset a = new MediaAsset();
@@ -272,15 +289,15 @@ public class ContentService {
         a.setCoverUrl(coverUrl);
         a.setArticleId(articleId);
         a.setCreatedAt(Instant.now());
-        return mediaRepo.save(a);
+        return toDto(mediaRepo.save(a));
     }
 
-    public java.util.List<MediaAsset> getMediaByArticleId(Long articleId) {
-        return mediaRepo.findByArticleId(articleId);
+    public java.util.List<MediaAssetDto> getMediaByArticleId(Long articleId) {
+        return mediaRepo.findByArticleId(articleId).stream().map(this::toDto).toList();
     }
 
-    public MediaAsset mediaDetail(Long id) {
-        return mediaRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found"));
+    public MediaAssetDto mediaDetail(Long id) {
+        return toDto(mediaRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
     public void deleteMedia(Long id) {
@@ -288,5 +305,70 @@ public class ContentService {
             throw new IllegalArgumentException("not found");
         }
         mediaRepo.deleteById(id);
+    }
+
+    private ContentArticleDto toDto(ContentArticle a) {
+        ContentArticleDto dto = new ContentArticleDto();
+        dto.setId(a.getId());
+        dto.setTitle(a.getTitle());
+        dto.setSummary(a.getSummary());
+        dto.setBody(a.getBody());
+        dto.setCoverUrl(a.getCoverUrl());
+        dto.setCategory(a.getCategory());
+        dto.setAuthor(a.getAuthor());
+        dto.setViews(a.getViews());
+        dto.setLiveUrl(a.getLiveUrl());
+        dto.setReplayUrl(a.getReplayUrl());
+        dto.setStatus(a.getStatus());
+        dto.setPublishedAt(a.getPublishedAt());
+        dto.setCreatedAt(a.getCreatedAt());
+        dto.setUpdatedAt(a.getUpdatedAt());
+        return dto;
+    }
+
+    private ExhibitorDto toDto(Exhibitor e) {
+        ExhibitorDto dto = new ExhibitorDto();
+        dto.setId(e.getId());
+        dto.setName(e.getName());
+        dto.setLogoUrl(e.getLogoUrl());
+        dto.setIntroduction(e.getIntroduction());
+        dto.setWebsite(e.getWebsite());
+        dto.setBrand(e.getBrand());
+        dto.setVideoUrl(e.getVideoUrl());
+        return dto;
+    }
+
+    private AchievementDto toDto(Achievement a) {
+        AchievementDto dto = new AchievementDto();
+        dto.setId(a.getId());
+        dto.setTitle(a.getTitle());
+        dto.setDescription(a.getDescription());
+        dto.setFileUrl(a.getFileUrl());
+        return dto;
+    }
+
+    private MaterialDto toDto(Material m) {
+        MaterialDto dto = new MaterialDto();
+        dto.setId(m.getId());
+        dto.setTitle(m.getTitle());
+        dto.setSpeaker(m.getSpeaker());
+        dto.setObjectName(m.getObjectName());
+        dto.setContentType(m.getContentType());
+        dto.setSize(m.getSize());
+        dto.setCreatedAt(m.getCreatedAt());
+        return dto;
+    }
+
+    private MediaAssetDto toDto(MediaAsset a) {
+        MediaAssetDto dto = new MediaAssetDto();
+        dto.setId(a.getId());
+        dto.setTitle(a.getTitle());
+        dto.setSummary(a.getSummary());
+        dto.setType(a.getType());
+        dto.setObjectName(a.getObjectName());
+        dto.setCoverUrl(a.getCoverUrl());
+        dto.setArticleId(a.getArticleId());
+        dto.setCreatedAt(a.getCreatedAt());
+        return dto;
     }
 }

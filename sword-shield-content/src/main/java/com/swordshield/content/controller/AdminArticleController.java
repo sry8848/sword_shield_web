@@ -1,14 +1,15 @@
 package com.swordshield.content.controller;
 
 import com.swordshield.common.JwtUtil;
+import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
-import com.swordshield.content.domain.ContentArticle;
+import com.swordshield.content.dto.AdminArticleUpsertRequest;
+import com.swordshield.content.dto.ContentArticleDto;
 import com.swordshield.content.service.ContentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -37,7 +38,7 @@ public class AdminArticleController {
 
     @GetMapping
     @Operation(summary = "资讯列表（管理员）", description = "分页查询全部资讯（包含草稿/已发布），支持按分类与状态过滤")
-    public Response<Map<String, Object>> list(
+    public Response<PageResult<ContentArticleDto>> list(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -46,18 +47,12 @@ public class AdminArticleController {
             @RequestParam(name = "status", required = false) Integer status,
             @RequestParam(name = "excludeCategory", required = false) String excludeCategory) {
         verifyAdmin(authorization);
-        Page<ContentArticle> p = service.listAdminArticles(page, size, category, status, excludeCategory);
-        return Response.ok(Map.of(
-                "items", p.getContent(),
-                "total", p.getTotalElements(),
-                "page", p.getNumber(),
-                "size", p.getSize()
-        ));
+        return Response.ok(service.listAdminArticles(page, size, category, status, excludeCategory));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "资讯详情（管理员）", description = "根据 ID 查询资讯（包含草稿/已发布）")
-    public Response<ContentArticle> detail(
+    public Response<ContentArticleDto> detail(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id) {
@@ -67,21 +62,21 @@ public class AdminArticleController {
 
     @PostMapping
     @Operation(summary = "创建资讯", description = "管理员创建资讯，可选择草稿/发布")
-    public Response<ContentArticle> create(
+    public Response<ContentArticleDto> create(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
-            @RequestBody ContentArticle body) {
+            @RequestBody AdminArticleUpsertRequest body) {
         String subject = verifyAdmin(authorization);
         return Response.ok(service.createAdminArticle(body, subject));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "更新资讯", description = "管理员更新资讯内容与发布状态")
-    public Response<ContentArticle> update(
+    public Response<ContentArticleDto> update(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id,
-            @RequestBody ContentArticle body) {
+            @RequestBody AdminArticleUpsertRequest body) {
         verifyAdmin(authorization);
         return Response.ok(service.updateAdminArticle(id, body));
     }

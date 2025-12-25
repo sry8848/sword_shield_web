@@ -144,7 +144,15 @@ async function save() {
   
   saving.value = true
   try {
-    const { data } = await api.put('/user/profile', form)
+    const payload = {
+      id: form.id,
+      nickname: form.nickname,
+      gender: form.gender,
+      phone: form.phone,
+      email: form.email,
+      avatarUrl: form.avatarUrl
+    }
+    const { data } = await api.put('/user/profile', payload)
     if (data.code === 0) {
       ElMessage.success('保存成功')
       // Update localStorage
