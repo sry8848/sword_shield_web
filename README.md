@@ -149,6 +149,13 @@ npm run build    # 生产构建
 - Kibana：`http://127.0.0.1:5601`
 
 ## 部署（K8s / Helm）
+- Docker 镜像构建：
+  - 各后端服务 Dockerfile 使用多阶段缓存构建（先 `COPY pom.xml` 再离线下载依赖，再拷贝源码编译），可显著提升二次构建速度。
+  - 注意：Docker build 的 context 必须是仓库根目录（因为 Dockerfile 会 `COPY` 根 `pom.xml` 与各模块 `pom.xml`）。
+  - 示例（user 服务）：
+    ```sh
+    docker build -f sword-shield-user/Dockerfile -t sword-shield-user:dev .
+    ```
 - K8s 探针已使用：`/actuator/health/liveness`、`/actuator/health/readiness`
 - Helm tracing 模式开关：`helm/sword-shield/values.yaml` 的 `observability.tracing.mode`
   - `micrometer`（默认）：使用 `MANAGEMENT_OTLP_TRACING_ENDPOINT`
