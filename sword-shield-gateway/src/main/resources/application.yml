@@ -1,6 +1,38 @@
 server:
   port: 8080
   max-http-request-header-size: 10MB
+jwt:
+  secret: ${JWT_SECRET:swordshield-dev-secret-change-me}
+gateway:
+  security:
+    permit-all:
+      - /swagger-ui**
+      - /webjars/swagger-ui/**
+      - /v3/api-docs**
+      - /api/user/login
+      - /api/user/register
+      - /api/admin/auth/login
+      - /api/activity/list**
+      - /api/activity/detail**
+      - /api/activity/statistics**
+      - /api/content/articles**
+      - /api/content/article**
+      - /api/content/exhibitors**
+      - /api/content/exhibitor**
+      - /api/content/achievements**
+      - /api/content/achievement**
+      - /api/content/material**
+      - /api/content/media**
+      - /api/content/poster**
+      - /api/file/presigned**
+      - /api/interaction/comments**
+      - /api/interaction/likes/count**
+      - /actuator/health**
+      - /actuator/info**
+      - /actuator/prometheus**
+    admin-paths:
+      - /api/admin/**
+      - /api/*/admin/**
 spring:
   application:
     name: sword-shield-gateway

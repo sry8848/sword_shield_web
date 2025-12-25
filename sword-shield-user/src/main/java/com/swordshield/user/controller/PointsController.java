@@ -29,10 +29,11 @@ public class PointsController {
     @Operation(summary = "每日签到（已下线）", description = "每日签到功能已下线，请在活动详情页进行活动签到")
     public Response<Object> checkin(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-            @RequestHeader("Authorization") String authorization) {
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader) {
         // Keep endpoint for backward compatibility but disable it on purpose.
         // Still parse token to ensure this is an authenticated request.
-        AuthUtils.requireSubject(authorization);
+        AuthUtils.requireSubject(subjectHeader, authorization);
         return Response.error(ErrorCode.BAD_REQUEST.code, "每日签到已下线，请在活动详情页签到");
     }
 
@@ -40,8 +41,9 @@ public class PointsController {
     @Operation(summary = "查询积分", description = "返回用户累计积分，需携带 JWT")
     public Response<PointsSummaryDto> points(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-            @RequestHeader("Authorization") String authorization) {
-        Long userId = AuthUtils.requireUserId(authorization);
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-User-Id", required = false) String userIdHeader) {
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         return Response.ok(pointsService.getPoints(userId));
     }
 
@@ -49,10 +51,11 @@ public class PointsController {
     @Operation(summary = "积分明细", description = "分页返回积分变更明细，需携带 JWT")
     public Response<PageResult<PointsTxnDto>> pointsTxns(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-            @RequestHeader("Authorization") String authorization,
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         return Response.ok(pointsService.getPointsTxns(userId, page, size));
     }
 
@@ -60,9 +63,10 @@ public class PointsController {
     @Operation(summary = "活动签到状态", description = "查询当前用户是否已对指定活动签到，需携带 JWT")
     public Response<Map<String, Object>> activityCheckinStatus(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-            @RequestHeader("Authorization") String authorization,
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
             @RequestParam("activityId") Long activityId) {
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         return Response.ok(pointsService.activityCheckinStatus(userId, activityId));
     }
 
@@ -70,9 +74,10 @@ public class PointsController {
     @Operation(summary = "活动签到", description = "仅活动期间可签到，成功后增加积分，需携带 JWT")
     public Response<Map<String, Object>> activityCheckin(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-            @RequestHeader("Authorization") String authorization,
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
             @RequestBody Map<String, Object> body) {
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         Object activityIdObj = body.get("activityId");
         if (activityIdObj == null) {
             throw new IllegalArgumentException("activityId 不能为空");

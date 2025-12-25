@@ -25,9 +25,10 @@ public class FileController {
     @Operation(summary = "上传文件", description = "需携带 JWT，支持 multipart 文件上传")
     public Response<AssetFileDto> upload(
                                       @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-                                      @RequestHeader("Authorization") String authorization,
+                                      @RequestHeader(name = "Authorization", required = false) String authorization,
+                                      @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
                                       @RequestPart("file") MultipartFile file) throws Exception {
-        Long userId = AuthUtils.requireUserIdAllowAdmin(authorization);
+        Long userId = AuthUtils.requireUserIdAllowAdmin(userIdHeader, authorization);
         
         // Generate unique object name: UUID + original extension
         String originalFilename = file.getOriginalFilename();

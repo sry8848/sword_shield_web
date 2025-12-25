@@ -33,9 +33,10 @@ public class InteractionController {
     @Operation(summary = "发表评论", description = "需携带用户 JWT")
     public Response<Object> post(
                                  @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-                                 @RequestHeader("Authorization") String authorization,
+                                 @RequestHeader(name = "Authorization", required = false) String authorization,
+                                 @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
                                  @RequestBody Map<String, Object> body) {
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         String targetType = (String) body.get("targetType");
         Long targetId = ((Number) body.get("targetId")).longValue();
         String content = (String) body.get("content");
@@ -47,9 +48,10 @@ public class InteractionController {
     @Operation(summary = "点赞", description = "需携带用户 JWT，返回最新点赞数")
     public Response<Map<String, Long>> like(
                                             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-                                            @RequestHeader("Authorization") String authorization,
+                                            @RequestHeader(name = "Authorization", required = false) String authorization,
+                                            @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
                                             @RequestBody Map<String, Object> body) {
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         String targetType = (String) body.get("targetType");
         Long targetId = ((Number) body.get("targetId")).longValue();
         long count = service.like(userId, targetType, targetId);
@@ -60,9 +62,10 @@ public class InteractionController {
     @Operation(summary = "取消点赞", description = "需携带用户 JWT，返回最新点赞数")
     public Response<Map<String, Long>> unlike(
                                                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-                                               @RequestHeader("Authorization") String authorization,
+                                               @RequestHeader(name = "Authorization", required = false) String authorization,
+                                               @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
                                               @RequestBody Map<String, Object> body) {
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         String targetType = (String) body.get("targetType");
         Long targetId = ((Number) body.get("targetId")).longValue();
         long count = service.unlike(userId, targetType, targetId);
@@ -73,9 +76,10 @@ public class InteractionController {
     @Operation(summary = "分享", description = "记录用户分享行为，需携带 JWT")
     public Response<Object> share(
                                   @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-                                  @RequestHeader("Authorization") String authorization,
+                                  @RequestHeader(name = "Authorization", required = false) String authorization,
+                                  @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
                                   @RequestBody Map<String, Object> body) {
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         String targetType = (String) body.get("targetType");
         Long targetId = ((Number) body.get("targetId")).longValue();
         String channel = (String) body.getOrDefault("channel", "link");

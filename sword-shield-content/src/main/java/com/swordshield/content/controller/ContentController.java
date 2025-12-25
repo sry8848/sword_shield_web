@@ -85,8 +85,9 @@ public class ContentController {
     @Operation(summary = "新建资料", description = "创建资料元数据，支持上传后的对象信息对接")
     public Response<MaterialDto> createMaterial(
             @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader,
             @RequestBody Map<String, Object> body) {
-        AuthUtils.requireAdminSubject(authorization);
+        AuthUtils.requireAdminSubject(subjectHeader, authorization);
         try {
             String title = (String) body.get("title");
             String speaker = (String) body.get("speaker");
@@ -105,8 +106,9 @@ public class ContentController {
     @Operation(summary = "删除资料", description = "根据 ID 删除资料元信息")
     public Response<Object> deleteMaterial(
             @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader,
             @PathVariable("id") Long id) {
-        AuthUtils.requireAdminSubject(authorization);
+        AuthUtils.requireAdminSubject(subjectHeader, authorization);
         service.deleteMaterial(id);
         return Response.ok(null);
     }

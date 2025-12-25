@@ -45,11 +45,12 @@ public class ActivityController {
     @Operation(summary = "报名活动", description = "需携带用户 JWT，支持指定渠道")
     public Response<Object> register(
                                      @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-                                     @RequestHeader("Authorization") String authorization,
+                                     @RequestHeader(name = "Authorization", required = false) String authorization,
+                                     @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
                                      @RequestBody Map<String, Object> body) {
         Long activityId = ((Number) body.get("activityId")).longValue();
         String channel = (String) body.getOrDefault("channel", "web");
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         service.register(userId, activityId, channel);
         return Response.ok(null);
     }
@@ -58,9 +59,10 @@ public class ActivityController {
     @Operation(summary = "报名状态", description = "查询当前用户是否已报名指定活动，需携带用户 JWT")
     public Response<Map<String, Object>> registrationStatus(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-            @RequestHeader("Authorization") String authorization,
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
             @RequestParam("activityId") Long activityId) {
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         boolean registered = service.isRegistered(userId, activityId);
         return Response.ok(Map.of("activityId", activityId, "registered", registered));
     }
@@ -83,10 +85,11 @@ public class ActivityController {
     @Operation(summary = "我的报名记录", description = "需携带用户 JWT，分页返回本人报名的活动")
     public Response<Map<String, Object>> myRegistrations(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
-            @RequestHeader("Authorization") String authorization,
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-        Long userId = AuthUtils.requireUserId(authorization);
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         Page<Map<String, Object>> p = service.getMyRegisteredActivities(userId, page, size);
         return Response.ok(Map.of(
                 "items", p.getContent(),
