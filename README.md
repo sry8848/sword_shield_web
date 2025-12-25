@@ -65,7 +65,10 @@ npm run build    # 生产构建
 ## 开发流程建议
 1) 拉取仓库`git clone -b dev https://github.com/Penryn/sword_shield_web.git`
 2) 把解压包的data、db、logs文件夹复制到当前目录并运行`docker-compose up -d` 启动依赖。
-3) 后端首先在根目录执行`mvn clean package && mvn clean install`然后`./scripts/run-with-otel-agent.sh <module>` 依次启动所有服务，最后启动网关。（上面`模块与端口`带有端口的就是可以启动的服务）
+3) 后端首先在根目录执行 `mvn clean package && mvn clean install`，然后按需选择一种 tracing 模式启动服务（避免 Micrometer + Javaagent 双开导致重复/不一致）：
+   - 推荐（默认）：Micrometer Tracing（不启用 Javaagent），直接在模块目录执行 `mvn spring-boot:run -DskipTests`
+   - 可选：OpenTelemetry Javaagent（自动埋点），使用 `./scripts/run-with-otel-agent.sh <module>`（脚本已默认设置 `MANAGEMENT_TRACING_ENABLED=false`）
+   依次启动所有服务，最后启动网关。（上面`模块与端口`带有端口的就是可以启动的服务）
 4) 前端 `cd sword-shield-web-ui && npm i && npm run dev`，默认端口 5173。
 5) 验证：浏览器访问`http://localhost:5173`。
 6) 保存本地：`git fetch && git add . && git commit -m "本次更改内容" `

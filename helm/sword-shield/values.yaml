@@ -28,3 +28,9 @@ dependencies:
   mysqlPort: 3306
   nacosHost: nacos
   nacosPort: 8848
+
+observability:
+  tracing:
+    # micrometer: Spring Boot/Micrometer Tracing(默认，使用 management.otlp.tracing.endpoint)
+    # agent: OpenTelemetry Javaagent（会自动设置 MANAGEMENT_TRACING_ENABLED=false，避免重复埋点）
+    mode: micrometer

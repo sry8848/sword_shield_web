@@ -18,14 +18,15 @@ public class TraceGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String traceId = TraceUtils.ensureTraceId(exchange.getRequest().getHeaders().getFirst(TraceUtils.TRACE_ID_HEADER));
+        String traceId = TraceUtils.currentOtelTraceId()
+                .orElseGet(() -> TraceUtils.ensureTraceId(
+                        exchange.getRequest().getHeaders().getFirst(TraceUtils.TRACE_ID_HEADER)));
 
         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                 .headers(headers -> headers.set(TraceUtils.TRACE_ID_HEADER, traceId))
                 .build();
         exchange.getResponse().getHeaders().set(TraceUtils.TRACE_ID_HEADER, traceId);
 
-        MDC.put(TraceUtils.TRACE_ID_MDC_KEY, traceId);
         return chain.filter(exchange.mutate().request(mutatedRequest).build())
                 .contextWrite(ctx -> ctx.put(TraceUtils.TRACE_ID_MDC_KEY, traceId))
                 .doOnEach(signal -> setTraceIdInMdc(signal.getContextView()))

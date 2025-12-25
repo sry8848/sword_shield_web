@@ -26,7 +26,11 @@ export OTEL_EXPORTER_OTLP_PROTOCOL="${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf
 export OTEL_TRACES_EXPORTER="${OTEL_TRACES_EXPORTER:-otlp}"
 export OTEL_METRICS_EXPORTER="${OTEL_METRICS_EXPORTER:-none}"
 export OTEL_LOGS_EXPORTER="${OTEL_LOGS_EXPORTER:-none}"
+export OTEL_PROPAGATORS="${OTEL_PROPAGATORS:-tracecontext,baggage}"
 export OTEL_INSTRUMENTATION_COMMON_DB_STATEMENT_SANITIZER_ENABLED="${OTEL_INSTRUMENTATION_COMMON_DB_STATEMENT_SANITIZER_ENABLED:-true}"
+
+# 使用 Javaagent 时关闭 Spring Boot/Micrometer Tracing，避免双重埋点导致重复 span / trace 不一致
+export MANAGEMENT_TRACING_ENABLED="${MANAGEMENT_TRACING_ENABLED:-false}"
 
 # 在模块目录内运行，避免 spring-boot:run 作用于父 POM
 if [[ ! -d "${MODULE}" ]]; then

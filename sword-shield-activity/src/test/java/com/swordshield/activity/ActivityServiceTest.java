@@ -18,12 +18,14 @@ public class ActivityServiceTest {
         ActivityRegistrationRepository rr = Mockito.mock(ActivityRegistrationRepository.class);
         ActivityService service = new ActivityService(ar, rr);
 
+        Instant now = Instant.now();
         Activity act = new Activity();
         act.setId(10L);
-        act.setStartTime(Instant.now().minusSeconds(3600));
-        act.setEndTime(Instant.now().plusSeconds(3600));
+        act.setStartTime(now.plusSeconds(3600));
+        act.setEndTime(now.plusSeconds(7200));
         act.setMaxRegistrations(1);
         Mockito.when(ar.findById(10L)).thenReturn(Optional.of(act));
+        Mockito.when(rr.findByActivityIdAndUserId(Mockito.eq(10L), Mockito.anyLong())).thenReturn(Optional.empty());
         Mockito.when(rr.countByActivityId(10L)).thenReturn(0L);
 
         service.register(1L, 10L, "web");

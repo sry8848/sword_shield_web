@@ -65,11 +65,21 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -162,11 +172,21 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8101
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8101
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -257,11 +277,21 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8102
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8102
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -352,11 +382,21 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8103
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8103
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -447,11 +487,21 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8104
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8104
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -542,13 +592,23 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
             - name: MINIO_ENDPOINT
               value: "http://minio:9000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8105
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8105
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -639,8 +699,12 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
           resources:
             requests:
               cpu: 200m
@@ -648,9 +712,15 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8106
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8106
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -689,6 +759,12 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /

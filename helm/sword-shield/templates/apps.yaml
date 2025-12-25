@@ -75,11 +75,42 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            {{- if eq .Values.observability.tracing.mode "agent" }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "false"
+            - name: JAVA_AGENT_OPTS
+              value: "-javaagent:/app/opentelemetry-javaagent.jar"
+            - name: OTEL_SERVICE_NAME
+              value: "sword-shield-gateway"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4318"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_PROPAGATORS
+              value: "tracecontext,baggage"
+            {{- else }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            {{- end }}
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -174,11 +205,42 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            {{- if eq .Values.observability.tracing.mode "agent" }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "false"
+            - name: JAVA_AGENT_OPTS
+              value: "-javaagent:/app/opentelemetry-javaagent.jar"
+            - name: OTEL_SERVICE_NAME
+              value: "sword-shield-user"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4318"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_PROPAGATORS
+              value: "tracecontext,baggage"
+            {{- else }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            {{- end }}
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8101
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8101
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -271,11 +333,42 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            {{- if eq .Values.observability.tracing.mode "agent" }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "false"
+            - name: JAVA_AGENT_OPTS
+              value: "-javaagent:/app/opentelemetry-javaagent.jar"
+            - name: OTEL_SERVICE_NAME
+              value: "sword-shield-activity"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4318"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_PROPAGATORS
+              value: "tracecontext,baggage"
+            {{- else }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            {{- end }}
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8102
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8102
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -368,11 +461,42 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            {{- if eq .Values.observability.tracing.mode "agent" }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "false"
+            - name: JAVA_AGENT_OPTS
+              value: "-javaagent:/app/opentelemetry-javaagent.jar"
+            - name: OTEL_SERVICE_NAME
+              value: "sword-shield-content"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4318"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_PROPAGATORS
+              value: "tracecontext,baggage"
+            {{- else }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            {{- end }}
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8103
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8103
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -465,11 +589,42 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            {{- if eq .Values.observability.tracing.mode "agent" }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "false"
+            - name: JAVA_AGENT_OPTS
+              value: "-javaagent:/app/opentelemetry-javaagent.jar"
+            - name: OTEL_SERVICE_NAME
+              value: "sword-shield-interaction"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4318"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_PROPAGATORS
+              value: "tracecontext,baggage"
+            {{- else }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            {{- end }}
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8104
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8104
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -562,13 +717,44 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            {{- if eq .Values.observability.tracing.mode "agent" }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "false"
+            - name: JAVA_AGENT_OPTS
+              value: "-javaagent:/app/opentelemetry-javaagent.jar"
+            - name: OTEL_SERVICE_NAME
+              value: "sword-shield-file"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4318"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_PROPAGATORS
+              value: "tracecontext,baggage"
+            {{- else }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            {{- end }}
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
             - name: MINIO_ENDPOINT
               value: "http://minio:9000"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8105
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8105
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -661,8 +847,33 @@ spec:
               value: "nacos:8848"
             - name: SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD
               value: "sentinel-dashboard:8858"
+            {{- if eq .Values.observability.tracing.mode "agent" }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "false"
+            - name: JAVA_AGENT_OPTS
+              value: "-javaagent:/app/opentelemetry-javaagent.jar"
+            - name: OTEL_SERVICE_NAME
+              value: "sword-shield-admin"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4318"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_PROPAGATORS
+              value: "tracecontext,baggage"
+            {{- else }}
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
             - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
               value: "http://otel-collector:4318/v1/traces"
+            {{- end }}
+            - name: LOGSTASH_DESTINATION
+              value: "logstash:5000"
           resources:
             requests:
               cpu: 200m
@@ -670,9 +881,15 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8106
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8106
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -711,6 +928,12 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /
