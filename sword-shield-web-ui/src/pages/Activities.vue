@@ -1,7 +1,10 @@
 <template>
   <div class="activities-container">
     <div class="activities-header" v-if="!minimal">
-      <h2>🎉 活动列表</h2>
+      <h2>
+        <el-icon class="title-icon"><Calendar /></el-icon>
+        活动列表
+      </h2>
       <el-select v-model="orderBy" @change="fetchList" size="large" style="width:160px">
         <el-option label="按时间" value="time" />
         <el-option label="按热度" value="heat" />
@@ -24,16 +27,19 @@
           <p class="card-summary">{{ item.summary || '暂无描述' }}</p>
           <div class="card-meta">
             <div class="meta-item">
-              <span class="meta-icon">📍</span>
+              <el-icon class="meta-icon"><Location /></el-icon>
               <span>{{ item.location || '待定' }}</span>
             </div>
             <div class="meta-item">
-              <span class="meta-icon">📅</span>
+              <el-icon class="meta-icon"><Calendar /></el-icon>
               <span>{{ formatDate(item.startTime) }}</span>
             </div>
           </div>
           <div class="card-footer">
-            <el-tag v-if="item.heat" type="danger" size="small">🔥 {{ item.heat }}</el-tag>
+            <el-tag v-if="item.heat" type="danger" size="small">
+              <el-icon class="heat-icon"><Lightning /></el-icon>
+              {{ item.heat }}
+            </el-tag>
             <el-button type="primary" size="small" text>查看详情 →</el-button>
           </div>
         </div>
@@ -45,7 +51,9 @@
         <a @click.prevent="$router.push(`/activity/${item.id}`)" class="minimal-link">
           <span class="dot"></span>
           <span class="title">{{ item.title }}</span>
-          <el-tag v-if="item.heat && item.heat > 50" type="danger" size="small" effect="plain">🔥</el-tag>
+          <el-tag v-if="item.heat && item.heat > 50" type="danger" size="small" effect="plain">
+            <el-icon class="heat-icon"><Lightning /></el-icon>
+          </el-tag>
         </a>
       </li>
     </ul>
@@ -122,6 +130,13 @@ onMounted(fetchList)
   font-size: 28px;
   color: #333;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-icon {
+  color: #409eff;
 }
 
 .activities-grid {
@@ -198,6 +213,10 @@ onMounted(fetchList)
 
 .meta-icon {
   font-size: 14px;
+}
+
+.heat-icon {
+  margin-right: 4px;
 }
 
 .card-footer {

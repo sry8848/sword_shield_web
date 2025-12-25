@@ -1,10 +1,16 @@
 <template>
   <div class="admin-materials-page">
-    <h2 class="page-title">📄 资料管理</h2>
+    <h2 class="page-title">
+      <el-icon class="title-icon"><Document /></el-icon>
+      资料管理
+    </h2>
     <p class="page-subtitle">上传并发布大会资料（PPT、PDF 等）</p>
 
     <el-card class="upload-card">
-      <h3>📤 上传资料</h3>
+      <h3>
+        <el-icon class="heading-icon"><Upload /></el-icon>
+        上传资料
+      </h3>
       <el-form :model="form" label-width="120px" class="upload-form">
         <el-form-item label="标题" required>
           <el-input v-model="form.title" placeholder="例如：主论坛演讲PPT" />
@@ -28,13 +34,17 @@
             </template>
           </el-upload>
           <div v-if="selectedFile" class="file-info">
-            ✅ 已选择: {{ selectedFile.name }}
+            <el-icon class="status-icon"><CircleCheck /></el-icon>
+            已选择: {{ selectedFile.name }}
           </div>
         </el-form-item>
 
         <el-form-item>
           <el-button type="primary" @click="submitMaterial" :loading="uploading" size="large">
-            <span v-if="!uploading">🚀 上传并发布</span>
+            <span v-if="!uploading">
+              <el-icon class="btn-icon"><Promotion /></el-icon>
+              上传并发布
+            </span>
             <span v-else>上传中...</span>
           </el-button>
           <el-button @click="resetForm">重置</el-button>
@@ -44,7 +54,10 @@
 
     <el-card class="list-card">
       <div class="list-header">
-        <h3>📋 已发布资料</h3>
+        <h3>
+          <el-icon class="heading-icon"><List /></el-icon>
+          已发布资料
+        </h3>
       </div>
       <el-table :data="materials" style="width: 100%" v-loading="loading" empty-text="暂无已发布资料">
         <el-table-column type="index" label="#" width="60" />
@@ -258,6 +271,13 @@ onMounted(() => {
   font-weight: bold;
   color: #333;
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-icon {
+  color: #409eff;
 }
 
 .page-subtitle {
@@ -275,6 +295,9 @@ onMounted(() => {
   font-size: 20px;
   margin-bottom: 20px;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .upload-form {
@@ -285,6 +308,8 @@ onMounted(() => {
   margin-top: 8px;
   color: #67c23a;
   font-size: 14px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .list-card {
@@ -302,6 +327,21 @@ onMounted(() => {
   font-size: 20px;
   color: #333;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.heading-icon {
+  color: #409eff;
+}
+
+.status-icon {
+  margin-right: 6px;
+}
+
+.btn-icon {
+  margin-right: 6px;
 }
 
 .pagination {

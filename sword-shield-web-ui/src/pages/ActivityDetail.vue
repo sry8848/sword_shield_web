@@ -8,19 +8,19 @@
         <h1 class="detail-title">{{ item.title }}</h1>
         <div class="detail-meta">
           <div class="meta-tag">
-            <span class="icon">📍</span>
+            <el-icon class="icon"><Location /></el-icon>
             <span>{{ item.location || '地点待定' }}</span>
           </div>
           <div class="meta-tag">
-            <span class="icon">📅</span>
+            <el-icon class="icon"><Calendar /></el-icon>
             <span>开始 {{ formatDate(item.startTime) || '待定' }}</span>
           </div>
           <div class="meta-tag">
-            <span class="icon">⏰</span>
+            <el-icon class="icon"><Clock /></el-icon>
             <span>结束 {{ formatDate(item.endTime) || '待定' }}</span>
           </div>
           <div class="meta-tag" v-if="item.maxRegistrations">
-            <span class="icon">👥</span>
+            <el-icon class="icon"><UserFilled /></el-icon>
             <span>限额 {{ item.maxRegistrations }} 人</span>
           </div>
         </div>
@@ -32,8 +32,14 @@
         <p class="summary">{{ item.summary }}</p>
         <div class="action-section">
           <el-button type="primary" size="large" @click="register" :loading="registering" :disabled="!canRegister || registered">
-            <span v-if="registered">✅ 已报名</span>
-            <span v-else>🎉 立即报名</span>
+            <span v-if="registered">
+              <el-icon class="btn-icon"><CircleCheck /></el-icon>
+              已报名
+            </span>
+            <span v-else>
+              <el-icon class="btn-icon"><Tickets /></el-icon>
+              立即报名
+            </span>
           </el-button>
           <el-button
             type="success"
@@ -43,11 +49,20 @@
             :disabled="!canCheckin || checkedIn"
             style="margin-left: 12px;"
           >
-            <span v-if="checkedIn">✅ 已签到</span>
-            <span v-else>🧾 活动签到</span>
+            <span v-if="checkedIn">
+              <el-icon class="btn-icon"><CircleCheck /></el-icon>
+              已签到
+            </span>
+            <span v-else>
+              <el-icon class="btn-icon"><DocumentChecked /></el-icon>
+              活动签到
+            </span>
           </el-button>
           <el-button size="large" @click="share" :loading="sharing" style="margin-left: 12px;">
-            <span>🔗 分享活动</span>
+            <span>
+              <el-icon class="btn-icon"><Share /></el-icon>
+              分享活动
+            </span>
           </el-button>
           <div v-if="registerHint || checkinHint" class="checkin-hint">
             <div v-if="registerHint">{{ registerHint }}</div>
@@ -59,10 +74,13 @@
       <!-- Live & Replay Links Section -->
       <div v-if="item.liveUrl || item.replayUrl" class="media-links-section">
         <el-divider />
-        <h3 class="section-heading">📺 直播与回放</h3>
+        <h3 class="section-heading">
+          <el-icon class="heading-icon"><VideoPlay /></el-icon>
+          直播与回放
+        </h3>
         <div class="media-links">
           <el-card v-if="item.liveUrl" class="media-card live-card" shadow="hover">
-            <div class="media-icon">🔴</div>
+            <el-icon class="media-icon live-icon"><VideoCameraFilled /></el-icon>
             <div class="media-info">
               <h4>直播链接</h4>
               <p>点击进入直播间</p>
@@ -73,7 +91,7 @@
           </el-card>
           
           <el-card v-if="item.replayUrl" class="media-card replay-card" shadow="hover">
-            <div class="media-icon">🎥</div>
+            <el-icon class="media-icon replay-icon"><VideoPlay /></el-icon>
             <div class="media-info">
               <h4>回放链接</h4>
               <p>观看录播回放</p>
@@ -89,9 +107,15 @@
 
       <div class="interaction-section">
         <div class="section-title">
-          <h3>💬 评论区</h3>
+          <h3>
+            <el-icon class="heading-icon"><ChatDotRound /></el-icon>
+            评论区
+          </h3>
           <el-button size="small" @click="like" :loading="liking">
-            <span>👍 {{ likeCount }}</span>
+            <span>
+              <el-icon class="inline-icon"><StarFilled /></el-icon>
+              {{ likeCount }}
+            </span>
           </el-button>
         </div>
 
@@ -122,12 +146,15 @@
             </el-empty>
           </div>
           <div v-for="c in comments" :key="c.id" class="comment-item">
-            <div class="comment-avatar">👤</div>
+            <div class="comment-avatar">
+              <el-icon><Avatar /></el-icon>
+            </div>
             <div class="comment-content">
               <div class="comment-text">{{ c.content }}</div>
               <div class="comment-actions">
                 <el-button size="small" @click="likeComment(c)" :loading="c._liking">
-                  👍 {{ c.likeCount ?? 0 }}
+                  <el-icon class="inline-icon"><StarFilled /></el-icon>
+                  {{ c.likeCount ?? 0 }}
                 </el-button>
               </div>
               <div class="comment-time">{{ formatDate(c.createdAt) }}</div>
@@ -576,6 +603,9 @@ onMounted(async () => {
   font-weight: bold;
   color: #333;
   margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .media-links {
@@ -613,6 +643,14 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 
+.live-icon {
+  color: #f56c6c;
+}
+
+.replay-icon {
+  color: #409eff;
+}
+
 .media-info {
   flex: 1;
 }
@@ -645,6 +683,9 @@ onMounted(async () => {
   font-size: 20px;
   color: #333;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .comment-form {
@@ -679,6 +720,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   font-size: 20px;
+  color: white;
   flex-shrink: 0;
 }
 
@@ -702,5 +744,17 @@ onMounted(async () => {
 .comment-time {
   font-size: 12px;
   color: #999;
+}
+
+.heading-icon {
+  color: #409eff;
+}
+
+.btn-icon {
+  margin-right: 6px;
+}
+
+.inline-icon {
+  margin-right: 6px;
 }
 </style>

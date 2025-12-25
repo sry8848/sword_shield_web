@@ -2,7 +2,10 @@
   <div class="page">
     <div class="page-header">
       <div>
-        <h2 class="title">📄 资料下载（嘉宾PPT）</h2>
+        <h2 class="title">
+          <el-icon class="title-icon"><Document /></el-icon>
+          资料下载（嘉宾PPT）
+        </h2>
         <p class="subtitle">仅展示已发布资料</p>
       </div>
     </div>
@@ -55,7 +58,8 @@ onMounted(() => { load(1) })
 <style scoped>
 .page { max-width: 1000px; margin: 0 auto; }
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; }
-.title { margin: 0 0 6px; }
+.title { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+.title-icon { color: #409eff; }
 .subtitle { margin: 0; color: #6b7280; font-size: 14px; }
 .list-card { border-radius: 16px; }
 .pager { display: flex; justify-content: center; margin-top: 12px; }

@@ -1,7 +1,10 @@
 <template>
   <div class="submit-container">
     <el-card class="submit-card">
-      <h2 class="submit-title">📝 投稿 · 大会相关内容</h2>
+      <h2 class="submit-title">
+        <el-icon class="title-icon"><EditPen /></el-icon>
+        投稿 · 大会相关内容
+      </h2>
       <p class="submit-desc">分享你的大会见闻、心得与精彩瞬间，优秀内容将有机会在平台展示。</p>
       <el-form :model="form" label-width="100px" class="submit-form">
         <el-form-item label="标题" required>
@@ -78,7 +81,8 @@ async function submit() {
 <style scoped>
 .submit-container { max-width: 900px; margin: 0 auto; }
 .submit-card { border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
-.submit-title { margin: 0 0 8px; font-size: 24px; }
+.submit-title { margin: 0 0 8px; font-size: 24px; display: flex; align-items: center; gap: 8px; }
+.title-icon { color: #667eea; }
 .submit-desc { margin: 0 0 16px; color: #666; }
 .cover-upload { display: flex; gap: 12px; align-items: center; }
 .cover-preview { margin-top: 12px; max-width: 100%; border-radius: 8px; }

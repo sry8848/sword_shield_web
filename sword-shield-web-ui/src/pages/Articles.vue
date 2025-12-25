@@ -1,6 +1,9 @@
 <template>
   <div class="articles-container">
-    <h2 v-if="!minimal" class="articles-title">📰 资讯列表</h2>
+    <h2 v-if="!minimal" class="articles-title">
+      <el-icon class="title-icon"><Reading /></el-icon>
+      资讯列表
+    </h2>
     
     <div v-if="!minimal" class="articles-grid">
       <el-card 
@@ -104,6 +107,13 @@ onMounted(fetchList)
   font-size: 28px;
   color: #333;
   margin: 0 0 24px 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-icon {
+  color: #409eff;
 }
 
 .articles-grid {

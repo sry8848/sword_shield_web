@@ -8,12 +8,15 @@
           </el-avatar>
           <label class="upload-label">
             <input type="file" @change="onFile" accept="image/*" hidden ref="fileInput" />
-            <el-button type="primary" size="small" :loading="uploading" @click="triggerUpload">
-              📷 {{ uploading ? '上传中...' : '更换头像' }}
+            <el-button type="primary" size="small" :loading="uploading" @click="triggerUpload" :icon="Camera">
+              {{ uploading ? '上传中...' : '更换头像' }}
             </el-button>
           </label>
         </div>
-        <h2 class="profile-title">👤 个人信息</h2>
+        <h2 class="profile-title">
+          <el-icon class="title-icon"><Avatar /></el-icon>
+          个人信息
+        </h2>
       </div>
 
       <el-divider />
@@ -79,6 +82,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, onMounted } from 'vue'
+import { Avatar, Camera } from '@element-plus/icons-vue'
 import api from '../api'
 import { ElMessage } from 'element-plus'
 
@@ -253,6 +257,14 @@ onMounted(load)
   color: #333;
   margin: 0;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.title-icon {
+  color: #409eff;
 }
 
 .profile-form {

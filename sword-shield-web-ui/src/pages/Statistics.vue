@@ -1,7 +1,10 @@
 <template>
   <div class="statistics-container">
     <el-card class="header-card">
-      <h1 class="page-title">📊 活动统计</h1>
+      <h1 class="page-title">
+        <el-icon class="title-icon"><DataAnalysis /></el-icon>
+        活动统计
+      </h1>
       <p class="page-subtitle">查看各项活动的参与情况和数据分析</p>
     </el-card>
 
@@ -10,7 +13,7 @@
       <el-row :gutter="24" class="overview-row">
         <el-col :span="6">
           <div class="stat-box stat-box-1">
-            <div class="stat-icon">🎯</div>
+            <el-icon class="stat-icon"><Aim /></el-icon>
             <div class="stat-content">
               <div class="stat-label">活动总数</div>
               <div class="stat-value">{{ totalActivities }}</div>
@@ -19,7 +22,7 @@
         </el-col>
         <el-col :span="6">
           <div class="stat-box stat-box-2">
-            <div class="stat-icon">👥</div>
+            <el-icon class="stat-icon"><UserFilled /></el-icon>
             <div class="stat-content">
               <div class="stat-label">总报名人数</div>
               <div class="stat-value">{{ totalRegistrations }}</div>
@@ -28,7 +31,7 @@
         </el-col>
         <el-col :span="6">
           <div class="stat-box stat-box-3">
-            <div class="stat-icon">🔥</div>
+            <el-icon class="stat-icon"><Lightning /></el-icon>
             <div class="stat-content">
               <div class="stat-label">总热度</div>
               <div class="stat-value">{{ totalHeat }}</div>
@@ -37,7 +40,7 @@
         </el-col>
         <el-col :span="6">
           <div class="stat-box stat-box-4">
-            <div class="stat-icon">📈</div>
+            <el-icon class="stat-icon"><TrendCharts /></el-icon>
             <div class="stat-content">
               <div class="stat-label">平均报名率</div>
               <div class="stat-value">{{ averageRate }}%</div>
@@ -178,6 +181,14 @@ onMounted(() => {
   font-size: 32px;
   color: #333;
   font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-icon {
+  color: #409eff;
 }
 
 .page-subtitle {

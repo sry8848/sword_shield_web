@@ -1,23 +1,35 @@
 <template>
   <div class="media-page">
     <div class="page-header">
-      <h1 class="page-title">🎬 大会精彩瞬间</h1>
+      <h1 class="page-title">
+        <el-icon class="title-icon"><Film /></el-icon>
+        大会精彩瞬间
+      </h1>
       <p class="page-subtitle">浏览我们的图片和视频花絮</p>
     </div>
 
     <!-- Filter Tabs -->
     <el-card class="filter-card">
       <el-radio-group v-model="filterType" @change="loadMedia(1)" size="large">
-        <el-radio-button label="">🎉 全部</el-radio-button>
-        <el-radio-button label="image">📷 图片</el-radio-button>
-        <el-radio-button label="video">🎥 视频</el-radio-button>
+        <el-radio-button label="">
+          <el-icon class="tab-icon"><Grid /></el-icon>
+          全部
+        </el-radio-button>
+        <el-radio-button label="image">
+          <el-icon class="tab-icon"><Picture /></el-icon>
+          图片
+        </el-radio-button>
+        <el-radio-button label="video">
+          <el-icon class="tab-icon"><VideoCamera /></el-icon>
+          视频
+        </el-radio-button>
       </el-radio-group>
     </el-card>
 
     <!-- Media Grid -->
     <div class="media-grid" v-loading="loading">
       <div v-if="items.length === 0" class="empty-state">
-        <div class="empty-icon">📸</div>
+        <el-icon class="empty-icon"><Camera /></el-icon>
         <p>暂无媒体内容</p>
       </div>
       
@@ -31,18 +43,27 @@
         <div class="media-thumbnail">
           <div v-if="item.type === 'image'" class="thumbnail-image">
             <el-icon class="media-icon"><Picture /></el-icon>
-            <div class="media-type-badge image-badge">📷 图片</div>
+            <div class="media-type-badge image-badge">
+              <el-icon class="badge-icon"><Picture /></el-icon>
+              图片
+            </div>
           </div>
           <div v-else class="thumbnail-video">
             <el-icon class="media-icon"><VideoPlay /></el-icon>
-            <div class="media-type-badge video-badge">🎥 视频</div>
+            <div class="media-type-badge video-badge">
+              <el-icon class="badge-icon"><VideoCamera /></el-icon>
+              视频
+            </div>
           </div>
         </div>
         <div class="media-info">
           <h3 class="media-title">{{ item.title }}</h3>
           <p class="media-summary" v-if="item.summary">{{ item.summary }}</p>
           <div class="media-footer">
-            <span class="media-date">📅 {{ formatDate(item.createdAt) }}</span>
+            <span class="media-date">
+              <el-icon class="date-icon"><Calendar /></el-icon>
+              {{ formatDate(item.createdAt) }}
+            </span>
           </div>
         </div>
       </el-card>
@@ -92,7 +113,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Picture, VideoPlay } from '@element-plus/icons-vue'
+import { Calendar, Camera, Film, Grid, Picture, VideoCamera, VideoPlay } from '@element-plus/icons-vue'
 import api from '../api'
 
 const items = ref<any[]>([])
@@ -179,6 +200,18 @@ onMounted(() => {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-icon {
+  color: #ff0050;
+  -webkit-text-fill-color: initial;
+}
+
+.tab-icon {
+  margin-right: 6px;
 }
 
 .page-subtitle {
@@ -262,6 +295,12 @@ onMounted(() => {
   font-size: 12px;
   font-weight: 600;
   color: white;
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge-icon {
+  margin-right: 4px;
 }
 
 .image-badge {
@@ -307,6 +346,12 @@ onMounted(() => {
 .media-date {
   font-size: 12px;
   color: #999;
+  display: inline-flex;
+  align-items: center;
+}
+
+.date-icon {
+  margin-right: 4px;
 }
 
 .pagination {

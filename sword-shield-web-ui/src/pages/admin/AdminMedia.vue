@@ -1,11 +1,17 @@
 <template>
   <div class="admin-media-page">
-    <h2 class="page-title">📸 媒体资产管理</h2>
+    <h2 class="page-title">
+      <el-icon class="title-icon"><Camera /></el-icon>
+      媒体资产管理
+    </h2>
     <p class="page-subtitle">管理大会精彩花絮、图片和视频内容</p>
 
     <!-- Upload Form -->
     <el-card class="upload-card">
-      <h3>📤 上传新媒体</h3>
+      <h3>
+        <el-icon class="heading-icon"><Upload /></el-icon>
+        上传新媒体
+      </h3>
       <el-form :model="form" label-width="120px" class="upload-form">
         <el-form-item label="标题" required>
           <el-input v-model="form.title" placeholder="例如：开幕式精彩瞬间" />
@@ -22,8 +28,14 @@
         
         <el-form-item label="媒体类型" required>
           <el-radio-group v-model="form.type">
-            <el-radio label="image">📷 图片</el-radio>
-            <el-radio label="video">🎬 视频</el-radio>
+            <el-radio label="image">
+              <el-icon class="inline-icon"><Picture /></el-icon>
+              图片
+            </el-radio>
+            <el-radio label="video">
+              <el-icon class="inline-icon"><VideoCamera /></el-icon>
+              视频
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         
@@ -43,7 +55,8 @@
             </template>
           </el-upload>
           <div v-if="selectedFile" class="file-info">
-            ✅ 已选择: {{ selectedFile.name }}
+            <el-icon class="status-icon"><CircleCheck /></el-icon>
+            已选择: {{ selectedFile.name }}
           </div>
         </el-form-item>
         
@@ -78,7 +91,10 @@
             :loading="uploading"
             size="large"
           >
-            <span v-if="!uploading">🚀 上传并发布</span>
+            <span v-if="!uploading">
+              <el-icon class="btn-icon"><Promotion /></el-icon>
+              上传并发布
+            </span>
             <span v-else>上传中...</span>
           </el-button>
           <el-button @click="resetForm">重置</el-button>
@@ -89,7 +105,10 @@
     <!-- Media List -->
     <el-card class="list-card">
       <div class="list-header">
-        <h3>📋 已发布媒体列表</h3>
+        <h3>
+          <el-icon class="heading-icon"><List /></el-icon>
+          已发布媒体列表
+        </h3>
         <el-radio-group v-model="filterType" @change="loadMedia(1)" size="small">
           <el-radio-button label="">全部</el-radio-button>
           <el-radio-button label="image">图片</el-radio-button>
@@ -103,7 +122,14 @@
         <el-table-column label="类型" width="100">
           <template #default="{ row }">
             <el-tag :type="row.type === 'image' ? 'success' : 'primary'">
-              {{ row.type === 'image' ? '📷 图片' : '🎬 视频' }}
+              <template v-if="row.type === 'image'">
+                <el-icon class="tag-icon"><Picture /></el-icon>
+                图片
+              </template>
+              <template v-else>
+                <el-icon class="tag-icon"><VideoCamera /></el-icon>
+                视频
+              </template>
             </el-tag>
           </template>
         </el-table-column>
@@ -170,7 +196,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Upload, View, Delete } from '@element-plus/icons-vue'
+import { Camera, CircleCheck, Delete, List, Picture, Promotion, Upload, VideoCamera, View } from '@element-plus/icons-vue'
 import adminApi from '../../adminApi'
 
 const form = reactive({
@@ -384,6 +410,13 @@ onMounted(() => {
   font-weight: bold;
   color: #333;
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-icon {
+  color: #409eff;
 }
 
 .page-subtitle {
@@ -401,6 +434,9 @@ onMounted(() => {
   font-size: 20px;
   margin-bottom: 20px;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .upload-form {
@@ -411,6 +447,8 @@ onMounted(() => {
   margin-top: 8px;
   color: #67C23A;
   font-size: 14px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .form-tip {
@@ -434,6 +472,29 @@ onMounted(() => {
   font-size: 20px;
   color: #333;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.heading-icon {
+  color: #409eff;
+}
+
+.inline-icon {
+  margin-right: 6px;
+}
+
+.status-icon {
+  margin-right: 6px;
+}
+
+.btn-icon {
+  margin-right: 6px;
+}
+
+.tag-icon {
+  margin-right: 4px;
 }
 
 .pagination {
