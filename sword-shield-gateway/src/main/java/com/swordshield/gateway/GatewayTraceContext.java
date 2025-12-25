@@ -38,7 +38,7 @@ public class GatewayTraceContext {
         String headerTraceParent = exchange.getRequest().getHeaders().getFirst(TraceUtils.TRACEPARENT_HEADER);
         String traceId = TraceUtils.traceIdFromTraceParent(headerTraceParent)
                 .orElseGet(() -> TraceUtils.ensureW3cTraceId(exchange.getRequest().getHeaders().getFirst(TraceUtils.TRACE_ID_HEADER)));
-        String traceParent = StringUtils.hasText(headerTraceParent) ? headerTraceParent : TraceUtils.newTraceParent(traceId);
+        String traceParent = TraceUtils.isValidTraceParent(headerTraceParent) ? headerTraceParent.trim() : TraceUtils.newTraceParent(traceId);
 
         TraceInfo computed = new TraceInfo(traceId, traceParent);
         cacheTraceInfo(exchange, computed);

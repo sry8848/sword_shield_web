@@ -78,9 +78,9 @@ public class TraceContextFilter implements Filter {
 
         // 让下游在同一线程中还能取到 traceId（例如 HTTP client interceptor）
         RpcContext.getServerAttachment().setAttachment(TraceUtils.TRACE_ID_HEADER, traceId);
-        if (StringUtils.hasText(incomingTraceParent)) {
-            RpcContext.getServerAttachment().setAttachment(TraceUtils.TRACEPARENT_HEADER, incomingTraceParent);
-        }
+        String traceParentToUse = TraceUtils.currentTraceParent()
+                .orElseGet(() -> TraceUtils.isValidTraceParent(incomingTraceParent) ? incomingTraceParent.trim() : TraceUtils.newTraceParent(traceId));
+        RpcContext.getServerAttachment().setAttachment(TraceUtils.TRACEPARENT_HEADER, traceParentToUse);
 
         try {
             return supplier.get();

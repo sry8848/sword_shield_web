@@ -31,26 +31,50 @@ public final class TraceUtils {
     public static String ensureW3cTraceId(String incoming) {
         if (StringUtils.hasText(incoming)) {
             String trimmed = incoming.trim();
-            if (trimmed.matches("(?i)^[0-9a-f]{32}$")) {
+            if (isValidTraceId(trimmed)) {
                 return trimmed.toLowerCase();
             }
         }
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public static Optional<String> traceIdFromTraceParent(String traceParent) {
+    public static boolean isValidTraceId(String traceId) {
+        if (!StringUtils.hasText(traceId)) {
+            return false;
+        }
+        String trimmed = traceId.trim();
+        return isValidHex(trimmed, 32) && !isAllZerosHex(trimmed);
+    }
+
+    public static boolean isValidSpanId(String spanId) {
+        if (!StringUtils.hasText(spanId)) {
+            return false;
+        }
+        String trimmed = spanId.trim();
+        return isValidHex(trimmed, 16) && !isAllZerosHex(trimmed);
+    }
+
+    public static boolean isValidTraceParent(String traceParent) {
         if (!StringUtils.hasText(traceParent)) {
+            return false;
+        }
+        String[] parts = traceParent.trim().split("-");
+        if (parts.length != 4) {
+            return false;
+        }
+        String version = parts[0];
+        if (!isValidHex(version, 2) || "ff".equalsIgnoreCase(version)) {
+            return false;
+        }
+        return isValidTraceId(parts[1]) && isValidSpanId(parts[2]) && isValidHex(parts[3], 2);
+    }
+
+    public static Optional<String> traceIdFromTraceParent(String traceParent) {
+        if (!isValidTraceParent(traceParent)) {
             return Optional.empty();
         }
         // traceparent = "00-<traceId>-<spanId>-<flags>"
-        String[] parts = traceParent.trim().split("-");
-        if (parts.length < 4) {
-            return Optional.empty();
-        }
-        String traceId = parts[1];
-        if (!StringUtils.hasText(traceId) || !traceId.matches("(?i)^[0-9a-f]{32}$")) {
-            return Optional.empty();
-        }
+        String traceId = traceParent.trim().split("-")[1];
         return Optional.of(traceId.toLowerCase());
     }
 
@@ -61,8 +85,44 @@ public final class TraceUtils {
 
     public static String newSpanId() {
         byte[] bytes = new byte[8];
-        RANDOM.nextBytes(bytes);
+        do {
+            RANDOM.nextBytes(bytes);
+        } while (isAllZeros(bytes));
         return HEX.formatHex(bytes);
+    }
+
+    private static boolean isValidHex(String value, int expectedLength) {
+        if (!StringUtils.hasText(value)) {
+            return false;
+        }
+        if (value.length() != expectedLength) {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            if (Character.digit(value.charAt(i), 16) < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isAllZerosHex(String hex) {
+        for (int i = 0; i < hex.length(); i++) {
+            char c = hex.charAt(i);
+            if (c != '0') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isAllZeros(byte[] bytes) {
+        for (byte b : bytes) {
+            if (b != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static Optional<String> currentOtelTraceId() {

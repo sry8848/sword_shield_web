@@ -32,7 +32,7 @@ public class TraceIdFilter extends OncePerRequestFilter {
                 .orElseGet(() -> TraceUtils.ensureW3cTraceId(request.getHeader(TraceUtils.TRACE_ID_HEADER)));
 
         String traceParent = TraceUtils.currentTraceParent()
-                .orElseGet(() -> StringUtils.hasText(headerTraceParent) ? headerTraceParent : TraceUtils.newTraceParent(traceId));
+                .orElseGet(() -> TraceUtils.isValidTraceParent(headerTraceParent) ? headerTraceParent.trim() : TraceUtils.newTraceParent(traceId));
 
         HttpServletRequest requestToUse = new TraceHeadersRequestWrapper(request, traceParent, traceId);
 
