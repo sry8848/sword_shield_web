@@ -92,20 +92,34 @@ public class FileServiceClient {
                     new ParameterizedTypeReference<Response<AssetFile>>() {}
             );
         } catch (RestClientResponseException e) {
-            log.warn("File upload failed: baseUrl={} status={} message={}", baseUrlCandidate, e.getRawStatusCode(), e.getMessage());
+            String bodySnippet = safeSnippet(e.getResponseBodyAsString(), 500);
+            log.warn("File upload failed: baseUrl={} status={} message={} body={}",
+                    baseUrlCandidate, e.getRawStatusCode(), e.getMessage(), bodySnippet);
             return null;
         } catch (Exception e) {
             log.warn("File upload failed: baseUrl={} error={}", baseUrlCandidate, e.getMessage());
             return null;
         }
         Response<AssetFile> uploadBody = uploadResponse.getBody();
-        if (uploadBody == null || uploadBody.getCode() != 0 || uploadBody.getData() == null) {
+        if (uploadBody == null) {
+            log.warn("File upload returned empty body: baseUrl={}", baseUrlCandidate);
+            return null;
+        }
+        if (uploadBody.getCode() != 0) {
+            log.warn("File upload returned error: baseUrl={} code={} message={}",
+                    baseUrlCandidate, uploadBody.getCode(), uploadBody.getMessage());
+            return null;
+        }
+        if (uploadBody.getData() == null) {
+            log.warn("File upload returned null data: baseUrl={}", baseUrlCandidate);
             return null;
         }
         String objectName = uploadBody.getData().getObjectName();
         if (objectName == null || objectName.isBlank()) {
+            log.warn("File upload returned empty objectName: baseUrl={}", baseUrlCandidate);
             return null;
         }
+        log.debug("File upload ok: baseUrl={} objectName={}", baseUrlCandidate, objectName);
 
         String presignedUrl = UriComponentsBuilder.fromHttpUrl(joinBaseUrl(baseUrlCandidate, "/api/file/presigned"))
                 .queryParam("objectName", objectName)
@@ -121,16 +135,25 @@ public class FileServiceClient {
                     new ParameterizedTypeReference<Response<String>>() {}
             );
         } catch (RestClientResponseException e) {
-            log.warn("Presign request failed: baseUrl={} status={} message={}", baseUrlCandidate, e.getRawStatusCode(), e.getMessage());
+            String bodySnippet = safeSnippet(e.getResponseBodyAsString(), 500);
+            log.warn("Presign request failed: baseUrl={} status={} message={} body={}",
+                    baseUrlCandidate, e.getRawStatusCode(), e.getMessage(), bodySnippet);
             return null;
         } catch (Exception e) {
             log.warn("Presign request failed: baseUrl={} error={}", baseUrlCandidate, e.getMessage());
             return null;
         }
         Response<String> presignBody = presignResponse.getBody();
-        if (presignBody == null || presignBody.getCode() != 0) {
+        if (presignBody == null) {
+            log.warn("Presign request returned empty body: baseUrl={} objectName={}", baseUrlCandidate, objectName);
             return null;
         }
+        if (presignBody.getCode() != 0) {
+            log.warn("Presign request returned error: baseUrl={} objectName={} code={} message={}",
+                    baseUrlCandidate, objectName, presignBody.getCode(), presignBody.getMessage());
+            return null;
+        }
+        log.debug("Presign ok: baseUrl={} objectName={}", baseUrlCandidate, objectName);
         return presignBody.getData();
     }
 
@@ -159,6 +182,12 @@ public class FileServiceClient {
     private boolean isLoopbackHost(String host) {
         String normalized = host.trim().toLowerCase();
         return "localhost".equals(normalized) || "127.0.0.1".equals(normalized) || "::1".equals(normalized);
+    }
+
+    private String safeSnippet(String value, int maxLen) {
+        if (!StringUtils.hasText(value)) return "";
+        String trimmed = value.trim().replaceAll("\\s+", " ");
+        return trimmed.length() <= maxLen ? trimmed : trimmed.substring(0, maxLen) + "...";
     }
 
     private String resolveAuthorization(String authorization) {
