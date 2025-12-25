@@ -1,8 +1,8 @@
 package com.swordshield.content.controller;
 
+import com.swordshield.common.AuthUtils;
 import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
-import com.swordshield.common.JwtUtil;
 import com.swordshield.content.dto.AchievementDto;
 import com.swordshield.content.dto.ContentArticleDto;
 import com.swordshield.content.dto.ExhibitorDto;
@@ -21,17 +21,6 @@ public class ContentController {
     private final ContentService service;
 
     public ContentController(ContentService service) { this.service = service; }
-
-    private void verifyAdmin(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new SecurityException("未登录，请先登录");
-        }
-        String token = authorization.substring(7);
-        String subject = JwtUtil.parseSubject(token);
-        if (!subject.startsWith("admin_")) {
-            throw new SecurityException("无权限访问，需要管理员权限");
-        }
-    }
 
     @GetMapping("/articles")
     @Operation(summary = "文章列表", description = "按分页、分类、标签筛选文章")
@@ -97,7 +86,7 @@ public class ContentController {
     public Response<MaterialDto> createMaterial(
             @RequestHeader(name = "Authorization", required = false) String authorization,
             @RequestBody Map<String, Object> body) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         try {
             String title = (String) body.get("title");
             String speaker = (String) body.get("speaker");
@@ -117,7 +106,7 @@ public class ContentController {
     public Response<Object> deleteMaterial(
             @RequestHeader(name = "Authorization", required = false) String authorization,
             @PathVariable("id") Long id) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         service.deleteMaterial(id);
         return Response.ok(null);
     }

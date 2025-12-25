@@ -1,6 +1,6 @@
 package com.swordshield.file.controller;
 
-import com.swordshield.common.JwtUtil;
+import com.swordshield.common.AuthUtils;
 import com.swordshield.common.Response;
 import com.swordshield.file.dto.AssetFileDto;
 import com.swordshield.file.service.FileService;
@@ -27,12 +27,7 @@ public class FileController {
                                       @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                       @RequestHeader("Authorization") String authorization,
                                       @RequestPart("file") MultipartFile file) throws Exception {
-        String token = authorization != null && authorization.startsWith("Bearer ") ? authorization.substring(7) : null;
-        String subject = JwtUtil.parseSubject(token);
-        if (subject != null && subject.startsWith("admin_")) {
-            subject = subject.substring("admin_".length());
-        }
-        Long userId = Long.valueOf(subject);
+        Long userId = AuthUtils.requireUserIdAllowAdmin(authorization);
         
         // Generate unique object name: UUID + original extension
         String originalFilename = file.getOriginalFilename();

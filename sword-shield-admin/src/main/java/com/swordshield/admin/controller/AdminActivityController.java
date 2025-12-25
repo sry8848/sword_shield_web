@@ -2,7 +2,7 @@ package com.swordshield.admin.controller;
 
 import com.swordshield.admin.service.AdminActivityService;
 import com.swordshield.admin.dto.ActivityDto;
-import com.swordshield.common.JwtUtil;
+import com.swordshield.common.AuthUtils;
 import com.swordshield.common.Response;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,26 +20,12 @@ public class AdminActivityController {
         this.activityService = activityService;
     }
 
-    /**
-     * 验证管理员权限
-     */
-    private void verifyAdmin(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new SecurityException("未登录，请先登录");
-        }
-        String token = authorization.substring(7);
-        String subject = JwtUtil.parseSubject(token);
-        if (!subject.startsWith("admin_")) {
-            throw new SecurityException("无权限访问，需要管理员权限");
-        }
-    }
-
     @GetMapping
     @Operation(summary = "全部活动列表", description = "管理员查询全部活动")
     public Response<java.util.List<ActivityDto>> getAll(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         return activityService.getAll(authorization);
     }
 
@@ -50,7 +36,7 @@ public class AdminActivityController {
             @RequestHeader("Authorization") String authorization,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         return activityService.list(authorization, page, size);
     }
 
@@ -60,7 +46,7 @@ public class AdminActivityController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         return activityService.getById(authorization, id);
     }
 
@@ -70,7 +56,7 @@ public class AdminActivityController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @RequestBody ActivityDto activity) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         return activityService.create(authorization, activity);
     }
 
@@ -81,7 +67,7 @@ public class AdminActivityController {
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id,
             @RequestBody ActivityDto activity) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         return activityService.update(authorization, id, activity);
     }
 
@@ -91,7 +77,7 @@ public class AdminActivityController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         return activityService.delete(authorization, id);
     }
 }

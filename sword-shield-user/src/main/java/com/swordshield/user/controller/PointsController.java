@@ -1,7 +1,7 @@
 package com.swordshield.user.controller;
 
+import com.swordshield.common.AuthUtils;
 import com.swordshield.common.ErrorCode;
-import com.swordshield.common.JwtUtil;
 import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
 import com.swordshield.user.dto.PointsSummaryDto;
@@ -32,7 +32,7 @@ public class PointsController {
             @RequestHeader("Authorization") String authorization) {
         // Keep endpoint for backward compatibility but disable it on purpose.
         // Still parse token to ensure this is an authenticated request.
-        JwtUtil.parseSubject(authorization.substring(7));
+        AuthUtils.requireSubject(authorization);
         return Response.error(ErrorCode.BAD_REQUEST.code, "每日签到已下线，请在活动详情页签到");
     }
 
@@ -41,7 +41,7 @@ public class PointsController {
     public Response<PointsSummaryDto> points(
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
             @RequestHeader("Authorization") String authorization) {
-        Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
+        Long userId = AuthUtils.requireUserId(authorization);
         return Response.ok(pointsService.getPoints(userId));
     }
 
@@ -52,7 +52,7 @@ public class PointsController {
             @RequestHeader("Authorization") String authorization,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-        Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
+        Long userId = AuthUtils.requireUserId(authorization);
         return Response.ok(pointsService.getPointsTxns(userId, page, size));
     }
 
@@ -62,7 +62,7 @@ public class PointsController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @RequestParam("activityId") Long activityId) {
-        Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
+        Long userId = AuthUtils.requireUserId(authorization);
         return Response.ok(pointsService.activityCheckinStatus(userId, activityId));
     }
 
@@ -72,7 +72,7 @@ public class PointsController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @RequestBody Map<String, Object> body) {
-        Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
+        Long userId = AuthUtils.requireUserId(authorization);
         Object activityIdObj = body.get("activityId");
         if (activityIdObj == null) {
             throw new IllegalArgumentException("activityId 不能为空");

@@ -1,6 +1,6 @@
 package com.swordshield.interaction.controller;
 
-import com.swordshield.common.JwtUtil;
+import com.swordshield.common.AuthUtils;
 import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
 import com.swordshield.interaction.dto.CommentDto;
@@ -35,7 +35,7 @@ public class InteractionController {
                                  @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                  @RequestHeader("Authorization") String authorization,
                                  @RequestBody Map<String, Object> body) {
-        Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
+        Long userId = AuthUtils.requireUserId(authorization);
         String targetType = (String) body.get("targetType");
         Long targetId = ((Number) body.get("targetId")).longValue();
         String content = (String) body.get("content");
@@ -49,7 +49,7 @@ public class InteractionController {
                                             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                             @RequestHeader("Authorization") String authorization,
                                             @RequestBody Map<String, Object> body) {
-        Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
+        Long userId = AuthUtils.requireUserId(authorization);
         String targetType = (String) body.get("targetType");
         Long targetId = ((Number) body.get("targetId")).longValue();
         long count = service.like(userId, targetType, targetId);
@@ -62,7 +62,7 @@ public class InteractionController {
                                                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                                @RequestHeader("Authorization") String authorization,
                                               @RequestBody Map<String, Object> body) {
-        Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
+        Long userId = AuthUtils.requireUserId(authorization);
         String targetType = (String) body.get("targetType");
         Long targetId = ((Number) body.get("targetId")).longValue();
         long count = service.unlike(userId, targetType, targetId);
@@ -75,7 +75,7 @@ public class InteractionController {
                                   @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                   @RequestHeader("Authorization") String authorization,
                                   @RequestBody Map<String, Object> body) {
-        Long userId = Long.valueOf(JwtUtil.parseSubject(authorization.substring(7)));
+        Long userId = AuthUtils.requireUserId(authorization);
         String targetType = (String) body.get("targetType");
         Long targetId = ((Number) body.get("targetId")).longValue();
         String channel = (String) body.getOrDefault("channel", "link");

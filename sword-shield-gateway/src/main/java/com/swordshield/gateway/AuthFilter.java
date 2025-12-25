@@ -1,6 +1,6 @@
 package com.swordshield.gateway;
 
-import com.swordshield.common.JwtUtil;
+import com.swordshield.common.AuthUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -47,12 +47,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
         String auth = req.getHeaders().getFirst("Authorization");
-        if (auth != null && auth.startsWith("Bearer ")) {
-            String token = auth.substring(7);
-            try {
-                JwtUtil.parseSubject(token);
-                return chain.filter(exchange);
-            } catch (Exception ignored) {}
+        if (AuthUtils.isValidBearerToken(auth)) {
+            return chain.filter(exchange);
         }
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         return exchange.getResponse().setComplete();

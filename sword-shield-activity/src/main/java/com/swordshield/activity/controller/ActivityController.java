@@ -2,7 +2,7 @@ package com.swordshield.activity.controller;
 
 import com.swordshield.activity.dto.ActivityDto;
 import com.swordshield.activity.service.ActivityService;
-import com.swordshield.common.JwtUtil;
+import com.swordshield.common.AuthUtils;
 import com.swordshield.common.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -49,8 +49,7 @@ public class ActivityController {
                                      @RequestBody Map<String, Object> body) {
         Long activityId = ((Number) body.get("activityId")).longValue();
         String channel = (String) body.getOrDefault("channel", "web");
-        String token = authorization != null && authorization.startsWith("Bearer ") ? authorization.substring(7) : null;
-        Long userId = Long.valueOf(JwtUtil.parseSubject(token));
+        Long userId = AuthUtils.requireUserId(authorization);
         service.register(userId, activityId, channel);
         return Response.ok(null);
     }
@@ -61,8 +60,7 @@ public class ActivityController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @RequestParam("activityId") Long activityId) {
-        String token = authorization != null && authorization.startsWith("Bearer ") ? authorization.substring(7) : null;
-        Long userId = Long.valueOf(JwtUtil.parseSubject(token));
+        Long userId = AuthUtils.requireUserId(authorization);
         boolean registered = service.isRegistered(userId, activityId);
         return Response.ok(Map.of("activityId", activityId, "registered", registered));
     }
@@ -88,8 +86,7 @@ public class ActivityController {
             @RequestHeader("Authorization") String authorization,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-        String token = authorization != null && authorization.startsWith("Bearer ") ? authorization.substring(7) : null;
-        Long userId = Long.valueOf(JwtUtil.parseSubject(token));
+        Long userId = AuthUtils.requireUserId(authorization);
         Page<Map<String, Object>> p = service.getMyRegisteredActivities(userId, page, size);
         return Response.ok(Map.of(
                 "items", p.getContent(),

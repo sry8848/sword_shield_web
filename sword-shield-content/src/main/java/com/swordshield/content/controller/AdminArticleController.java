@@ -1,6 +1,6 @@
 package com.swordshield.content.controller;
 
-import com.swordshield.common.JwtUtil;
+import com.swordshield.common.AuthUtils;
 import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
 import com.swordshield.content.dto.AdminArticleUpsertRequest;
@@ -24,18 +24,6 @@ public class AdminArticleController {
         this.service = service;
     }
 
-    private String verifyAdmin(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new SecurityException("未登录，请先登录");
-        }
-        String token = authorization.substring(7);
-        String subject = JwtUtil.parseSubject(token);
-        if (!subject.startsWith("admin_")) {
-            throw new SecurityException("无权限访问，需要管理员权限");
-        }
-        return subject;
-    }
-
     @GetMapping
     @Operation(summary = "资讯列表（管理员）", description = "分页查询全部资讯（包含草稿/已发布），支持按分类与状态过滤")
     public Response<PageResult<ContentArticleDto>> list(
@@ -46,7 +34,7 @@ public class AdminArticleController {
             @RequestParam(name = "category", required = false) String category,
             @RequestParam(name = "status", required = false) Integer status,
             @RequestParam(name = "excludeCategory", required = false) String excludeCategory) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         return Response.ok(service.listAdminArticles(page, size, category, status, excludeCategory));
     }
 
@@ -56,7 +44,7 @@ public class AdminArticleController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         return Response.ok(service.articleDetail(id));
     }
 
@@ -66,7 +54,7 @@ public class AdminArticleController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @RequestBody AdminArticleUpsertRequest body) {
-        String subject = verifyAdmin(authorization);
+        String subject = AuthUtils.requireAdminSubject(authorization);
         return Response.ok(service.createAdminArticle(body, subject));
     }
 
@@ -77,7 +65,7 @@ public class AdminArticleController {
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id,
             @RequestBody AdminArticleUpsertRequest body) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         return Response.ok(service.updateAdminArticle(id, body));
     }
 
@@ -87,7 +75,7 @@ public class AdminArticleController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {admin_token}", required = true)
             @RequestHeader("Authorization") String authorization,
             @PathVariable("id") Long id) {
-        verifyAdmin(authorization);
+        AuthUtils.requireAdminSubject(authorization);
         service.deleteAdminArticle(id);
         return Response.ok(null);
     }
