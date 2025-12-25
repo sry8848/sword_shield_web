@@ -36,7 +36,7 @@ public class PointsController {
         // Keep endpoint for backward compatibility but disable it on purpose.
         // Still parse token to ensure this is an authenticated request.
         AuthUtils.requireSubject(subjectHeader, authorization);
-        return Response.error(ErrorCode.BAD_REQUEST.code, "每日签到已下线，请在活动详情页签到");
+        return Response.error(ErrorCode.BAD_REQUEST, "每日签到已下线，请在活动详情页签到");
     }
 
     @GetMapping("/points")

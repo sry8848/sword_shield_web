@@ -2,6 +2,7 @@ import axios, { AxiosHeaders } from 'axios'
 
 const adminApi = axios.create({
   baseURL: '/api',
+  validateStatus: () => true,
 })
 
 adminApi.interceptors.request.use((config) => {
@@ -13,6 +14,15 @@ adminApi.interceptors.request.use((config) => {
     config.headers = headers
   }
   return config
+})
+
+adminApi.interceptors.response.use((response) => {
+  const data = response.data as any
+  if (data && typeof data.code === 'number') {
+    return response
+  }
+  response.data = { code: response.status || 500, message: '请求失败', data: null }
+  return response
 })
 
 export default adminApi

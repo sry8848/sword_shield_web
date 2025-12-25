@@ -7,10 +7,18 @@ public class Response<T> {
 
     public static <T> Response<T> ok(T data) {
         Response<T> r = new Response<>();
-        r.code = 0;
-        r.message = "ok";
+        r.code = ErrorCode.OK.code;
+        r.message = ErrorCode.OK.message;
         r.data = data;
         return r;
+    }
+
+    public static <T> Response<T> error(ErrorCode errorCode) {
+        return error(errorCode, errorCode.message);
+    }
+
+    public static <T> Response<T> error(ErrorCode errorCode, String message) {
+        return error(errorCode.code, message);
     }
 
     public static <T> Response<T> error(int code, String message) {

@@ -1,5 +1,6 @@
 package com.swordshield.admin.service;
 
+import com.swordshield.common.ErrorCode;
 import com.swordshield.common.Response;
 import com.swordshield.api.activity.ActivityDto;
 import com.swordshield.api.activity.rpc.ActivityAdminRpcService;
@@ -19,7 +20,7 @@ public class AdminActivityService {
         try {
             return Response.ok(activityAdminRpcService.getAll());
         } catch (Exception e) {
-            return Response.error(502, "Activity service unavailable");
+            return Response.error(ErrorCode.SERVICE_UNAVAILABLE, "Activity service unavailable");
         }
     }
 
@@ -33,7 +34,7 @@ public class AdminActivityService {
                     "size", p.getSize()
             ));
         } catch (Exception e) {
-            return Response.error(502, "Activity service unavailable");
+            return Response.error(ErrorCode.SERVICE_UNAVAILABLE, "Activity service unavailable");
         }
     }
 
@@ -41,7 +42,7 @@ public class AdminActivityService {
         try {
             return Response.ok(activityAdminRpcService.getById(id));
         } catch (Exception e) {
-            return Response.error(502, "Activity service unavailable");
+            return Response.error(ErrorCode.SERVICE_UNAVAILABLE, "Activity service unavailable");
         }
     }
 
@@ -49,7 +50,7 @@ public class AdminActivityService {
         try {
             return Response.ok(activityAdminRpcService.create(activity));
         } catch (Exception e) {
-            return Response.error(502, "Activity service unavailable");
+            return Response.error(ErrorCode.SERVICE_UNAVAILABLE, "Activity service unavailable");
         }
     }
 
@@ -57,7 +58,7 @@ public class AdminActivityService {
         try {
             return Response.ok(activityAdminRpcService.update(id, activity));
         } catch (Exception e) {
-            return Response.error(502, "Activity service unavailable");
+            return Response.error(ErrorCode.SERVICE_UNAVAILABLE, "Activity service unavailable");
         }
     }
 
@@ -66,7 +67,7 @@ public class AdminActivityService {
             activityAdminRpcService.delete(id);
             return Response.ok(null);
         } catch (Exception e) {
-            return Response.error(502, "Activity service unavailable");
+            return Response.error(ErrorCode.SERVICE_UNAVAILABLE, "Activity service unavailable");
         }
     }
 }

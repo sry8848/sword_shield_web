@@ -2,36 +2,9 @@ server:
   port: 8103
 spring:
   config:
-    import: "classpath:observability.yml,classpath:dubbo.yml"
+    import: "classpath:common.yml,classpath:observability.yml,classpath:dubbo.yml"
   application:
     name: sword-shield-content
-  datasource:
-    url: jdbc:mysql://localhost:3306/sword_shield?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 123456
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-  cloud:
-    nacos:
-      discovery:
-        enabled: true
-        server-addr: 127.0.0.1:8848
-      config:
-        import-check:
-          enabled: false
-    sentinel:
-      transport:
-        dashboard: localhost:8858
-      datasource:
-        flow:
-          nacos:
-            server-addr: ${spring.cloud.nacos.discovery.server-addr}
-            data-id: ${spring.application.name}-sentinel-flow
-            group-id: SENTINEL_GROUP
-            data-type: json
-            rule-type: flow
 springdoc:
   api-docs:
     path: /api/content/v3/api-docs

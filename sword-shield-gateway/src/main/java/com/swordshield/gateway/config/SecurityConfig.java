@@ -1,6 +1,7 @@
 package com.swordshield.gateway.config;
 
 import com.swordshield.common.Response;
+import com.swordshield.common.ErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +41,11 @@ import java.util.List;
 public class SecurityConfig {
     private static final String DEFAULT_SECRET = "swordshield-dev-secret-change-me";
     private static final String ADMIN_PREFIX = "admin_";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public SecurityConfig(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
@@ -124,17 +129,17 @@ public class SecurityConfig {
     }
 
     private ServerAuthenticationEntryPoint jsonAuthEntryPoint() {
-        return (exchange, ex) -> writeJson(exchange, HttpStatus.UNAUTHORIZED, Response.error(401, "未登录，请先登录"));
+        return (exchange, ex) -> writeJson(exchange, HttpStatus.UNAUTHORIZED, Response.error(ErrorCode.UNAUTHORIZED, "未登录，请先登录"));
     }
 
     private ServerAccessDeniedHandler jsonAccessDeniedHandler() {
-        return (exchange, ex) -> writeJson(exchange, HttpStatus.FORBIDDEN, Response.error(403, "无权限访问"));
+        return (exchange, ex) -> writeJson(exchange, HttpStatus.FORBIDDEN, Response.error(ErrorCode.FORBIDDEN, "无权限访问"));
     }
 
     private Mono<Void> writeJson(ServerWebExchange exchange, HttpStatus status, Object body) {
         byte[] bytes;
         try {
-            bytes = OBJECT_MAPPER.writeValueAsBytes(body);
+            bytes = objectMapper.writeValueAsBytes(body);
         } catch (Exception e) {
             exchange.getResponse().setStatusCode(status);
             return exchange.getResponse().setComplete();

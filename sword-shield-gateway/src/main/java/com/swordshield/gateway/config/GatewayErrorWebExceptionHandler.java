@@ -1,6 +1,7 @@
 package com.swordshield.gateway.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.swordshield.common.ErrorCode;
 import com.swordshield.common.Response;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.core.Ordered;
@@ -20,7 +21,11 @@ import java.util.concurrent.TimeoutException;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public GatewayErrorWebExceptionHandler(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
@@ -31,10 +36,10 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
         HttpStatus status = resolveStatus(ex);
         String message = resolveMessage(ex, status);
 
-        Response<Object> body = Response.error(status.value(), message);
+        Response<Object> body = Response.error(ErrorCode.fromHttpStatus(status.value()), message);
         byte[] bytes;
         try {
-            bytes = OBJECT_MAPPER.writeValueAsBytes(body);
+            bytes = objectMapper.writeValueAsBytes(body);
         } catch (Exception e) {
             bytes = ("{\"code\":" + status.value() + ",\"message\":\"" + escapeJson(message) + "\"}")
                     .getBytes(StandardCharsets.UTF_8);

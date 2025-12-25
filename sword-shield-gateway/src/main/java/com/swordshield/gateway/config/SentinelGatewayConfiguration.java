@@ -2,6 +2,7 @@ package com.swordshield.gateway.config;
 
 import com.alibaba.csp.sentinel.adapter.gateway.sc.callback.BlockRequestHandler;
 import com.alibaba.csp.sentinel.adapter.gateway.sc.callback.GatewayCallbackManager;
+import com.swordshield.common.ErrorCode;
 import com.swordshield.common.Response;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +18,7 @@ public class SentinelGatewayConfiguration {
         BlockRequestHandler blockRequestHandler = (exchange, ex) -> ServerResponse
                 .status(HttpStatus.TOO_MANY_REQUESTS)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(Response.error(HttpStatus.TOO_MANY_REQUESTS.value(),
-                        "Too many requests, please try again later"));
+                .bodyValue(Response.error(ErrorCode.TOO_MANY_REQUESTS, "Too many requests, please try again later"));
         GatewayCallbackManager.setBlockHandler(blockRequestHandler);
     }
 }

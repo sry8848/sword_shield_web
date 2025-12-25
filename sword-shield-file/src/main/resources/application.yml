@@ -2,43 +2,17 @@ server:
   port: 8105
 spring:
   config:
-    import: "classpath:observability.yml,classpath:dubbo.yml"
+    import: "classpath:common.yml,classpath:observability.yml,classpath:dubbo.yml"
   application:
     name: sword-shield-file
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
-  datasource:
-    url: jdbc:mysql://localhost:3306/sword_shield?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 123456
   jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
-  cloud:
-    nacos:
-      discovery:
-        enabled: true
-        server-addr: localhost:8848
-      config:
-        import-check:
-          enabled: false
-    sentinel:
-      transport:
-        dashboard: localhost:8858
-      datasource:
-        flow:
-          nacos:
-            server-addr: ${spring.cloud.nacos.discovery.server-addr}
-            data-id: ${spring.application.name}-sentinel-flow
-            group-id: SENTINEL_GROUP
-            data-type: json
-            rule-type: flow
 springdoc:
   api-docs:
     path: /api/file/v3/api-docs

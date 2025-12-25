@@ -35,29 +35,12 @@ gateway:
       - /api/*/admin/**
 spring:
   config:
-    import: "classpath:observability.yml"
+    import: "classpath:common.yml,classpath:observability.yml"
   application:
     name: sword-shield-gateway
   codec:
     max-in-memory-size: 50MB
   cloud:
-    nacos:
-      discovery:
-        enabled: true
-        server-addr: localhost:8848
-      config:
-        enabled: false
-    sentinel:
-      transport:
-        dashboard: localhost:8858
-      datasource:
-        flow:
-          nacos:
-            server-addr: ${spring.cloud.nacos.discovery.server-addr}
-            data-id: ${spring.application.name}-sentinel-flow
-            group-id: SENTINEL_GROUP
-            data-type: json
-            rule-type: flow
     gateway:
       default-filters: []
       routes:
