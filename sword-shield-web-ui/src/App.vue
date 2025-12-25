@@ -37,9 +37,11 @@
         </div>
 
         <div class="nav-bar">
-          <div class="nav-inner">
-            <div class="brand" @click="$router.push('/')">
-              <div class="brand-mark">SS</div>
+            <div class="nav-inner">
+          <div class="brand" @click="$router.push('/')">
+              <div class="brand-mark">
+                <el-icon class="brand-icon"><DataBoard /></el-icon>
+              </div>
               <div class="brand-text">
                 <div class="brand-cn">西湖论剑·数字安全</div>
                 <div class="brand-en">SWORD SHIELD CYBER SECURITY</div>
@@ -88,7 +90,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Lock } from '@element-plus/icons-vue'
+import { DataBoard, Lock } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -283,9 +285,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 18px;
   color: #f9fafb;
+}
+
+.brand-icon {
+  font-size: 20px;
 }
 
 .brand-text {
