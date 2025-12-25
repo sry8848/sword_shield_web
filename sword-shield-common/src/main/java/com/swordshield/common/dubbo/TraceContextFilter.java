@@ -41,9 +41,17 @@ public class TraceContextFilter implements Filter {
 
     private void inject(Invocation invocation) {
         Optional<String> traceParent = TraceUtils.currentTraceParent();
-        traceParent.ifPresent(tp -> invocation.setAttachment(TraceUtils.TRACEPARENT_HEADER, tp));
+        if (traceParent.isPresent()) {
+            invocation.setAttachment(TraceUtils.TRACEPARENT_HEADER, traceParent.get());
+        } else {
+            TraceUtils.currentTraceId()
+                    .map(TraceUtils::ensureW3cTraceId)
+                    .ifPresent(traceId -> invocation.setAttachment(TraceUtils.TRACEPARENT_HEADER, TraceUtils.newTraceParent(traceId)));
+        }
 
-        TraceUtils.currentTraceId().ifPresent(traceId -> invocation.setAttachment(TraceUtils.TRACE_ID_HEADER, traceId));
+        TraceUtils.currentTraceId()
+                .map(TraceUtils::ensureW3cTraceId)
+                .ifPresent(traceId -> invocation.setAttachment(TraceUtils.TRACE_ID_HEADER, traceId));
     }
 
     private Result withMdc(Invocation invocation, SupplierWithResult supplier) {
@@ -56,15 +64,15 @@ public class TraceContextFilter implements Filter {
         }
 
         String prevTraceId = MDC.get(TraceUtils.TRACE_ID_MDC_KEY);
-        String prevTraceIdAlt = MDC.get(TraceUtils.OTEL_TRACE_ID_MDC_KEY);
+        String prevOtelTraceId = MDC.get(TraceUtils.OTEL_TRACE_ID_MDC_KEY);
 
         boolean setTraceId = !StringUtils.hasText(prevTraceId);
-        boolean setAlt = !StringUtils.hasText(prevTraceIdAlt);
+        boolean setOtelTraceId = !StringUtils.hasText(prevOtelTraceId);
 
         if (setTraceId) {
             MDC.put(TraceUtils.TRACE_ID_MDC_KEY, traceId);
         }
-        if (setAlt) {
+        if (setOtelTraceId) {
             MDC.put(TraceUtils.OTEL_TRACE_ID_MDC_KEY, traceId);
         }
 
@@ -78,15 +86,15 @@ public class TraceContextFilter implements Filter {
             return supplier.get();
         } finally {
             if (setTraceId) {
-                MDC.remove(TraceUtils.TRACE_ID_MDC_KEY);
-                if (StringUtils.hasText(prevTraceId)) {
-                    MDC.put(TraceUtils.TRACE_ID_MDC_KEY, prevTraceId);
+                String current = MDC.get(TraceUtils.TRACE_ID_MDC_KEY);
+                if (traceId.equals(current)) {
+                    MDC.remove(TraceUtils.TRACE_ID_MDC_KEY);
                 }
             }
-            if (setAlt) {
-                MDC.remove(TraceUtils.OTEL_TRACE_ID_MDC_KEY);
-                if (StringUtils.hasText(prevTraceIdAlt)) {
-                    MDC.put(TraceUtils.OTEL_TRACE_ID_MDC_KEY, prevTraceIdAlt);
+            if (setOtelTraceId) {
+                String current = MDC.get(TraceUtils.OTEL_TRACE_ID_MDC_KEY);
+                if (traceId.equals(current)) {
+                    MDC.remove(TraceUtils.OTEL_TRACE_ID_MDC_KEY);
                 }
             }
         }
@@ -94,17 +102,9 @@ public class TraceContextFilter implements Filter {
 
     private String resolveTraceId(String incomingTraceId, String incomingTraceParent) {
         if (StringUtils.hasText(incomingTraceId)) {
-            return incomingTraceId;
+            return TraceUtils.ensureW3cTraceId(incomingTraceId);
         }
-        if (!StringUtils.hasText(incomingTraceParent)) {
-            return null;
-        }
-        // traceparent = "00-<traceId>-<spanId>-<flags>"
-        String[] parts = incomingTraceParent.split("-");
-        if (parts.length >= 2 && StringUtils.hasText(parts[1])) {
-            return parts[1];
-        }
-        return null;
+        return TraceUtils.traceIdFromTraceParent(incomingTraceParent).orElse(null);
     }
 
     @FunctionalInterface

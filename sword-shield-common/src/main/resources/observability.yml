@@ -35,3 +35,9 @@ management:
     tracing:
       endpoint: ${OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
       protocol: ${OTLP_TRACING_PROTOCOL:http/protobuf}
+
+spring:
+  reactor:
+    # Enable automatic ThreadLocal <-> Reactor Context propagation.
+    # Without this, reactive thread hops can break tracing context and cause gateway to start a new trace for outbound calls.
+    context-propagation: auto
