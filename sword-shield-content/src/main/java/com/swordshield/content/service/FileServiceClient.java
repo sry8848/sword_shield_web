@@ -1,7 +1,7 @@
 package com.swordshield.content.service;
 
 import com.swordshield.common.Response;
-import com.swordshield.file.domain.AssetFile;
+import com.swordshield.content.service.dto.AssetFileDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.ServiceInstance;
@@ -83,13 +83,13 @@ public class FileServiceClient {
         headers.set(HttpHeaders.AUTHORIZATION, authHeader);
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Response<AssetFile>> uploadResponse;
+        ResponseEntity<Response<AssetFileDto>> uploadResponse;
         try {
             uploadResponse = restTemplate.exchange(
                     uploadUrl,
                     HttpMethod.POST,
                     requestEntity,
-                    new ParameterizedTypeReference<Response<AssetFile>>() {}
+                    new ParameterizedTypeReference<Response<AssetFileDto>>() {}
             );
         } catch (RestClientResponseException e) {
             String bodySnippet = safeSnippet(e.getResponseBodyAsString(), 500);
@@ -100,7 +100,7 @@ public class FileServiceClient {
             log.warn("File upload failed: baseUrl={} error={}", baseUrlCandidate, e.getMessage());
             return null;
         }
-        Response<AssetFile> uploadBody = uploadResponse.getBody();
+        Response<AssetFileDto> uploadBody = uploadResponse.getBody();
         if (uploadBody == null) {
             log.warn("File upload returned empty body: baseUrl={}", baseUrlCandidate);
             return null;

@@ -24,6 +24,7 @@
     <dubbo.version>3.2.9</dubbo.version>
     <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
     <springdoc-openapi.version>2.2.0</springdoc-openapi.version>
+    <lombok.version>1.18.34</lombok.version>
   </properties>
 
   <dependencyManagement>
@@ -76,6 +77,11 @@
         <artifactId>springdoc-openapi-starter-gateway</artifactId>
         <version>${springdoc-openapi.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>${lombok.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -90,6 +96,13 @@
             <source>${java.version}</source>
             <target>${java.version}</target>
             <parameters>true</parameters>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+              </path>
+            </annotationProcessorPaths>
           </configuration>
         </plugin>
         <plugin>

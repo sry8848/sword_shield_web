@@ -1,95 +1,47 @@
 package com.swordshield.admin.service;
 
-import com.swordshield.activity.domain.Activity;
-import com.swordshield.activity.repository.ActivityRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import com.swordshield.admin.dto.ActivityDto;
+import com.swordshield.common.Response;
 import org.springframework.stereotype.Service;
-import java.time.Instant;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class AdminActivityService {
-    private final ActivityRepository activityRepo;
+    private final ActivityAdminClient client;
 
-    public AdminActivityService(ActivityRepository activityRepo) {
-        this.activityRepo = activityRepo;
+    public AdminActivityService(ActivityAdminClient client) {
+        this.client = client;
     }
 
-    public java.util.List<Activity> getAll() {
-        return activityRepo.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    public Response<List<ActivityDto>> getAll(String authorization) {
+        Response<List<ActivityDto>> res = client.getAll(authorization);
+        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
-    public Page<Activity> list(int page, int size) {
-        Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), 
-            Sort.by(Sort.Direction.DESC, "id"));
-        return activityRepo.findAll(pageable);
+    public Response<Map<String, Object>> list(String authorization, int page, int size) {
+        Response<Map<String, Object>> res = client.list(authorization, page, size);
+        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
-    public Activity getById(Long id) {
-        return activityRepo.findById(id).orElseThrow(() -> 
-            new IllegalArgumentException("活动不存在"));
+    public Response<ActivityDto> getById(String authorization, Long id) {
+        Response<ActivityDto> res = client.getById(authorization, id);
+        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
-    public Activity create(Activity activity) {
-        if (activity.getTitle() == null || activity.getTitle().isBlank()) {
-            throw new IllegalArgumentException("活动标题不能为空");
-        }
-        
-        activity.setId(null);  // 确保是新建
-        activity.setCurrentRegistrations(0);
-        activity.setHeat(0);
-        activity.setStatus(1);
-        activity.setCreatedAt(Instant.now());
-        activity.setUpdatedAt(Instant.now());
-        
-        return activityRepo.save(activity);
+    public Response<ActivityDto> create(String authorization, ActivityDto activity) {
+        Response<ActivityDto> res = client.create(authorization, activity);
+        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
-    public Activity update(Long id, Activity activity) {
-        Activity existing = getById(id);
-        
-        if (activity.getTitle() != null && !activity.getTitle().isBlank()) {
-            existing.setTitle(activity.getTitle());
-        }
-        if (activity.getSummary() != null) {
-            existing.setSummary(activity.getSummary());
-        }
-        if (activity.getCoverUrl() != null) {
-            existing.setCoverUrl(activity.getCoverUrl());
-        }
-        if (activity.getStartTime() != null) {
-            existing.setStartTime(activity.getStartTime());
-        }
-        if (activity.getEndTime() != null) {
-            existing.setEndTime(activity.getEndTime());
-        }
-        if (activity.getLocation() != null) {
-            existing.setLocation(activity.getLocation());
-        }
-        if (activity.getSpeaker() != null) {
-            existing.setSpeaker(activity.getSpeaker());
-        }
-        if (activity.getLiveUrl() != null) {
-            existing.setLiveUrl(activity.getLiveUrl());
-        }
-        if (activity.getReplayUrl() != null) {
-            existing.setReplayUrl(activity.getReplayUrl());
-        }
-        if (activity.getMaxRegistrations() != null) {
-            existing.setMaxRegistrations(activity.getMaxRegistrations());
-        }
-        if (activity.getStatus() != null) {
-            existing.setStatus(activity.getStatus());
-        }
-        
-        existing.setUpdatedAt(Instant.now());
-        return activityRepo.save(existing);
+    public Response<ActivityDto> update(String authorization, Long id, ActivityDto activity) {
+        Response<ActivityDto> res = client.update(authorization, id, activity);
+        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 
-    public void delete(Long id) {
-        Activity activity = getById(id);
-        activityRepo.delete(activity);
+    public Response<Object> delete(String authorization, Long id) {
+        Response<Object> res = client.delete(authorization, id);
+        return res == null ? Response.error(502, "Activity service unavailable") : res;
     }
 }
