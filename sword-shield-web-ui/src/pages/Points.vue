@@ -4,7 +4,7 @@
       <div class="points-header">
         <el-icon class="points-icon"><Trophy /></el-icon>
         <div>
-          <h2>积分</h2>
+          <h2>积分详情</h2>
           <p class="points-subtitle">活动签到获得积分，明细实时更新</p>
         </div>
       </div>
