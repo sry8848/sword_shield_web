@@ -5,6 +5,7 @@ import Register from './pages/Register.vue'
 import Home from './pages/Home.vue'
 import Activities from './pages/Activities.vue'
 import ActivityDetail from './pages/ActivityDetail.vue'
+import ActivityLive from './pages/ActivityLive.vue'
 import Articles from './pages/Articles.vue'
 import ArticleDetail from './pages/ArticleDetail.vue'
 import Profile from './pages/Profile.vue'
@@ -28,6 +29,7 @@ const routes = [
   { path: '/register', component: Register, meta: { public: true } },
   { path: '/activities', component: Activities },
   { path: '/activity/:id', component: ActivityDetail },
+  { path: '/activity/:id/live', component: ActivityLive },
   { path: '/articles', component: Articles },
   { path: '/article/:id', component: ArticleDetail },
   { path: '/profile', component: Profile },
