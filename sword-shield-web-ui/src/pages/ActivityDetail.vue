@@ -77,6 +77,7 @@
 
         <div class="comment-form">
           <el-input 
+            ref="commentInputRef"
             v-model="comment" 
             type="textarea" 
             :rows="3"
@@ -96,8 +97,9 @@
 
         <div class="comments-list">
           <div v-if="comments.length === 0" class="empty-comments">
-            <span>💭</span>
-            <p>还没有评论，来发表第一条吧！</p>
+            <el-empty description="还没有评论，快来发表第一条吧！" :image-size="96">
+              <el-button type="primary" @click="focusCommentBox">去评论</el-button>
+            </el-empty>
           </div>
           <div v-for="c in comments" :key="c.id" class="comment-item">
             <div class="comment-avatar">👤</div>
@@ -118,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api'
 import { ElMessage } from 'element-plus'
@@ -133,11 +135,17 @@ const registering = ref(false)
 const commenting = ref(false)
 const liking = ref(false)
 const sharing = ref(false)
+const commentInputRef = ref<any>(null)
 
 function formatDate(dateStr: string) {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleString('zh-CN')
+}
+
+async function focusCommentBox() {
+  await nextTick()
+  commentInputRef.value?.focus?.()
 }
 
 function openLink(url: string) {
@@ -506,14 +514,7 @@ onMounted(async () => {
 
 .empty-comments {
   text-align: center;
-  padding: 60px 20px;
-  color: #999;
-}
-
-.empty-comments span {
-  font-size: 48px;
-  display: block;
-  margin-bottom: 12px;
+  padding: 18px 10px 8px;
 }
 
 .comment-item {

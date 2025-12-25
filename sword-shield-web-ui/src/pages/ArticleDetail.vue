@@ -108,6 +108,7 @@
 
         <div class="comment-form">
           <el-input 
+            ref="commentInputRef"
             v-model="comment" 
             type="textarea" 
             :rows="3"
@@ -127,8 +128,9 @@
 
         <div class="comments-list">
           <div v-if="comments.length === 0" class="empty-comments">
-            <div class="empty-comments-mark">SS</div>
-            <p>还没有评论，来发表第一条吧！</p>
+            <el-empty description="还没有评论，快来发表第一条吧！" :image-size="96">
+              <el-button type="primary" @click="focusCommentBox">去评论</el-button>
+            </el-empty>
           </div>
           <div v-for="c in comments" :key="c.id" class="comment-item">
             <div class="comment-avatar-mark">U</div>
@@ -177,7 +179,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Picture, VideoPlay } from '@element-plus/icons-vue'
 import api from '../api'
@@ -192,6 +194,7 @@ const likeCount = ref(0)
 const commenting = ref(false)
 const liking = ref(false)
 const sharing = ref(false)
+const commentInputRef = ref<any>(null)
 
 const relatedMedia = ref<any[]>([])
 const mediaPreviewVisible = ref(false)
@@ -218,6 +221,11 @@ function openLink(url: string) {
   if (url) {
     window.open(url, '_blank')
   }
+}
+
+async function focusCommentBox() {
+  await nextTick()
+  commentInputRef.value?.focus?.()
 }
 
 function enterLive(url: string) {
@@ -802,22 +810,7 @@ onMounted(async () => {
 
 .empty-comments {
   text-align: center;
-  padding: 46px 20px;
-  color: #9ca3af;
-}
-
-.empty-comments-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  background: #e5e7eb;
-  font-size: 14px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 8px;
+  padding: 18px 10px 8px;
 }
 
 .comment-item {
