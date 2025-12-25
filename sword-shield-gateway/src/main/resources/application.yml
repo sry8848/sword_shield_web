@@ -6,9 +6,13 @@ jwt:
 gateway:
   security:
     permit-all:
-      - /swagger-ui**
+      - /swagger-ui.html
+      - /swagger-ui/**
       - /webjars/swagger-ui/**
-      - /v3/api-docs**
+      - /v3/api-docs
+      - /v3/api-docs/**
+      - /api/*/v3/api-docs
+      - /api/*/v3/api-docs/**
       - /api/user/login
       - /api/user/register
       - /api/admin/auth/login
