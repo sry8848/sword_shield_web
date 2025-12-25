@@ -2,9 +2,9 @@ package com.swordshield.activity.service;
 
 import com.swordshield.activity.domain.Activity;
 import com.swordshield.activity.domain.ActivityRegistration;
-import com.swordshield.activity.dto.ActivityDto;
 import com.swordshield.activity.repository.ActivityRegistrationRepository;
 import com.swordshield.activity.repository.ActivityRepository;
+import com.swordshield.api.activity.ActivityDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

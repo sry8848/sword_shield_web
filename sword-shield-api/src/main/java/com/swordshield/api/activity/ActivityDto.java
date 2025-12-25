@@ -1,4 +1,4 @@
-package com.swordshield.activity.dto;
+package com.swordshield.api.activity;
 
 import lombok.Data;
 
@@ -23,4 +23,3 @@ public class ActivityDto {
     private Instant createdAt;
     private Instant updatedAt;
 }
-

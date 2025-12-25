@@ -1,4 +1,4 @@
-package com.swordshield.file.dto;
+package com.swordshield.api.file;
 
 import lombok.Data;
 
@@ -15,4 +15,3 @@ public class AssetFileDto {
     private Instant createdAt;
     private String originalName;
 }
-

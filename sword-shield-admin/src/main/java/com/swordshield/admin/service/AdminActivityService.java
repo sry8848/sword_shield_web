@@ -3,8 +3,8 @@ package com.swordshield.admin.service;
 import com.swordshield.admin.client.ActivityAdminDirectClient;
 import com.swordshield.admin.client.ActivityAdminDiscoveryClient;
 import com.swordshield.admin.client.ActivityAdminApi;
-import com.swordshield.admin.dto.ActivityDto;
 import com.swordshield.common.Response;
+import com.swordshield.api.activity.ActivityDto;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 

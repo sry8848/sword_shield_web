@@ -3,7 +3,7 @@ package com.swordshield.content.service;
 import com.swordshield.common.Response;
 import com.swordshield.content.client.FileServiceDirectClient;
 import com.swordshield.content.client.FileServiceDiscoveryClient;
-import com.swordshield.content.service.dto.AssetFileDto;
+import com.swordshield.api.file.AssetFileDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;

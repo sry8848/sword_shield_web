@@ -1,7 +1,7 @@
 package com.swordshield.admin.controller;
 
 import com.swordshield.admin.service.AdminActivityService;
-import com.swordshield.admin.dto.ActivityDto;
+import com.swordshield.api.activity.ActivityDto;
 import com.swordshield.common.AuthUtils;
 import com.swordshield.common.Response;
 import org.springframework.web.bind.annotation.*;

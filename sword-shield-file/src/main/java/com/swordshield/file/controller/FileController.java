@@ -2,7 +2,7 @@ package com.swordshield.file.controller;
 
 import com.swordshield.common.AuthUtils;
 import com.swordshield.common.Response;
-import com.swordshield.file.dto.AssetFileDto;
+import com.swordshield.api.file.AssetFileDto;
 import com.swordshield.file.service.FileService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;

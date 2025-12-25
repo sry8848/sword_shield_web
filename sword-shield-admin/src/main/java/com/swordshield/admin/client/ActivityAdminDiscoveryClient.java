@@ -1,7 +1,7 @@
 package com.swordshield.admin.client;
 
-import com.swordshield.admin.dto.ActivityDto;
 import com.swordshield.common.Response;
+import com.swordshield.api.activity.ActivityDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;

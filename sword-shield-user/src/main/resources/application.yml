@@ -1,6 +1,8 @@
 server:
   port: 8101
 spring:
+  config:
+    import: "classpath:observability.yml"
   
   application:
     name: sword-shield-user
@@ -34,18 +36,3 @@ spring:
 springdoc:
   api-docs:
     path: /api/user/v3/api-docs
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
-  endpoint:
-    health:
-      show-details: always
-  tracing:
-    sampling:
-      probability: 1.0
-  otlp:
-    tracing:
-      endpoint: http://localhost:4318/v1/traces
-      protocol: http/protobuf

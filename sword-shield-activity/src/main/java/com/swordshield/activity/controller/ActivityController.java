@@ -1,10 +1,10 @@
 package com.swordshield.activity.controller;
 
-import com.swordshield.activity.dto.ActivityDto;
 import com.swordshield.activity.dto.ActivityRegisterRequest;
 import com.swordshield.activity.service.ActivityService;
 import com.swordshield.common.AuthUtils;
 import com.swordshield.common.Response;
+import com.swordshield.api.activity.ActivityDto;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 

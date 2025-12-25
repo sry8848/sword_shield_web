@@ -1,7 +1,7 @@
 package com.swordshield.content.client;
 
 import com.swordshield.common.Response;
-import com.swordshield.content.service.dto.AssetFileDto;
+import com.swordshield.api.file.AssetFileDto;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,4 +20,3 @@ public interface FileServiceApi {
             @RequestParam("expireSeconds") int expireSeconds
     );
 }
-

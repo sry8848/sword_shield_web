@@ -1,9 +1,9 @@
 package com.swordshield.activity.controller;
 
-import com.swordshield.activity.dto.ActivityDto;
 import com.swordshield.activity.service.ActivityAdminService;
 import com.swordshield.common.AuthUtils;
 import com.swordshield.common.Response;
+import com.swordshield.api.activity.ActivityDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;

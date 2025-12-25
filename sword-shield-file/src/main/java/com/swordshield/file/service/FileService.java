@@ -1,7 +1,7 @@
 package com.swordshield.file.service;
 
 import com.swordshield.file.domain.AssetFile;
-import com.swordshield.file.dto.AssetFileDto;
+import com.swordshield.api.file.AssetFileDto;
 import com.swordshield.file.repository.AssetFileRepository;
 import io.minio.*;
 import io.minio.http.Method;
