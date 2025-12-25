@@ -27,7 +27,7 @@ public class AdminActivityController {
             @RequestHeader(name = "Authorization", required = false) String authorization,
             @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader) {
         AuthUtils.requireAdminSubject(subjectHeader, authorization);
-        return activityService.getAll(authorization);
+        return activityService.getAll(authorization, subjectHeader);
     }
 
     @GetMapping("/list")
@@ -39,7 +39,7 @@ public class AdminActivityController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         AuthUtils.requireAdminSubject(subjectHeader, authorization);
-        return activityService.list(authorization, page, size);
+        return activityService.list(authorization, subjectHeader, page, size);
     }
 
     @GetMapping("/{id}")
@@ -50,7 +50,7 @@ public class AdminActivityController {
             @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader,
             @PathVariable("id") Long id) {
         AuthUtils.requireAdminSubject(subjectHeader, authorization);
-        return activityService.getById(authorization, id);
+        return activityService.getById(authorization, subjectHeader, id);
     }
 
     @PostMapping
@@ -61,7 +61,7 @@ public class AdminActivityController {
             @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader,
             @RequestBody ActivityDto activity) {
         AuthUtils.requireAdminSubject(subjectHeader, authorization);
-        return activityService.create(authorization, activity);
+        return activityService.create(authorization, subjectHeader, activity);
     }
 
     @PutMapping("/{id}")
@@ -73,7 +73,7 @@ public class AdminActivityController {
             @PathVariable("id") Long id,
             @RequestBody ActivityDto activity) {
         AuthUtils.requireAdminSubject(subjectHeader, authorization);
-        return activityService.update(authorization, id, activity);
+        return activityService.update(authorization, subjectHeader, id, activity);
     }
 
     @DeleteMapping("/{id}")
@@ -84,6 +84,6 @@ public class AdminActivityController {
             @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader,
             @PathVariable("id") Long id) {
         AuthUtils.requireAdminSubject(subjectHeader, authorization);
-        return activityService.delete(authorization, id);
+        return activityService.delete(authorization, subjectHeader, id);
     }
 }

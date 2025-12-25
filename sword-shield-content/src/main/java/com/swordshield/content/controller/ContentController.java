@@ -4,13 +4,17 @@ import com.swordshield.common.AuthUtils;
 import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
 import com.swordshield.content.dto.AchievementDto;
+import com.swordshield.content.dto.ArticleSubmitRequest;
 import com.swordshield.content.dto.ContentArticleDto;
+import com.swordshield.content.dto.CreateMaterialRequest;
+import com.swordshield.content.dto.CreateMediaRequest;
 import com.swordshield.content.dto.ExhibitorDto;
 import com.swordshield.content.dto.MaterialDto;
 import com.swordshield.content.dto.MediaAssetDto;
 import com.swordshield.content.service.ContentService;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -59,13 +63,13 @@ public class ContentController {
 
     @PostMapping("/article/submit")
     @Operation(summary = "提交文章", description = "UGC 投稿入口，提交标题、摘要、正文等信息")
-    public Response<ContentArticleDto> submit(@RequestBody Map<String, String> body) {
+    public Response<ContentArticleDto> submit(@Valid @RequestBody ArticleSubmitRequest body) {
         ContentArticleDto saved = service.submitArticle(
-                body.get("title"),
-                body.get("summary"),
-                body.get("body"),
-                body.get("coverUrl"),
-                body.getOrDefault("category", "UGC")
+                body.getTitle(),
+                body.getSummary(),
+                body.getBody(),
+                body.getCoverUrl(),
+                (body.getCategory() == null || body.getCategory().isBlank()) ? "UGC" : body.getCategory().trim()
         );
         return Response.ok(saved);
     }
@@ -86,20 +90,10 @@ public class ContentController {
     public Response<MaterialDto> createMaterial(
             @RequestHeader(name = "Authorization", required = false) String authorization,
             @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader,
-            @RequestBody Map<String, Object> body) {
+            @Valid @RequestBody CreateMaterialRequest body) {
         AuthUtils.requireAdminSubject(subjectHeader, authorization);
-        try {
-            String title = (String) body.get("title");
-            String speaker = (String) body.get("speaker");
-            String objectName = (String) body.get("objectName");
-            String contentType = (String) body.get("contentType");
-            long size = body.get("size") == null ? 0L : ((Number) body.get("size")).longValue();
-            MaterialDto saved = service.createMaterial(title, speaker, objectName, contentType, size);
-            return Response.ok(saved);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.error(500, "保存失败: " + e.getMessage());
-        }
+        long size = body.getSize() == null ? 0L : body.getSize();
+        return Response.ok(service.createMaterial(body.getTitle(), body.getSpeaker(), body.getObjectName(), body.getContentType(), size));
     }
 
     @DeleteMapping("/material/{id}")
@@ -127,18 +121,17 @@ public class ContentController {
 
     @PostMapping("/media")
     @Operation(summary = "创建媒体素材", description = "上传后的媒体元数据登记，可关联文章 ID")
-    public Response<MediaAssetDto> createMedia(@RequestBody Map<String, Object> body) {
-        String title = (String) body.get("title");
-        String summary = (String) body.get("summary");
-        String type = (String) body.get("type");
-        String objectName = (String) body.get("objectName");
-        String coverUrl = (String) body.get("coverUrl");
-        Long articleId = body.get("articleId") != null ? ((Number) body.get("articleId")).longValue() : null;
-        
-        if (articleId != null) {
-            return Response.ok(service.createMedia(title, summary, type, objectName, coverUrl, articleId));
+    public Response<MediaAssetDto> createMedia(
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader,
+            @Valid @RequestBody CreateMediaRequest body) {
+        AuthUtils.requireAdminSubject(subjectHeader, authorization);
+        if (body.getArticleId() != null) {
+            return Response.ok(service.createMedia(body.getTitle(), body.getSummary(), body.getType(),
+                    body.getObjectName(), body.getCoverUrl(), body.getArticleId()));
         }
-        return Response.ok(service.createMedia(title, summary, type, objectName, coverUrl));
+        return Response.ok(service.createMedia(body.getTitle(), body.getSummary(), body.getType(),
+                body.getObjectName(), body.getCoverUrl()));
     }
     
     @GetMapping("/media/by-article")
@@ -149,7 +142,11 @@ public class ContentController {
 
     @DeleteMapping("/media/{id}")
     @Operation(summary = "删除媒体素材", description = "根据 ID 删除媒体资产")
-    public Response<Object> deleteMedia(@PathVariable("id") Long id) {
+    public Response<Object> deleteMedia(
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-Auth-Subject", required = false) String subjectHeader,
+            @PathVariable("id") Long id) {
+        AuthUtils.requireAdminSubject(subjectHeader, authorization);
         service.deleteMedia(id);
         return Response.ok(null);
     }

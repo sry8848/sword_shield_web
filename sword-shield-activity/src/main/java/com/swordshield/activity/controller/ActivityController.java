@@ -1,6 +1,7 @@
 package com.swordshield.activity.controller;
 
 import com.swordshield.activity.dto.ActivityDto;
+import com.swordshield.activity.dto.ActivityRegisterRequest;
 import com.swordshield.activity.service.ActivityService;
 import com.swordshield.common.AuthUtils;
 import com.swordshield.common.Response;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -47,9 +49,9 @@ public class ActivityController {
                                      @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                      @RequestHeader(name = "Authorization", required = false) String authorization,
                                      @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
-                                     @RequestBody Map<String, Object> body) {
-        Long activityId = ((Number) body.get("activityId")).longValue();
-        String channel = (String) body.getOrDefault("channel", "web");
+                                     @Valid @RequestBody ActivityRegisterRequest body) {
+        Long activityId = body.getActivityId();
+        String channel = body.getChannel() == null || body.getChannel().isBlank() ? "web" : body.getChannel().trim();
         Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
         service.register(userId, activityId, channel);
         return Response.ok(null);

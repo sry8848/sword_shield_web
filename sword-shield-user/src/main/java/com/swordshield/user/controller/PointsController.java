@@ -4,12 +4,14 @@ import com.swordshield.common.AuthUtils;
 import com.swordshield.common.ErrorCode;
 import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
+import com.swordshield.user.dto.ActivityCheckinRequest;
 import com.swordshield.user.dto.PointsSummaryDto;
 import com.swordshield.user.dto.PointsTxnDto;
 import com.swordshield.user.service.PointsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -76,13 +78,9 @@ public class PointsController {
             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
             @RequestHeader(name = "Authorization", required = false) String authorization,
             @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
-            @RequestBody Map<String, Object> body) {
+            @Valid @RequestBody ActivityCheckinRequest body) {
         Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
-        Object activityIdObj = body.get("activityId");
-        if (activityIdObj == null) {
-            throw new IllegalArgumentException("activityId 不能为空");
-        }
-        Long activityId = ((Number) activityIdObj).longValue();
+        Long activityId = body.getActivityId();
         return Response.ok(pointsService.activityCheckin(userId, activityId));
     }
 }

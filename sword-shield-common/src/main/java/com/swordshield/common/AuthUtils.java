@@ -87,7 +87,7 @@ public final class AuthUtils {
             throw new SecurityException("未登录，请先登录");
         }
         if (!subject.startsWith(ADMIN_PREFIX)) {
-            throw new SecurityException("无权限访问，需要管理员权限");
+            throw new ForbiddenException("无权限访问，需要管理员权限");
         }
         return subject;
     }
@@ -101,7 +101,7 @@ public final class AuthUtils {
             throw new SecurityException("未登录，请先登录");
         }
         if (!subject.startsWith(ADMIN_PREFIX)) {
-            throw new SecurityException("无权限访问，需要管理员权限");
+            throw new ForbiddenException("无权限访问，需要管理员权限");
         }
         return subject;
     }

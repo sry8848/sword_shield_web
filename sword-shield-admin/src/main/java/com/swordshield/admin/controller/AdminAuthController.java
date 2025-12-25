@@ -1,8 +1,10 @@
 package com.swordshield.admin.controller;
 
 import com.swordshield.admin.service.AdminAuthService;
+import com.swordshield.admin.dto.AdminLoginRequest;
 import com.swordshield.common.Response;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,9 +21,8 @@ public class AdminAuthController {
 
     @PostMapping("/login")
     @Operation(summary = "管理员登录", description = "管理员用户名/密码登录，返回 JWT 令牌")
-    public Response<Map<String, String>> login(@RequestBody Map<String, String> body) {
-        System.out.printf("Login Request: %s\n", body);
-        Map<String, String> result = authService.login(body.get("username"), body.get("password"));
+    public Response<Map<String, String>> login(@Valid @RequestBody AdminLoginRequest body) {
+        Map<String, String> result = authService.login(body.getUsername(), body.getPassword());
         return Response.ok(result);
     }
 }

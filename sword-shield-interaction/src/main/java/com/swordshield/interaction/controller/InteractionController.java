@@ -4,9 +4,13 @@ import com.swordshield.common.AuthUtils;
 import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
 import com.swordshield.interaction.dto.CommentDto;
+import com.swordshield.interaction.dto.CommentCreateRequest;
+import com.swordshield.interaction.dto.ShareRequest;
+import com.swordshield.interaction.dto.TargetActionRequest;
 import com.swordshield.interaction.service.InteractionService;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -35,12 +39,9 @@ public class InteractionController {
                                  @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                  @RequestHeader(name = "Authorization", required = false) String authorization,
                                  @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
-                                 @RequestBody Map<String, Object> body) {
+                                 @Valid @RequestBody CommentCreateRequest body) {
         Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
-        String targetType = (String) body.get("targetType");
-        Long targetId = ((Number) body.get("targetId")).longValue();
-        String content = (String) body.get("content");
-        service.postComment(userId, targetType, targetId, content);
+        service.postComment(userId, body.getTargetType(), body.getTargetId(), body.getContent());
         return Response.ok(null);
     }
 
@@ -50,11 +51,9 @@ public class InteractionController {
                                             @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                             @RequestHeader(name = "Authorization", required = false) String authorization,
                                             @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
-                                            @RequestBody Map<String, Object> body) {
+                                            @Valid @RequestBody TargetActionRequest body) {
         Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
-        String targetType = (String) body.get("targetType");
-        Long targetId = ((Number) body.get("targetId")).longValue();
-        long count = service.like(userId, targetType, targetId);
+        long count = service.like(userId, body.getTargetType(), body.getTargetId());
         return Response.ok(Map.of("count", count));
     }
 
@@ -64,11 +63,9 @@ public class InteractionController {
                                                @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                                @RequestHeader(name = "Authorization", required = false) String authorization,
                                                @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
-                                              @RequestBody Map<String, Object> body) {
+                                              @Valid @RequestBody TargetActionRequest body) {
         Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
-        String targetType = (String) body.get("targetType");
-        Long targetId = ((Number) body.get("targetId")).longValue();
-        long count = service.unlike(userId, targetType, targetId);
+        long count = service.unlike(userId, body.getTargetType(), body.getTargetId());
         return Response.ok(Map.of("count", count));
     }
 
@@ -78,12 +75,10 @@ public class InteractionController {
                                   @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
                                   @RequestHeader(name = "Authorization", required = false) String authorization,
                                   @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
-                                  @RequestBody Map<String, Object> body) {
+                                  @Valid @RequestBody ShareRequest body) {
         Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
-        String targetType = (String) body.get("targetType");
-        Long targetId = ((Number) body.get("targetId")).longValue();
-        String channel = (String) body.getOrDefault("channel", "link");
-        service.share(userId, targetType, targetId, channel);
+        String channel = body.getChannel() == null || body.getChannel().isBlank() ? "link" : body.getChannel().trim();
+        service.share(userId, body.getTargetType(), body.getTargetId(), channel);
         return Response.ok(null);
     }
 
