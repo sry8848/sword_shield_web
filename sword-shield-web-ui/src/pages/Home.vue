@@ -176,11 +176,11 @@
           <div class="side-card secondary">
             <h3>推荐操作</h3>
             <ul class="side-actions">
-              <li @click="$router.push('/checkin')">
+              <li @click="$router.push('/points')">
                 <div class="action-icon action-icon-primary">SS</div>
                 <div class="action-text">
-                  <div class="action-title">会议现场签到</div>
-                  <div class="action-desc">支持二维码/名单核验，多终端同步。</div>
+                  <div class="action-title">积分详情</div>
+                  <div class="action-desc">查看积分余额与获取记录。</div>
                 </div>
               </li>
               <li @click="$router.push('/submit')">

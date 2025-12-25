@@ -56,7 +56,7 @@
               <router-link to="/media" class="nav-link">媒体中心</router-link>
               <router-link to="/statistics" class="nav-link">数据看板</router-link>
               <router-link to="/submit" class="nav-link">在线投稿</router-link>
-              <router-link to="/checkin" class="nav-link">会议签到</router-link>
+              <router-link to="/points" class="nav-link">积分</router-link>
             </nav>
           </div>
         </div>

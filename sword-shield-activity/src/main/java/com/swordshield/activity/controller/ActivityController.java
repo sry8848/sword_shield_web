@@ -55,6 +55,18 @@ public class ActivityController {
         return Response.ok(null);
     }
 
+    @GetMapping("/registration/status")
+    @Operation(summary = "报名状态", description = "查询当前用户是否已报名指定活动，需携带用户 JWT")
+    public Response<Map<String, Object>> registrationStatus(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
+            @RequestHeader("Authorization") String authorization,
+            @RequestParam("activityId") Long activityId) {
+        String token = authorization != null && authorization.startsWith("Bearer ") ? authorization.substring(7) : null;
+        Long userId = Long.valueOf(JwtUtil.parseSubject(token));
+        boolean registered = service.isRegistered(userId, activityId);
+        return Response.ok(Map.of("activityId", activityId, "registered", registered));
+    }
+
     @GetMapping("/statistics")
     @Operation(summary = "活动统计数据", description = "返回单个活动的报名、点赞等统计信息")
     public Response<Map<String, Object>> statistics(@RequestParam("id") Long id) {

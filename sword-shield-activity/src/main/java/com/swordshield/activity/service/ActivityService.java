@@ -37,14 +37,18 @@ public class ActivityService {
             new IllegalArgumentException("活动不存在"));
     }
 
+    public boolean isRegistered(Long userId, Long activityId) {
+        return regRepo.findByActivityIdAndUserId(activityId, userId).isPresent();
+    }
+
     public void register(Long userId, Long activityId, String channel) {
         Activity act = detail(activityId);
         Instant now = Instant.now();
         if (act.getEndTime() != null && now.isAfter(act.getEndTime())) {
             throw new IllegalArgumentException("活动已结束，无法报名");
         }
-        if (act.getStartTime() != null && now.isBefore(act.getStartTime())) {
-            throw new IllegalArgumentException("活动未开始，暂时无法报名");
+        if (act.getStartTime() != null && !now.isBefore(act.getStartTime())) {
+            throw new IllegalArgumentException("活动已开始，报名已截止");
         }
         regRepo.findByActivityIdAndUserId(activityId, userId).ifPresent(r -> { 
             throw new IllegalArgumentException("您已报名该活动，无需重复报名"); 

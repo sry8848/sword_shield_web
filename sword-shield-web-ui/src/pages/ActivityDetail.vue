@@ -13,7 +13,11 @@
           </div>
           <div class="meta-tag">
             <span class="icon">📅</span>
-            <span>{{ formatDate(item.startTime) }}</span>
+            <span>开始 {{ formatDate(item.startTime) || '待定' }}</span>
+          </div>
+          <div class="meta-tag">
+            <span class="icon">⏰</span>
+            <span>结束 {{ formatDate(item.endTime) || '待定' }}</span>
           </div>
           <div class="meta-tag" v-if="item.maxRegistrations">
             <span class="icon">👥</span>
@@ -27,12 +31,28 @@
       <div class="detail-content">
         <p class="summary">{{ item.summary }}</p>
         <div class="action-section">
-          <el-button type="primary" size="large" @click="register" :loading="registering">
-            <span>🎉 立即报名</span>
+          <el-button type="primary" size="large" @click="register" :loading="registering" :disabled="!canRegister || registered">
+            <span v-if="registered">✅ 已报名</span>
+            <span v-else>🎉 立即报名</span>
+          </el-button>
+          <el-button
+            type="success"
+            size="large"
+            @click="activityCheckin"
+            :loading="checkingIn"
+            :disabled="!canCheckin || checkedIn"
+            style="margin-left: 12px;"
+          >
+            <span v-if="checkedIn">✅ 已签到</span>
+            <span v-else>🧾 活动签到</span>
           </el-button>
           <el-button size="large" @click="share" :loading="sharing" style="margin-left: 12px;">
             <span>🔗 分享活动</span>
           </el-button>
+          <div v-if="registerHint || checkinHint" class="checkin-hint">
+            <div v-if="registerHint">{{ registerHint }}</div>
+            <div v-if="checkinHint">{{ checkinHint }}</div>
+          </div>
         </div>
       </div>
 
@@ -136,6 +156,13 @@ const commenting = ref(false)
 const liking = ref(false)
 const sharing = ref(false)
 const commentInputRef = ref<any>(null)
+const checkingIn = ref(false)
+const checkedIn = ref(false)
+const canCheckin = ref(false)
+const checkinHint = ref('')
+const canRegister = ref(true)
+const registerHint = ref('')
+const registered = ref(false)
 
 function formatDate(dateStr: string) {
   if (!dateStr) return ''
@@ -166,7 +193,13 @@ function enterReplay(url: string) {
 
 async function load() {
   const { data } = await api.get('/activity/detail', { params: { id: route.params.id } })
-  if (data.code === 0) item.value = data.data
+  if (data.code === 0) {
+    item.value = data.data
+    computeRegisterWindow()
+    computeCheckinWindow()
+    await loadRegistrationStatus()
+    await loadCheckinStatus()
+  }
   
   // Load initial like count
   const likeCountRes = await api.get('/interaction/likes/count', { 
@@ -180,6 +213,74 @@ async function load() {
   }
 }
 
+function computeCheckinWindow() {
+  checkinHint.value = ''
+  canCheckin.value = false
+  if (!item.value) return
+  const now = Date.now()
+  const startMs = item.value.startTime ? new Date(item.value.startTime).getTime() : null
+  const endMs = item.value.endTime ? new Date(item.value.endTime).getTime() : null
+
+  if (startMs != null && now < startMs) {
+    checkinHint.value = '活动未开始，暂不可签到'
+    return
+  }
+  if (endMs != null && now > endMs) {
+    checkinHint.value = '活动已结束，不可签到'
+    return
+  }
+  canCheckin.value = true
+}
+
+function computeRegisterWindow() {
+  registerHint.value = ''
+  canRegister.value = false
+  if (!item.value) return
+  const now = Date.now()
+  const startMs = item.value.startTime ? new Date(item.value.startTime).getTime() : null
+  const endMs = item.value.endTime ? new Date(item.value.endTime).getTime() : null
+
+  if (endMs != null && now > endMs) {
+    registerHint.value = '活动已结束，报名已截止'
+    return
+  }
+  if (startMs != null && now >= startMs) {
+    registerHint.value = '活动已开始，报名已截止'
+    return
+  }
+  canRegister.value = true
+}
+
+async function loadCheckinStatus() {
+  const token = localStorage.getItem('token')
+  if (!token) return
+  try {
+    const { data } = await api.get('/user/activity-checkin/status', {
+      params: { activityId: Number(route.params.id) }
+    })
+    if (data.code === 0) {
+      checkedIn.value = !!data.data.checkedIn
+    }
+  } catch {
+    // ignore
+  }
+}
+
+async function loadRegistrationStatus() {
+  const token = localStorage.getItem('token')
+  if (!token) return
+  try {
+    const { data } = await api.get('/activity/registration/status', {
+      params: { activityId: Number(route.params.id) }
+    })
+    if (data.code === 0) {
+      registered.value = !!data.data.registered
+    }
+  } catch {
+    // ignore
+  }
+}
+
 async function register() {
   const token = localStorage.getItem('token')
   if (!token) {
@@ -187,6 +288,11 @@ async function register() {
     router.push('/login')
     return
   }
+  if (!canRegister.value) {
+    ElMessage.warning(registerHint.value || '当前不可报名')
+    return
+  }
+  if (registered.value) return
   
   registering.value = true
   try {
@@ -195,14 +301,47 @@ async function register() {
       channel: 'web' 
     })
     if (data.code === 0) {
+      registered.value = true
       ElMessage.success('报名成功！')
     } else {
+      if (typeof data.message === 'string' && data.message.includes('已报名')) {
+        registered.value = true
+      }
       ElMessage.error(data.message || '报名失败')
     }
   } catch (error) {
     ElMessage.error('报名失败，请稍后重试')
   } finally {
     registering.value = false
+  }
+}
+
+async function activityCheckin() {
+  const token = localStorage.getItem('token')
+  if (!token) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+  if (!canCheckin.value) {
+    ElMessage.warning(checkinHint.value || '当前不可签到')
+    return
+  }
+  if (checkedIn.value) return
+
+  checkingIn.value = true
+  try {
+    const { data } = await api.post('/user/activity-checkin', { activityId: Number(route.params.id) })
+    if (data.code === 0) {
+      checkedIn.value = true
+      ElMessage.success('签到成功！')
+    } else {
+      ElMessage.error(data.message || '签到失败')
+    }
+  } catch (error) {
+    ElMessage.error('签到失败，请稍后重试')
+  } finally {
+    checkingIn.value = false
   }
 }
 
@@ -419,6 +558,12 @@ onMounted(async () => {
 .action-section {
   text-align: center;
   padding: 24px 0;
+}
+
+.checkin-hint {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #909399;
 }
 
 /* Media links styling */

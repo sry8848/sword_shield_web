@@ -10,7 +10,7 @@ import Articles from './pages/Articles.vue'
 import ArticleDetail from './pages/ArticleDetail.vue'
 import ArticleLive from './pages/ArticleLive.vue'
 import Profile from './pages/Profile.vue'
-import Checkin from './pages/Checkin.vue'
+import Points from './pages/Points.vue'
 import Statistics from './pages/Statistics.vue'
 import UGCSubmit from './pages/UGCSubmit.vue'
 import AdminLogin from './pages/admin/AdminLogin.vue'
@@ -37,7 +37,8 @@ const routes = [
   { path: '/article/:id', component: ArticleDetail },
   { path: '/article/:id/live', component: ArticleLive },
   { path: '/profile', component: Profile },
-  { path: '/checkin', component: Checkin },
+  { path: '/checkin', redirect: '/points' },
+  { path: '/points', component: Points },
   { path: '/statistics', component: Statistics },
   { path: '/exhibitors', component: Exhibitors },
   { path: '/achievements', component: Achievements },
