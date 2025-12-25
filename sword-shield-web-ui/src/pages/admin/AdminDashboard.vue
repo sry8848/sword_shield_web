@@ -22,6 +22,14 @@
             <el-icon><Calendar /></el-icon>
             <span>活动管理</span>
           </el-menu-item>
+          <el-menu-item index="articles">
+            <el-icon><Reading /></el-icon>
+            <span>资讯管理</span>
+          </el-menu-item>
+          <el-menu-item index="submissions">
+            <el-icon><EditPen /></el-icon>
+            <span>在线投稿</span>
+          </el-menu-item>
           <el-menu-item index="media">
             <el-icon><Picture /></el-icon>
             <span>媒体管理</span>
@@ -62,7 +70,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { HomeFilled, Calendar, Picture, Document, User, SwitchButton } from '@element-plus/icons-vue'
+import { HomeFilled, Calendar, Picture, Document, Reading, EditPen, User, SwitchButton } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -72,6 +80,8 @@ const adminNickname = ref(localStorage.getItem('adminNickname') || '')
 
 const activeMenu = computed(() => {
   if (route.path.includes('/admin/dashboard/activities')) return 'activities'
+  if (route.path.includes('/admin/dashboard/articles')) return 'articles'
+  if (route.path.includes('/admin/dashboard/submissions')) return 'submissions'
   if (route.path.includes('/admin/dashboard/media')) return 'media'
   if (route.path.includes('/admin/dashboard/materials')) return 'materials'
   return 'dashboard'
@@ -79,6 +89,8 @@ const activeMenu = computed(() => {
 
 const pageTitle = computed(() => {
   if (route.path.includes('/admin/dashboard/activities')) return '活动管理'
+  if (route.path.includes('/admin/dashboard/articles')) return '资讯管理'
+  if (route.path.includes('/admin/dashboard/submissions')) return '在线投稿'
   if (route.path.includes('/admin/dashboard/media')) return '媒体资产管理'
   if (route.path.includes('/admin/dashboard/materials')) return '资料管理'
   return '仪表盘'
@@ -89,6 +101,10 @@ function handleMenuSelect(index: string) {
     router.push('/admin/dashboard')
   } else if (index === 'activities') {
     router.push('/admin/dashboard/activities')
+  } else if (index === 'articles') {
+    router.push('/admin/dashboard/articles')
+  } else if (index === 'submissions') {
+    router.push('/admin/dashboard/submissions')
   } else if (index === 'media') {
     router.push('/admin/dashboard/media')
   } else if (index === 'materials') {

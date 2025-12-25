@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 public class ContentService {
@@ -40,6 +41,131 @@ public class ContentService {
         }
         // Only return published articles (status = 1 and publishedAt is not null)
         return articleRepo.findPublishedArticles(pageable);
+    }
+
+    public Page<ContentArticle> listAdminArticles(int page, int size, String category, Integer status, String excludeCategory) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "id"));
+
+        boolean hasCategory = category != null && !category.isBlank();
+        boolean hasStatus = status != null;
+        boolean hasExcludeCategory = excludeCategory != null && !excludeCategory.isBlank();
+
+        if (hasCategory && hasStatus) {
+            return articleRepo.findByStatusAndCategory(status, category, pageable);
+        }
+        if (hasStatus) {
+            if (hasExcludeCategory) {
+                return articleRepo.findByStatusAndCategoryNot(status, excludeCategory, pageable);
+            }
+            return articleRepo.findByStatus(status, pageable);
+        }
+        if (hasCategory) {
+            return articleRepo.findByCategory(category, pageable);
+        }
+        if (hasExcludeCategory) {
+            return articleRepo.findByCategoryNot(excludeCategory, pageable);
+        }
+        return articleRepo.findAll(pageable);
+    }
+
+    public ContentArticle createAdminArticle(ContentArticle input, String adminSubject) {
+        if (input == null) {
+            throw new IllegalArgumentException("参数不能为空");
+        }
+        if (input.getTitle() == null || input.getTitle().isBlank()) {
+            throw new IllegalArgumentException("标题不能为空");
+        }
+        if (input.getSummary() == null || input.getSummary().isBlank()) {
+            throw new IllegalArgumentException("摘要不能为空");
+        }
+        if (input.getBody() == null || input.getBody().isBlank()) {
+            throw new IllegalArgumentException("正文内容不能为空");
+        }
+
+        int status = input.getStatus();
+        if (status != 0 && status != 1) {
+            throw new IllegalArgumentException("状态非法，仅支持 0(草稿)/1(发布)");
+        }
+
+        ContentArticle a = new ContentArticle();
+        a.setTitle(input.getTitle());
+        a.setSummary(input.getSummary());
+        a.setBody(input.getBody());
+        a.setCoverUrl(input.getCoverUrl());
+        a.setCategory(Optional.ofNullable(input.getCategory()).filter(s -> !s.isBlank()).orElse("通用"));
+        a.setLiveUrl(input.getLiveUrl());
+        a.setReplayUrl(input.getReplayUrl());
+        a.setStatus(status);
+
+        String author = input.getAuthor();
+        if (author == null || author.isBlank()) {
+            author = adminSubject != null && adminSubject.startsWith("admin_") ? adminSubject.substring("admin_".length()) : adminSubject;
+        }
+        a.setAuthor(author);
+
+        if (status == 1) {
+            a.setPublishedAt(input.getPublishedAt() != null ? input.getPublishedAt() : Instant.now());
+        } else {
+            a.setPublishedAt(null);
+        }
+
+        return articleRepo.save(a);
+    }
+
+    public ContentArticle updateAdminArticle(Long id, ContentArticle input) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID 不能为空");
+        }
+        ContentArticle existing = articleRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found"));
+        if (input == null) {
+            throw new IllegalArgumentException("参数不能为空");
+        }
+        if (input.getTitle() == null || input.getTitle().isBlank()) {
+            throw new IllegalArgumentException("标题不能为空");
+        }
+        if (input.getSummary() == null || input.getSummary().isBlank()) {
+            throw new IllegalArgumentException("摘要不能为空");
+        }
+        if (input.getBody() == null || input.getBody().isBlank()) {
+            throw new IllegalArgumentException("正文内容不能为空");
+        }
+
+        int status = input.getStatus();
+        if (status != 0 && status != 1) {
+            throw new IllegalArgumentException("状态非法，仅支持 0(草稿)/1(发布)");
+        }
+
+        existing.setTitle(input.getTitle());
+        existing.setSummary(input.getSummary());
+        existing.setBody(input.getBody());
+        existing.setCoverUrl(input.getCoverUrl());
+        existing.setCategory(Optional.ofNullable(input.getCategory()).filter(s -> !s.isBlank()).orElse("通用"));
+        existing.setLiveUrl(input.getLiveUrl());
+        existing.setReplayUrl(input.getReplayUrl());
+        existing.setAuthor(input.getAuthor());
+        existing.setStatus(status);
+
+        if (status == 1) {
+            if (input.getPublishedAt() != null) {
+                existing.setPublishedAt(input.getPublishedAt());
+            } else if (existing.getPublishedAt() == null) {
+                existing.setPublishedAt(Instant.now());
+            }
+        } else {
+            existing.setPublishedAt(null);
+        }
+
+        return articleRepo.save(existing);
+    }
+
+    public void deleteAdminArticle(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID 不能为空");
+        }
+        if (!articleRepo.existsById(id)) {
+            throw new IllegalArgumentException("not found");
+        }
+        articleRepo.deleteById(id);
     }
 
     public ContentArticle submitArticle(String title, String summary, String body, String coverUrl, String authorCategory) {

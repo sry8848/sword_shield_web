@@ -19,6 +19,8 @@ import AdminHome from './pages/admin/AdminHome.vue'
 import AdminActivities from './pages/admin/AdminActivities.vue'
 import AdminMedia from './pages/admin/AdminMedia.vue'
 import AdminMaterials from './pages/admin/AdminMaterials.vue'
+import AdminArticles from './pages/admin/AdminArticles.vue'
+import AdminSubmissions from './pages/admin/AdminSubmissions.vue'
 import Exhibitors from './pages/Exhibitors.vue'
 import Achievements from './pages/Achievements.vue'
 import Materials from './pages/Materials.vue'
@@ -49,6 +51,8 @@ const routes = [
     children: [
       { path: '', component: AdminHome },
       { path: 'activities', component: AdminActivities },
+      { path: 'articles', component: AdminArticles },
+      { path: 'submissions', component: AdminSubmissions },
       { path: 'media', component: AdminMedia },
       { path: 'materials', component: AdminMaterials }
     ]
