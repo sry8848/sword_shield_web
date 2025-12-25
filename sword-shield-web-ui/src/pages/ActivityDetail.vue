@@ -148,22 +148,12 @@ function openLink(url: string) {
 
 function enterLive(url: string) {
   if (!url) return
-  const maybeMp4 = url.toLowerCase().includes('.mp4')
-  if (maybeMp4) {
-    router.push(`/activity/${route.params.id}/live?mode=live`)
-    return
-  }
-  openLink(url)
+  router.push(`/activity/${route.params.id}/live?mode=live`)
 }
 
 function enterReplay(url: string) {
   if (!url) return
-  const maybeMp4 = url.toLowerCase().includes('.mp4')
-  if (maybeMp4) {
-    router.push(`/activity/${route.params.id}/live?mode=replay`)
-    return
-  }
-  openLink(url)
+  router.push(`/activity/${route.params.id}/live?mode=replay`)
 }
 
 async function load() {

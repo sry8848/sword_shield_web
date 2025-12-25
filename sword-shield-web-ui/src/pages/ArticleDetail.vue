@@ -27,7 +27,7 @@
               <h4>直播链接</h4>
               <p>点击进入直播间</p>
             </div>
-            <el-button type="danger" @click="openLink(item.liveUrl)" round>
+            <el-button type="danger" @click="enterLive(item.liveUrl)" round>
               进入直播 →
             </el-button>
           </el-card>
@@ -38,7 +38,7 @@
               <h4>回放链接</h4>
               <p>观看录播回放</p>
             </div>
-            <el-button type="primary" @click="openLink(item.replayUrl)" round>
+            <el-button type="primary" @click="enterReplay(item.replayUrl)" round>
               观看回放 →
             </el-button>
           </el-card>
@@ -218,6 +218,16 @@ function openLink(url: string) {
   if (url) {
     window.open(url, '_blank')
   }
+}
+
+function enterLive(url: string) {
+  if (!url) return
+  router.push(`/article/${route.params.id}/live?mode=live`)
+}
+
+function enterReplay(url: string) {
+  if (!url) return
+  router.push(`/article/${route.params.id}/live?mode=replay`)
 }
 
 async function load() {

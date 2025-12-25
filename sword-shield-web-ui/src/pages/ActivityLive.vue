@@ -36,9 +36,10 @@
       <div v-else class="player">
         <div class="player-shell">
           <video
+            v-if="renderKind === 'video'"
             ref="videoEl"
             class="video"
-            :src="videoSrc"
+            :src="playUrl"
             :controls="mode === 'replay'"
             :muted="muted"
             autoplay
@@ -51,6 +52,17 @@
             @pause="onPause"
             @seeking="onSeeking"
             @ended="onEnded"
+            @error="onVideoError"
+          />
+
+          <iframe
+            v-else
+            class="video iframe"
+            :src="playUrl"
+            title="直播/回放"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+            referrerpolicy="no-referrer"
           />
 
           <div v-if="mode === 'live'" class="live-overlay">
@@ -61,24 +73,34 @@
             <div class="live-time">{{ liveTimeText }}</div>
           </div>
 
-          <div v-if="mode === 'live' && needsUserPlay" class="tap-to-play">
+          <div v-if="renderKind === 'video' && mode === 'live' && needsUserPlay" class="tap-to-play">
             <el-button type="danger" size="large" @click="forcePlay">
               点击开始播放
             </el-button>
             <div class="tap-hint">浏览器可能拦截了自动播放</div>
           </div>
+
+          <div v-if="renderKind === 'video' && videoError" class="tap-to-play">
+            <el-alert title="视频播放失败" type="error" show-icon :closable="false" />
+            <div class="tap-hint">{{ videoError }}</div>
+          </div>
         </div>
 
         <div class="controls-row">
-          <el-button v-if="mode === 'live'" type="danger" @click="forceSync">
+          <el-button v-if="mode === 'live' && renderKind === 'video'" type="danger" @click="forceSync">
             同步到直播进度
           </el-button>
-          <el-button @click="toggleMute">{{ muted ? '取消静音' : '静音' }}</el-button>
+          <el-button v-if="renderKind === 'video'" @click="toggleMute">{{ muted ? '取消静音' : '静音' }}</el-button>
+          <el-button v-if="playUrl" @click="openExternal">新窗口打开</el-button>
           <el-button @click="goBack">返回活动详情</el-button>
         </div>
 
-        <div v-if="mode === 'live'" class="note">
+        <div v-if="mode === 'live' && renderKind === 'video'" class="note">
           伪直播模式：进度会跟随当前时间，无法拖动进度条。
+        </div>
+
+        <div v-else-if="mode === 'live' && renderKind === 'iframe'" class="note">
+          外部直播页已内嵌；如无画面/被浏览器拦截，请点“新窗口打开”。
         </div>
       </div>
     </el-card>
@@ -108,6 +130,7 @@ const videoEl = ref<HTMLVideoElement | null>(null)
 const initialSeekDone = ref(false)
 const lastLiveSecond = ref<number | null>(null)
 const needsUserPlay = ref(false)
+const videoError = ref<string | null>(null)
 
 const liveUrl = computed(() => item.value?.liveUrl || '')
 const replayUrl = computed(() => item.value?.replayUrl || '')
@@ -191,6 +214,19 @@ const videoSrc = computed(() => {
   return liveUrl.value || replayUrl.value
 })
 
+function isLikelyVideoUrl(url: string) {
+  const u = url.toLowerCase()
+  return u.includes('.mp4') || u.includes('.m3u8') || u.includes('.webm') || u.includes('.ogg')
+}
+
+const renderKind = computed<'video' | 'iframe'>(() => {
+  const url = videoSrc.value
+  if (!url) return 'video'
+  return isLikelyVideoUrl(url) ? 'video' : 'iframe'
+})
+
+const playUrl = computed(() => videoSrc.value)
+
 function clampExpectedToDuration(rawExpected: number) {
   const el = videoEl.value
   if (!el) return rawExpected
@@ -206,6 +242,7 @@ function clampExpectedToDuration(rawExpected: number) {
 function applyPseudoLivePosition() {
   const el = videoEl.value
   if (!el) return
+  if (renderKind.value !== 'video') return
   if (mode.value !== 'live') return
   const target = clampExpectedToDuration(expectedSeconds.value)
   try {
@@ -218,11 +255,13 @@ function applyPseudoLivePosition() {
 function tryAutoPlay() {
   const el = videoEl.value
   if (!el) return
+  if (renderKind.value !== 'video') return
   const p = el.play()
   if (p && typeof (p as Promise<any>).catch === 'function') {
     ;(p as Promise<any>)
       .then(() => {
         needsUserPlay.value = false
+        videoError.value = null
       })
       .catch(() => {
         needsUserPlay.value = true
@@ -244,12 +283,18 @@ function toggleMute() {
   muted.value = !muted.value
 }
 
+function openExternal() {
+  if (!playUrl.value) return
+  window.open(playUrl.value, '_blank')
+}
+
 function goBack() {
   router.push(`/activity/${route.params.id}`)
 }
 
 function onLoadedMetadata() {
   initialSeekDone.value = false
+  videoError.value = null
   if (mode.value === 'live') {
     applyPseudoLivePosition()
     initialSeekDone.value = true
@@ -269,6 +314,7 @@ function onLoadedMetadata() {
 }
 
 function onPlay() {
+  videoError.value = null
   if (mode.value !== 'live') return
   if (!initialSeekDone.value) {
     applyPseudoLivePosition()
@@ -277,10 +323,12 @@ function onPlay() {
 }
 
 function onPlaying() {
+  videoError.value = null
   needsUserPlay.value = false
 }
 
 function onPause() {
+  if (renderKind.value !== 'video') return
   if (mode.value !== 'live') return
   const el = videoEl.value
   if (!el) return
@@ -289,14 +337,22 @@ function onPause() {
 }
 
 function onEnded() {
+  if (renderKind.value !== 'video') return
   if (mode.value === 'live') {
     ElMessage.info('视频已播完，等待切换到回放模式')
   }
 }
 
 function onSeeking() {
+  if (renderKind.value !== 'video') return
   if (mode.value !== 'live') return
   applyPseudoLivePosition()
+}
+
+function onVideoError() {
+  const el = videoEl.value
+  const code = el?.error?.code
+  videoError.value = `无法播放该视频（错误码 ${code ?? 'unknown'}）。可能是地址不可访问、CORS、或格式不受支持。`
 }
 
 let ticker: number | null = null
@@ -338,6 +394,7 @@ onMounted(async () => {
   }, 1000)
 
   resyncer = window.setInterval(() => {
+    if (renderKind.value !== 'video') return
     if (mode.value !== 'live') return
     const el = videoEl.value
     if (!el) return
@@ -470,6 +527,10 @@ onBeforeUnmount(() => {
   height: 520px;
   display: block;
   background: #000;
+}
+
+.iframe {
+  border: 0;
 }
 
 .live-overlay {
