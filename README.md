@@ -60,6 +60,9 @@ flowchart LR
   ADM --- MYSQL
   FILE --- MINIO
   CNT --- MQ
+  USER --- REDIS
+  ACT --- REDIS
+  CNT --- REDIS
 
   GW --- OBS
   USER --- OBS
@@ -81,6 +84,7 @@ flowchart LR
 - **注册发现与治理闭环**：Nacos 负责注册发现（可选配置中心）；Sentinel 支持网关/服务的限流与熔断，规则可持久化到 Nacos 并热更新。
 - **Dubbo 防误路由最佳实践**：Dubbo 使用独立 `application.name` + 独立 Nacos group；并提供 `traceContextFilter` 统一透传链路上下文。
 - **统一安全入口**：Gateway 集成 Spring Security（OAuth2 Resource Server）校验 JWT；内部服务只关注业务与鉴权信息透传。
+- **Redis 缓存与登录保护**：内容/活动读多写少接口走 Redis 缓存；登录支持失败次数锁定与按 IP/账号限速，缓解撞库/爆破。
 - **异步任务与幂等**：内容服务将“海报生成 + 上传”异步化（RocketMQ），具备削峰、失败重试与消费幂等（状态原子迁移）。
 - **对象存储能力**：MinIO 集成 + 预签名 URL，覆盖上传与访问的常见场景。
 - **可观测一键就绪**：Actuator + Micrometer 指标；Prometheus/Grafana；OTLP 链路追踪（Jaeger）；Logstash→Elasticsearch→Kibana 日志链路；并提供 Micrometer/Javaagent 双模式避免“双重埋点”。
@@ -104,7 +108,7 @@ flowchart LR
 - Prometheus + Grafana
 - OpenTelemetry（Micrometer OTLP 或 Javaagent）+ Jaeger
 - Elasticsearch + Logstash + Kibana（ELK）
-- RocketMQ、MinIO、Nacos、MySQL、Redis（可选）
+- RocketMQ、MinIO、Nacos、MySQL、Redis（缓存/登录保护）
 
 ## 模块与接口前缀
 | 模块 | 端口 | 网关路由前缀 | 说明 |
@@ -249,11 +253,13 @@ npm run dev
 ### 常用环境变量（速查）
 - MySQL：`MYSQL_URL` / `MYSQL_USERNAME` / `MYSQL_PASSWORD`
 - Nacos：`NACOS_SERVER_ADDR` / `NACOS_CONFIG_ENABLED`
+- Redis：`REDIS_URL` / `REDIS_TIMEOUT`
 - Sentinel：`SENTINEL_DASHBOARD` / `SENTINEL_GROUP_ID`
 - JWT（网关）：`JWT_SECRET`
 - Tracing：`MANAGEMENT_TRACING_ENABLED` / `TRACING_SAMPLING_PROBABILITY` / `OTLP_TRACING_ENDPOINT`
 - Dubbo：`DUBBO_PORT` / `DUBBO_NACOS_GROUP` / `DUBBO_REGISTRY_ADDRESS` / `DUBBO_CONFIG_CENTER_ADDRESS` / `DUBBO_METADATA_REPORT_ADDRESS`
 - RocketMQ（海报任务）：`ROCKETMQ_NAME_SERVER` / `POSTER_MQ_ENABLED` / `POSTER_MQ_TOPIC` / `POSTER_PRESIGN_EXPIRE_SECONDS`
+- 登录保护（用户服务）：`LOGIN_RATE_LIMIT_IP_PER_MIN` / `LOGIN_RATE_LIMIT_USER_PER_MIN` / `LOGIN_LOCK_USER_MAX_FAILURES` / `LOGIN_LOCK_USER_LOCK_SECONDS` / `LOGIN_LOCK_IP_MAX_FAILURES` / `LOGIN_LOCK_IP_LOCK_SECONDS`
 
 ## 排错（Troubleshooting）
 ### Nacos 未发现实例 / 网关路由 404

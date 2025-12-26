@@ -5,11 +5,14 @@ import com.swordshield.activity.domain.ActivityRegistration;
 import com.swordshield.activity.repository.ActivityRegistrationRepository;
 import com.swordshield.activity.repository.ActivityRepository;
 import com.swordshield.api.activity.ActivityDto;
+import com.swordshield.common.PageResult;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 import java.util.Map;
 
@@ -33,6 +36,14 @@ public class ActivityService {
         return activityRepo.findByStatus(1, pageable);
     }
 
+    @Cacheable(cacheNames = "activity:list",
+            key = "'p=' + #page + ':s=' + #size + ':o=' + (#orderBy == null ? '' : #orderBy.trim())")
+    public PageResult<ActivityDto> listPublicActivities(int page, int size, String orderBy) {
+        Page<Activity> p = list(page, size, orderBy);
+        return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
+    }
+
+    @Cacheable(cacheNames = "activity:detail", key = "'id=' + #id")
     public ActivityDto detail(Long id) {
         return toDto(activityRepo.findById(id).orElseThrow(() ->
             new IllegalArgumentException("活动不存在")));
@@ -52,8 +63,8 @@ public class ActivityService {
         if (act.getStartTime() != null && !now.isBefore(act.getStartTime())) {
             throw new IllegalArgumentException("活动已开始，报名已截止");
         }
-        regRepo.findByActivityIdAndUserId(activityId, userId).ifPresent(r -> { 
-            throw new IllegalArgumentException("您已报名该活动，无需重复报名"); 
+        regRepo.findByActivityIdAndUserId(activityId, userId).ifPresent(r -> {
+            throw new IllegalArgumentException("您已报名该活动，无需重复报名");
         });
         long count = regRepo.countByActivityId(activityId);
         if (act.getMaxRegistrations() != null && count >= act.getMaxRegistrations()) {
@@ -70,7 +81,7 @@ public class ActivityService {
     public Map<String, Object> getStatistics(Long activityId) {
         Activity activity = activityRepo.findById(activityId).orElseThrow(() -> new IllegalArgumentException("活动不存在"));
         long registrationCount = regRepo.countByActivityId(activityId);
-        
+
         Map<String, Object> stats = new java.util.HashMap<>();
         stats.put("activityId", activityId);
         stats.put("activityTitle", activity.getTitle());
@@ -81,7 +92,7 @@ public class ActivityService {
         stats.put("startTime", activity.getStartTime());
         stats.put("endTime", activity.getEndTime());
         stats.put("location", activity.getLocation());
-        
+
         // Calculate registration rate
         if (activity.getMaxRegistrations() != null && activity.getMaxRegistrations() > 0) {
             double rate = (double) registrationCount / activity.getMaxRegistrations() * 100;
@@ -89,17 +100,17 @@ public class ActivityService {
         } else {
             stats.put("registrationRate", 0);
         }
-        
+
         return stats;
     }
 
     public java.util.List<Map<String, Object>> getAllStatistics() {
         java.util.List<Activity> activities = activityRepo.findAll(Sort.by(Sort.Direction.DESC, "heat"));
         java.util.List<Map<String, Object>> statsList = new java.util.ArrayList<>();
-        
+
         for (Activity activity : activities) {
             long registrationCount = regRepo.countByActivityId(activity.getId());
-            
+
             Map<String, Object> stats = new java.util.HashMap<>();
             stats.put("activityId", activity.getId());
             stats.put("activityTitle", activity.getTitle());
@@ -107,46 +118,46 @@ public class ActivityService {
             stats.put("maxRegistrations", activity.getMaxRegistrations());
             stats.put("heat", activity.getHeat());
             stats.put("startTime", activity.getStartTime());
-            
+
             if (activity.getMaxRegistrations() != null && activity.getMaxRegistrations() > 0) {
                 double rate = (double) registrationCount / activity.getMaxRegistrations() * 100;
                 stats.put("registrationRate", Math.round(rate * 100.0) / 100.0);
             } else {
                 stats.put("registrationRate", 0);
             }
-            
+
             statsList.add(stats);
         }
-        
+
         return statsList;
     }
 
     public Page<Map<String, Object>> getMyRegisteredActivities(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "registeredAt"));
         Page<ActivityRegistration> registrations = regRepo.findByUserId(userId, pageable);
-        
+
         // Get activity IDs
         java.util.List<Long> activityIds = registrations.getContent().stream()
             .map(ActivityRegistration::getActivityId)
             .toList();
-        
+
         // Fetch activities
         java.util.List<Activity> activities = activityRepo.findAllById(activityIds);
-        
+
         // Create a map for quick lookup
         java.util.Map<Long, Activity> activityMap = activities.stream()
             .collect(java.util.stream.Collectors.toMap(Activity::getId, a -> a));
-        
+
         // Create registration map for channel lookup
         java.util.Map<Long, ActivityRegistration> registrationMap = registrations.getContent().stream()
             .collect(java.util.stream.Collectors.toMap(ActivityRegistration::getActivityId, reg -> reg));
-        
+
         // Combine activity data with registration channel
         java.util.List<Map<String, Object>> result = registrations.getContent().stream()
             .map(reg -> {
                 Activity activity = activityMap.get(reg.getActivityId());
                 if (activity == null) return null;
-                
+
                 Map<String, Object> item = new java.util.HashMap<>();
                 item.put("id", activity.getId());
                 item.put("title", activity.getTitle());
@@ -164,12 +175,12 @@ public class ActivityService {
                 item.put("status", activity.getStatus());
                 item.put("registrationChannel", reg.getChannel());
                 item.put("registeredAt", reg.getRegisteredAt());
-                
+
                 return item;
             })
             .filter(item -> item != null)
             .toList();
-        
+
         return new org.springframework.data.domain.PageImpl<>(
             result,
             pageable,
@@ -208,3 +219,4 @@ public class ActivityService {
         return dto;
     }
 }
+

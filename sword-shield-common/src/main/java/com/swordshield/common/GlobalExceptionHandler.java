@@ -31,6 +31,11 @@ public class GlobalExceptionHandler {
         return Response.error(ErrorCode.FORBIDDEN, e.getMessage());
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public Response<Object> handleTooManyRequestsException(TooManyRequestsException e) {
+        return Response.error(ErrorCode.TOO_MANY_REQUESTS, e.getMessage());
+    }
+
     @ExceptionHandler(RemoteServiceException.class)
     public Response<Object> handleRemoteServiceException(RemoteServiceException e) {
         return Response.error(e.getCode(), e.getMessage());

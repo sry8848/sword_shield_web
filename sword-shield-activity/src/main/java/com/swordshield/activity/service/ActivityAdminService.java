@@ -3,6 +3,8 @@ package com.swordshield.activity.service;
 import com.swordshield.activity.domain.Activity;
 import com.swordshield.activity.repository.ActivityRepository;
 import com.swordshield.api.activity.ActivityDto;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,7 @@ public class ActivityAdminService {
                 new IllegalArgumentException("活动不存在")));
     }
 
+    @CacheEvict(cacheNames = "activity:list", allEntries = true)
     public ActivityDto create(ActivityDto activity) {
         Activity entity = new Activity();
         entity.setTitle(activity.getTitle());
@@ -71,6 +74,10 @@ public class ActivityAdminService {
         return toDto(activityRepo.save(entity));
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "activity:list", allEntries = true),
+            @CacheEvict(cacheNames = "activity:detail", key = "'id=' + #id")
+    })
     public ActivityDto update(Long id, ActivityDto activity) {
         Activity existing = activityRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("活动不存在"));
 
@@ -118,6 +125,10 @@ public class ActivityAdminService {
         return toDto(activityRepo.save(existing));
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "activity:list", allEntries = true),
+            @CacheEvict(cacheNames = "activity:detail", key = "'id=' + #id")
+    })
     public void delete(Long id) {
         Activity activity = activityRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("活动不存在"));
         activityRepo.delete(activity);

@@ -17,6 +17,9 @@ import com.swordshield.content.repository.ContentArticleRepository;
 import com.swordshield.content.repository.ExhibitorRepository;
 import com.swordshield.content.repository.MaterialRepository;
 import com.swordshield.content.repository.MediaAssetRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +44,8 @@ public class ContentService {
         this.mediaRepo = mediaRepo;
     }
 
+    @Cacheable(cacheNames = "content:articles",
+            key = "'p=' + #page + ':s=' + #size + ':c=' + (#category == null ? '' : #category.trim())")
     public PageResult<ContentArticleDto> listArticles(int page, int size, String category, String tags) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "publishedAt"));
         Page<ContentArticle> p;
@@ -79,6 +84,7 @@ public class ContentService {
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
+    @CacheEvict(cacheNames = "content:articles", allEntries = true)
     public ContentArticleDto createAdminArticle(AdminArticleUpsertRequest input, String adminSubject) {
         if (input == null) {
             throw new IllegalArgumentException("参数不能为空");
@@ -123,6 +129,10 @@ public class ContentService {
         return toDto(articleRepo.save(a));
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "content:articles", allEntries = true),
+            @CacheEvict(cacheNames = "content:article", key = "'id=' + #id")
+    })
     public ContentArticleDto updateAdminArticle(Long id, AdminArticleUpsertRequest input) {
         if (id == null) {
             throw new IllegalArgumentException("ID 不能为空");
@@ -169,6 +179,10 @@ public class ContentService {
         return toDto(articleRepo.save(existing));
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "content:articles", allEntries = true),
+            @CacheEvict(cacheNames = "content:article", key = "'id=' + #id")
+    })
     public void deleteAdminArticle(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("ID 不能为空");
@@ -200,36 +214,43 @@ public class ContentService {
         return toDto(articleRepo.save(a));
     }
 
+    @Cacheable(cacheNames = "content:article", key = "'id=' + #id")
     public ContentArticleDto articleDetail(Long id) {
         return toDto(articleRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
+    @Cacheable(cacheNames = "content:exhibitors", key = "'p=' + #page + ':s=' + #size")
     public PageResult<ExhibitorDto> listExhibitors(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size));
         Page<Exhibitor> p = exhibitorRepo.findAll(pageable);
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
+    @Cacheable(cacheNames = "content:exhibitor", key = "'id=' + #id")
     public ExhibitorDto exhibitorDetail(Long id) {
         return toDto(exhibitorRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
+    @Cacheable(cacheNames = "content:achievements", key = "'p=' + #page + ':s=' + #size")
     public PageResult<AchievementDto> listAchievements(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size));
         Page<Achievement> p = achievementRepo.findAll(pageable);
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
+    @Cacheable(cacheNames = "content:achievement", key = "'id=' + #id")
     public AchievementDto achievementDetail(Long id) {
         return toDto(achievementRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
+    @Cacheable(cacheNames = "content:materials", key = "'p=' + #page + ':s=' + #size")
     public PageResult<MaterialDto> listMaterials(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Material> p = materialRepo.findAll(pageable);
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
+    @CacheEvict(cacheNames = "content:materials", allEntries = true)
     public MaterialDto createMaterial(String title, String speaker, String objectName, String contentType, long size) {
         if (title == null || title.isBlank()) { throw new IllegalArgumentException("标题不能为空"); }
         if (objectName == null || objectName.isBlank()) { throw new IllegalArgumentException("文件对象名不能为空"); }
@@ -243,10 +264,15 @@ public class ContentService {
         return toDto(materialRepo.save(m));
     }
 
+    @Cacheable(cacheNames = "content:material", key = "'id=' + #id")
     public MaterialDto materialDetail(Long id) {
         return toDto(materialRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "content:materials", allEntries = true),
+            @CacheEvict(cacheNames = "content:material", key = "'id=' + #id")
+    })
     public void deleteMaterial(Long id) {
         if (!materialRepo.existsById(id)) {
             throw new IllegalArgumentException("not found");
@@ -254,6 +280,7 @@ public class ContentService {
         materialRepo.deleteById(id);
     }
 
+    @Cacheable(cacheNames = "content:media", key = "'p=' + #page + ':s=' + #size + ':t=' + (#type == null ? '' : #type.trim())")
     public PageResult<MediaAssetDto> listMedia(int page, int size, String type) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<MediaAsset> p;
@@ -265,6 +292,10 @@ public class ContentService {
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "content:media", allEntries = true),
+            @CacheEvict(cacheNames = "content:mediaByArticle", allEntries = true)
+    })
     public MediaAssetDto createMedia(String title, String summary, String type, String objectName, String coverUrl) {
         if (title == null || title.isBlank()) { throw new IllegalArgumentException("标题不能为空"); }
         if (objectName == null || objectName.isBlank()) { throw new IllegalArgumentException("媒体对象名不能为空"); }
@@ -278,6 +309,10 @@ public class ContentService {
         return toDto(mediaRepo.save(a));
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "content:media", allEntries = true),
+            @CacheEvict(cacheNames = "content:mediaByArticle", key = "'articleId=' + #articleId")
+    })
     public MediaAssetDto createMedia(String title, String summary, String type, String objectName, String coverUrl, Long articleId) {
         if (title == null || title.isBlank()) { throw new IllegalArgumentException("标题不能为空"); }
         if (objectName == null || objectName.isBlank()) { throw new IllegalArgumentException("媒体对象名不能为空"); }
@@ -292,14 +327,21 @@ public class ContentService {
         return toDto(mediaRepo.save(a));
     }
 
+    @Cacheable(cacheNames = "content:mediaByArticle", key = "'articleId=' + #articleId")
     public java.util.List<MediaAssetDto> getMediaByArticleId(Long articleId) {
         return mediaRepo.findByArticleId(articleId).stream().map(this::toDto).toList();
     }
 
+    @Cacheable(cacheNames = "content:mediaItem", key = "'id=' + #id")
     public MediaAssetDto mediaDetail(Long id) {
         return toDto(mediaRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "content:media", allEntries = true),
+            @CacheEvict(cacheNames = "content:mediaByArticle", allEntries = true),
+            @CacheEvict(cacheNames = "content:mediaItem", key = "'id=' + #id")
+    })
     public void deleteMedia(Long id) {
         if (!mediaRepo.existsById(id)) {
             throw new IllegalArgumentException("not found");

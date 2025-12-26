@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/user")
@@ -41,8 +42,10 @@ public class UserController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "登录信息，包含 username / password",
                     required = true,
                     content = @Content(schema = @Schema(example = "{\"username\":\"demo\",\"password\":\"123456\"}")))
-            @RequestBody LoginRequest body) {
-        return Response.ok(service.login(body.getUsername(), body.getPassword()));
+            @RequestBody LoginRequest body,
+            HttpServletRequest request) {
+        String clientIp = resolveClientIp(request);
+        return Response.ok(service.login(body.getUsername(), body.getPassword(), clientIp));
     }
 
     @GetMapping("/profile")
@@ -55,5 +58,17 @@ public class UserController {
     @Operation(summary = "更新用户资料", description = "修改昵称、性别、联系方式和头像")
     public Response<UserProfileDto> update(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "用户资料", required = true) @RequestBody UpdateUserProfileRequest body) {
         return Response.ok(service.updateProfile(body));
+    }
+
+    private String resolveClientIp(HttpServletRequest request) {
+        if (request == null) return null;
+        String xff = request.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isBlank()) {
+            int comma = xff.indexOf(',');
+            return (comma > 0 ? xff.substring(0, comma) : xff).trim();
+        }
+        String realIp = request.getHeader("X-Real-IP");
+        if (realIp != null && !realIp.isBlank()) return realIp.trim();
+        return request.getRemoteAddr();
     }
 }

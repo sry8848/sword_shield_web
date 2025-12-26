@@ -8,14 +8,19 @@ import com.swordshield.user.dto.UserProfileDto;
 import com.swordshield.user.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 
 @Service
 public class UserService {
     private final UserRepository repo;
+    private final LoginSecurityService loginSecurityService;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public UserService(UserRepository repo) { this.repo = repo; }
+    public UserService(UserRepository repo, LoginSecurityService loginSecurityService) {
+        this.repo = repo;
+        this.loginSecurityService = loginSecurityService;
+    }
 
     public void register(String username, String password, String confirmPassword) {
         if (username == null || password == null || confirmPassword == null) {
@@ -24,8 +29,8 @@ public class UserService {
         if (!password.equals(confirmPassword)) {
             throw new IllegalArgumentException("两次输入的密码不一致");
         }
-        repo.findByUsername(username).ifPresent(u -> { 
-            throw new IllegalArgumentException("用户名已存在，请换一个用户名"); 
+        repo.findByUsername(username).ifPresent(u -> {
+            throw new IllegalArgumentException("用户名已存在，请换一个用户名");
         });
         User u = new User();
         u.setUsername(username);
@@ -37,17 +42,31 @@ public class UserService {
         repo.save(u);
     }
 
-    public LoginResponse login(String username, String password) {
-        User u = repo.findByUsername(username).orElseThrow(() -> 
-            new IllegalArgumentException("用户名或密码错误"));
-        if (!encoder.matches(password, u.getPasswordHash())) {
-            throw new IllegalArgumentException("用户名或密码错误");
+    public LoginResponse login(String username, String password, String clientIp) {
+        loginSecurityService.beforeLogin(username, clientIp);
+
+        try {
+            if (username == null || username.isBlank() || password == null || password.isBlank()) {
+                throw new IllegalArgumentException("用户名或密码错误");
+            }
+
+            User u = repo.findByUsername(username).orElseThrow(() ->
+                new IllegalArgumentException("用户名或密码错误"));
+            if (!encoder.matches(password, u.getPasswordHash())) {
+                throw new IllegalArgumentException("用户名或密码错误");
+            }
+
+            String token = JwtUtil.generateToken(String.valueOf(u.getId()));
+            LoginResponse res = new LoginResponse();
+            res.setToken(token);
+            res.setUserId(String.valueOf(u.getId()));
+
+            loginSecurityService.onLoginSuccess(username);
+            return res;
+        } catch (IllegalArgumentException e) {
+            loginSecurityService.onLoginFailure(username, clientIp);
+            throw e;
         }
-        String token = JwtUtil.generateToken(String.valueOf(u.getId()));
-        LoginResponse res = new LoginResponse();
-        res.setToken(token);
-        res.setUserId(String.valueOf(u.getId()));
-        return res;
     }
 
     public UserProfileDto getProfile(Long id) {
@@ -84,3 +103,4 @@ public class UserService {
         return dto;
     }
 }
+

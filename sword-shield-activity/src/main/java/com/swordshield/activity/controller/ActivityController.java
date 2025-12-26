@@ -3,6 +3,7 @@ package com.swordshield.activity.controller;
 import com.swordshield.activity.dto.ActivityRegisterRequest;
 import com.swordshield.activity.service.ActivityService;
 import com.swordshield.common.AuthUtils;
+import com.swordshield.common.PageResult;
 import com.swordshield.common.Response;
 import com.swordshield.api.activity.ActivityDto;
 import org.springframework.data.domain.Page;
@@ -28,11 +29,11 @@ public class ActivityController {
     public Response<Map<String, Object>> list(@RequestParam(name = "page", defaultValue = "0") int page,
                                               @RequestParam(name = "size", defaultValue = "10") int size,
                                               @RequestParam(name = "orderBy", required = false) String orderBy) {
-        Page<ActivityDto> p = service.listDtoPage(page, size, orderBy);
+        PageResult<ActivityDto> p = service.listPublicActivities(page, size, orderBy);
         return Response.ok(Map.of(
-                "items", p.getContent(),
-                "total", p.getTotalElements(),
-                "page", p.getNumber(),
+                "items", p.getItems(),
+                "total", p.getTotal(),
+                "page", p.getPage(),
                 "size", p.getSize()
         ));
     }
