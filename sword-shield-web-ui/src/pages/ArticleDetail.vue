@@ -396,8 +396,14 @@ async function share() {
     router.push('/login')
     return
   }
+  const previewWindow = window.open('', '_blank')
   sharing.value = true
   try {
+    if (previewWindow) {
+      previewWindow.document.title = '海报生成中...'
+      previewWindow.document.body.innerHTML = '<div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; padding: 28px; color: #0f172a;"><h2 style="margin: 0 0 10px;">海报生成中...</h2><p style="margin: 0; color: #475569;">请稍候，生成完成后会自动跳转。</p></div>'
+    }
+
     const url = window.location.href
     if (navigator.clipboard) {
       await navigator.clipboard.writeText(url)
@@ -417,13 +423,48 @@ async function share() {
     const params = new URLSearchParams()
     params.set('title', item.value?.title || '西湖论剑·资讯')
     params.set('subtitle', `来自 ${nickname} 的分享`)
-    const poster = await api.post('/content/poster', params, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-    const posterUrl = poster.data?.data
-    if (posterUrl) {
+    ElMessage.info('海报生成中，请稍候...')
+    const posterJob = await api.post('/content/poster', params, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+    if (posterJob.data.code !== 0) {
+      throw new Error(posterJob.data.message || '海报任务提交失败')
+    }
+    const jobId = posterJob.data?.data?.jobId
+    if (!jobId) {
+      throw new Error('海报任务返回 jobId 为空')
+    }
+
+    const start = Date.now()
+    let posterUrl = ''
+    while (Date.now() - start < 30_000) {
+      const { data: statusRes } = await api.get(`/content/poster/jobs/${jobId}`)
+      if (statusRes.code !== 0) {
+        throw new Error(statusRes.message || '查询海报任务失败')
+      }
+      const status = statusRes?.data?.status
+      if (status === 'SUCCESS') {
+        posterUrl = statusRes?.data?.url || ''
+        break
+      }
+      if (status === 'FAILED') {
+        throw new Error(statusRes?.data?.errorMessage || '海报生成失败')
+      }
+      await new Promise((r) => setTimeout(r, 1000))
+    }
+    if (!posterUrl) {
+      throw new Error('海报生成超时，请稍后重试')
+    }
+
+    if (previewWindow) {
+      previewWindow.location.href = posterUrl
+    } else {
       window.open(posterUrl, '_blank')
     }
-  } catch (error) {
-    ElMessage.error('分享失败，请稍后重试')
+  } catch (error: any) {
+    if (previewWindow) {
+      previewWindow.document.title = '海报生成失败'
+      previewWindow.document.body.innerHTML = '<div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; padding: 28px; color: #0f172a;"><h2 style="margin: 0 0 10px;">海报生成失败</h2><p style="margin: 0; color: #475569;">请返回页面重试。</p></div>'
+    }
+    ElMessage.error(error?.message || '分享失败，请稍后重试')
   } finally {
     sharing.value = false
   }

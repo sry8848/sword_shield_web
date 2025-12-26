@@ -39,6 +39,90 @@ services:
     volumes:
       - ./data/redis:/data
 
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.4
+    platform: linux/amd64
+    container_name: ss_rocketmq_namesrv
+    ports:
+      - "9876:9876"
+    command: sh mqnamesrv
+    restart: always
+
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.4
+    platform: linux/amd64
+    container_name: ss_rocketmq_broker
+    user: root
+    ports:
+      - "8081:8082"
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    depends_on:
+      - rocketmq-namesrv
+    volumes:
+      - rocketmq_store:/home/rocketmq/store
+      - ./scripts/rocketmq/broker.conf:/home/rocketmq/broker.conf.template:ro
+      - ./scripts/rocketmq/start-broker.sh:/home/rocketmq/start-broker.sh:ro
+    environment:
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      # Broker advertised address.
+      # For local dev with this compose, the default 127.0.0.1 works (Dashboard shares broker network namespace).
+      # If RocketMQ clients run in other containers / other machines, set this to a host-reachable IP.
+      ROCKETMQ_BROKER_IP1: ${ROCKETMQ_BROKER_IP1:-127.0.0.1}
+      # RocketMQ blocks send when disk usage exceeds this ratio (default 75). Local dev machines may need higher.
+      ROCKETMQ_DISK_MAX_USED_SPACE_RATIO: ${ROCKETMQ_DISK_MAX_USED_SPACE_RATIO:-98}
+      ROCKETMQ_DISK_SPACE_WARNING_LEVEL_RATIO: ${ROCKETMQ_DISK_SPACE_WARNING_LEVEL_RATIO:-98}
+      ROCKETMQ_DISK_SPACE_CLEAN_FORCIBLY_RATIO: ${ROCKETMQ_DISK_SPACE_CLEAN_FORCIBLY_RATIO:-97}
+    command: sh /home/rocketmq/start-broker.sh
+    restart: always
+
+  rocketmq-dashboard:
+    image: apacherocketmq/rocketmq-dashboard:2.1.0
+    platform: linux/amd64
+    container_name: ss_rocketmq_dashboard
+    # Dashboard needs to connect to broker by the address registered in NameServer.
+    # When broker registers as 127.0.0.1 (common for local dev), a normal dashboard container would try to connect to itself.
+    # Sharing network with broker makes 127.0.0.1 point to the broker container network namespace.
+    network_mode: "service:rocketmq-broker"
+    depends_on:
+      - rocketmq-namesrv
+      - rocketmq-broker
+    environment:
+      JAVA_OPTS: >-
+        -Drocketmq.config.namesrvAddr=rocketmq-namesrv:9876
+        -Drocketmq.config.isVIPChannel=false
+    restart: always
+
+  rocketmq-init:
+    image: apache/rocketmq:5.3.4
+    platform: linux/amd64
+    container_name: ss_rocketmq_init
+    depends_on:
+      - rocketmq-namesrv
+      - rocketmq-broker
+    environment:
+      ROCKETMQ_INIT_TOPIC: ${POSTER_MQ_TOPIC:-sword-shield-poster-jobs}
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -e
+        topic="$$ROCKETMQ_INIT_TOPIC"
+        echo "initializing rocketmq topic: $$topic"
+        i=1
+        while [ "$$i" -le 30 ]; do
+          if /home/rocketmq/rocketmq-5.3.4/bin/mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t "$$topic" -r 4 -w 4 >/dev/null 2>&1; then
+            echo "topic ready: $$topic"
+            exit 0
+          fi
+          i=$$((i + 1))
+          sleep 2
+        done
+        echo "failed to init topic: $$topic"
+        exit 1
+    restart: "no"
+
   minio:
     image: minio/minio:latest
     container_name: ss_minio
@@ -188,3 +272,6 @@ services:
     volumes:
       - ./scripts/sentinel/gateway-flow.json:/data/gateway-flow.json:ro
     restart: "no"
+
+volumes:
+  rocketmq_store:

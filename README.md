@@ -61,9 +61,16 @@
 ```sh
 docker-compose up -d
 ```
-将启动 MySQL、Nacos、Redis、MinIO、Elasticsearch+Logstash+Kibana、Jaeger + OTel Collector、Sentinel、Prometheus + Grafana。
+将启动 MySQL、Nacos、Redis、RocketMQ、MinIO、Elasticsearch+Logstash+Kibana、Jaeger + OTel Collector、Sentinel、Prometheus + Grafana。
 - MySQL：`root / 123456`，数据库 `sword_shield`，端口 `3306`
 - Nacos：`8848`
+- RocketMQ NameServer：`9876`（内容服务海报任务队列默认使用 `ROCKETMQ_NAME_SERVER=localhost:9876`）
+- RocketMQ Dashboard：`8081`（Web UI）
+  - 登录：用户名/密码 `rocketmq / 1234567`（HTTP Basic Auth）
+  - 说明：本 `docker-compose` 通过让 Dashboard 共享 Broker 的网络命名空间，默认 `ROCKETMQ_BROKER_IP1=127.0.0.1` 也能正常连接；如果你的 RocketMQ 客户端运行在其它容器/其它机器上，再把 `ROCKETMQ_BROKER_IP1` 设为宿主机可达 IP（如 `ipconfig getifaddr en0` 或 OrbStack 的 `ifconfig bridge101 | grep inet`）。
+  - 说明：若看到 `CODE: 14 service not available now ... disk is full`，可先清理磁盘，或临时提高 `ROCKETMQ_DISK_*` 相关阈值（例如 `ROCKETMQ_DISK_SPACE_WARNING_LEVEL_RATIO=98`、`ROCKETMQ_DISK_SPACE_CLEAN_FORCIBLY_RATIO=97`）。
+  - 说明：RocketMQ store 默认使用 Docker volume（`sword_shield_web_rocketmq_store`），避免 bind-mount 到宿主机时磁盘占用过高触发 broker 拒绝写入；如需重置可删除该 volume。
+  - 说明：`rocketmq-init` 会自动创建海报任务 Topic（默认 `sword-shield-poster-jobs`，可用 `POSTER_MQ_TOPIC` 覆盖）。
 - MinIO：`9000`（API）/ `9001`（Console），账号 `admin / admin123456`
 - OTel Collector：OTLP gRPC `4317` / HTTP `4318`
 - Jaeger UI：`16686`
@@ -108,9 +115,13 @@ mvn spring-boot:run -DskipTests
   - 数据库：`MYSQL_URL` / `MYSQL_USERNAME` / `MYSQL_PASSWORD`
   - 注册发现：`NACOS_SERVER_ADDR`
   - Sentinel：`SENTINEL_DASHBOARD` / `SENTINEL_GROUP_ID`
+  - RocketMQ：`ROCKETMQ_NAME_SERVER`（默认 `localhost:9876`）/ `ROCKETMQ_BROKER_IP1`（默认 `127.0.0.1`）
+  - RocketMQ（本地磁盘阈值）：`ROCKETMQ_DISK_MAX_USED_SPACE_RATIO` / `ROCKETMQ_DISK_SPACE_WARNING_LEVEL_RATIO` / `ROCKETMQ_DISK_SPACE_CLEAN_FORCIBLY_RATIO`（默认 `98/98/97`，仅用于本地开发环境避免磁盘占用过高时 broker 拒绝写入）
+  - 海报任务队列：`POSTER_MQ_ENABLED` / `POSTER_MQ_TOPIC` / `POSTER_PRESIGN_EXPIRE_SECONDS` / `POSTER_MQ_DISPATCH_*`（投递业务重试）
   - 时区：`APP_TIME_ZONE`（默认 `Asia/Shanghai`）
   - Tracing：`MANAGEMENT_TRACING_ENABLED` / `TRACING_SAMPLING_PROBABILITY` / `OTLP_TRACING_ENDPOINT`
-  - Dubbo：`DUBBO_PORT`（本地默认随机端口；K8s/生产建议固定如 `20880`）、`DUBBO_NACOS_GROUP`（默认 `DUBBO_GROUP`）
+  - Dubbo：`DUBBO_PORT`（本地默认随机端口；K8s/生产建议固定如 `20880`）、`DUBBO_NACOS_GROUP`（默认 `DUBBO_GROUP`）、`DUBBO_CONFIG_CENTER_ADDRESS`（默认空值关闭）
+  - Dubbo 元数据中心：`DUBBO_METADATA_REPORT_ADDRESS`（默认空值关闭，本地避免因 Nacos 未就绪导致启动失败）
 
 健康检查与指标：
 - 基本：`/actuator/health`、`/actuator/info`、`/actuator/prometheus`
@@ -164,6 +175,7 @@ npm run build    # 生产构建
 ## 常用控制台/可视化地址
 - MinIO 控制台：`http://localhost:9001/browser`（admin / admin123456）
 - Nacos 控制台：`http://127.0.0.1:8848/nacos`
+- RocketMQ Dashboard：`http://localhost:8081`（查看 Topic/Consumer Group/消息堆积等）
 - Sentinel Dashboard：`http://localhost:8858`（默认账号/密码 `sentinel/sentinel`）
 - Kibana（ES 可视化）：`http://127.0.0.1:5601`
 - 网关聚合 Swagger UI：`http://localhost:8080/swagger-ui.html`（汇总各服务 OpenAPI）

@@ -230,7 +230,13 @@
         </el-row>
       </el-form>
       <div v-if="posterUrl" class="poster-preview">
-        <img :src="posterUrl" alt="Generated Poster" />
+        <div class="poster-result">
+          <el-input v-model="posterUrl" readonly />
+          <div class="poster-result-actions">
+            <el-button type="primary" @click="openPoster">打开海报</el-button>
+            <el-button @click="copyPosterUrl">复制链接</el-button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -267,9 +273,12 @@
 import Activities from './Activities.vue'
 import Articles from './Articles.vue'
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../api'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
+
+const router = useRouter()
 
 const title = ref('西湖论剑')
 const subtitle = ref('数字安全大会')
@@ -393,6 +402,11 @@ async function loadMyActivities() {
 }
 
 async function generatePoster() {
+  if (!isLoggedIn.value) {
+    ElMessage.warning('请先登录后生成海报')
+    router.push('/login')
+    return
+  }
   if (!title.value.trim()) {
     ElMessage.warning('请输入海报标题')
     return
@@ -401,17 +415,57 @@ async function generatePoster() {
   generating.value = true
   try {
     const params = new URLSearchParams({ title: title.value, subtitle: subtitle.value })
-    const { data } = await api.post('/content/poster', params)
-    if (data.code === 0) {
-      posterUrl.value = data.data
-      ElMessage.success('海报生成成功')
-    } else {
-      ElMessage.error(data.message || '生成失败')
+    posterUrl.value = ''
+    ElMessage.info('海报生成中，请稍候...')
+
+    const { data: createRes } = await api.post('/content/poster', params)
+    if (createRes.code !== 0) {
+      throw new Error(createRes.message || '海报任务提交失败')
     }
-  } catch (error) {
-    ElMessage.error('生成失败，请稍后重试')
+    const jobId = createRes?.data?.jobId
+    if (!jobId) {
+      throw new Error('海报任务返回 jobId 为空')
+    }
+
+    const start = Date.now()
+    while (Date.now() - start < 30_000) {
+      const { data: statusRes } = await api.get(`/content/poster/jobs/${jobId}`)
+      if (statusRes.code !== 0) {
+        throw new Error(statusRes.message || '查询海报任务失败')
+      }
+      const status = statusRes?.data?.status
+      if (status === 'SUCCESS') {
+        posterUrl.value = statusRes?.data?.url || ''
+        break
+      }
+      if (status === 'FAILED') {
+        throw new Error(statusRes?.data?.errorMessage || '海报生成失败')
+      }
+      await new Promise((r) => setTimeout(r, 1000))
+    }
+    if (!posterUrl.value) {
+      throw new Error('海报生成超时，请稍后重试')
+    }
+    ElMessage.success('海报生成成功')
+  } catch (error: any) {
+    ElMessage.error(error?.message || '生成失败，请稍后重试')
   } finally {
     generating.value = false
+  }
+}
+
+function openPoster() {
+  if (!posterUrl.value) return
+  window.open(posterUrl.value, '_blank')
+}
+
+async function copyPosterUrl() {
+  if (!posterUrl.value) return
+  try {
+    await navigator.clipboard.writeText(posterUrl.value)
+    ElMessage.success('已复制链接')
+  } catch (e) {
+    ElMessage.error('复制失败，请手动复制')
   }
 }
 
@@ -675,16 +729,23 @@ onMounted(() => {
 
 .poster-preview {
   margin-top: 16px;
+  padding: 14px;
+  background: #ffffff;
   border-radius: 14px;
-  overflow: hidden;
   border: 1px solid rgba(209, 213, 219, 0.9);
   box-shadow: 0 12px 30px rgba(148, 163, 184, 0.45);
 }
 
-.poster-preview img {
-  display: block;
-  width: 100%;
-  height: auto;
+.poster-result {
+  display: grid;
+  gap: 12px;
+}
+
+.poster-result-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .feature-section {

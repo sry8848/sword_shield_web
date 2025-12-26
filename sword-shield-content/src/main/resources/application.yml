@@ -12,3 +12,24 @@ springdoc:
 file:
   service:
     authorization:
+
+app:
+  poster:
+    presign-expire-seconds: ${POSTER_PRESIGN_EXPIRE_SECONDS:600}
+    mq:
+      enabled: ${POSTER_MQ_ENABLED:true}
+      name-server: ${ROCKETMQ_NAME_SERVER:localhost:9876}
+      topic: ${POSTER_MQ_TOPIC:sword-shield-poster-jobs}
+      producer-group: ${POSTER_MQ_PRODUCER_GROUP:sword-shield-content-poster-producer}
+      consumer-group: ${POSTER_MQ_CONSUMER_GROUP:sword-shield-content-poster-consumer}
+      send-timeout-ms: ${POSTER_MQ_SEND_TIMEOUT_MS:5000}
+      send-retry-times: ${POSTER_MQ_SEND_RETRY_TIMES:5}
+      dispatch-retry:
+        # Business-level retry for dispatch (producer) failures. Consumption is idempotent by job status transition.
+        max-attempts: ${POSTER_MQ_DISPATCH_MAX_ATTEMPTS:10}
+        lock-ms: ${POSTER_MQ_DISPATCH_LOCK_MS:15000}
+        base-delay-ms: ${POSTER_MQ_DISPATCH_BASE_DELAY_MS:1000}
+        max-delay-ms: ${POSTER_MQ_DISPATCH_MAX_DELAY_MS:30000}
+        scheduler-delay-ms: ${POSTER_MQ_DISPATCH_SCHEDULER_DELAY_MS:2000}
+        scheduler-initial-delay-ms: ${POSTER_MQ_DISPATCH_SCHEDULER_INITIAL_DELAY_MS:2000}
+        batch-size: ${POSTER_MQ_DISPATCH_BATCH_SIZE:50}

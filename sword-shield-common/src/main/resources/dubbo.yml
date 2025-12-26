@@ -2,6 +2,16 @@ dubbo:
   application:
     # 避免与 Spring Cloud Nacos 的 serviceName（spring.application.name）冲突：Dubbo 使用独立应用名
     name: ${spring.application.name}-dubbo
+  config-center:
+    # Dubbo 配置中心默认关闭，避免在本地开发时因为 Nacos Config 不可用导致启动失败。
+    # 如需启用：设置 DUBBO_CONFIG_CENTER_ADDRESS=nacos://<nacos-addr>:8848
+    address: ${DUBBO_CONFIG_CENTER_ADDRESS:}
+    check: ${DUBBO_CONFIG_CENTER_CHECK:false}
+  metadata-report:
+    # Dubbo 元数据中心默认关闭（本地开发常见：Nacos 启动较慢/未启动会导致应用直接失败）。
+    # 如需启用：设置 DUBBO_METADATA_REPORT_ADDRESS=nacos://<nacos-addr>:8848
+    address: ${DUBBO_METADATA_REPORT_ADDRESS:}
+    check: ${DUBBO_METADATA_REPORT_CHECK:false}
   registry:
     # 默认复用 Spring Cloud Nacos 地址；K8s/生产可通过 DUBBO_REGISTRY_ADDRESS 覆盖
     # 通过 Nacos group 与 Spring Cloud 的 DEFAULT_GROUP 隔离，避免网关误把 Dubbo 实例当 HTTP 实例路由
