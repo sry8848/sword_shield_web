@@ -44,6 +44,11 @@ spring:
             rule-type: flow
 
 app:
+  http:
+    # Return real HTTP status code according to Response.code (e.g. 400/401/403/429/500),
+    # so that monitoring/alerts can rely on HTTP semantics.
+    use-status-code: true
+
   security:
     login:
       rate-limit:
@@ -58,3 +63,10 @@ app:
         ip-max-failures: ${LOGIN_LOCK_IP_MAX_FAILURES:30}
         ip-window-seconds: ${LOGIN_LOCK_IP_WINDOW_SECONDS:900}
         ip-lock-seconds: ${LOGIN_LOCK_IP_LOCK_SECONDS:900}
+
+  cache:
+    # Add random TTL jitter to mitigate cache avalanche (many keys expiring at once).
+    # 0.1 means +0~10% extra TTL per entry.
+    jitter-percent: ${CACHE_JITTER_PERCENT:0.1}
+    # TTL for caching "not found" results (cache penetration protection).
+    negative-ttl: ${CACHE_NEGATIVE_TTL:30s}

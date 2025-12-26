@@ -1,6 +1,7 @@
 package com.swordshield.content.service;
 
 import com.swordshield.common.PageResult;
+import com.swordshield.common.cache.CacheSupport;
 import com.swordshield.content.domain.Achievement;
 import com.swordshield.content.domain.ContentArticle;
 import com.swordshield.content.domain.Exhibitor;
@@ -17,6 +18,7 @@ import com.swordshield.content.repository.ContentArticleRepository;
 import com.swordshield.content.repository.ExhibitorRepository;
 import com.swordshield.content.repository.MaterialRepository;
 import com.swordshield.content.repository.MediaAssetRepository;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -35,13 +37,20 @@ public class ContentService {
     private final AchievementRepository achievementRepo;
     private final MaterialRepository materialRepo;
     private final MediaAssetRepository mediaRepo;
+    private final CacheManager cacheManager;
 
-    public ContentService(ContentArticleRepository articleRepo, ExhibitorRepository exhibitorRepo, AchievementRepository achievementRepo, MaterialRepository materialRepo, MediaAssetRepository mediaRepo) {
+    public ContentService(ContentArticleRepository articleRepo,
+                          ExhibitorRepository exhibitorRepo,
+                          AchievementRepository achievementRepo,
+                          MaterialRepository materialRepo,
+                          MediaAssetRepository mediaRepo,
+                          CacheManager cacheManager) {
         this.articleRepo = articleRepo;
         this.exhibitorRepo = exhibitorRepo;
         this.achievementRepo = achievementRepo;
         this.materialRepo = materialRepo;
         this.mediaRepo = mediaRepo;
+        this.cacheManager = cacheManager;
     }
 
     @Cacheable(cacheNames = "content:articles",
@@ -215,9 +224,10 @@ public class ContentService {
         return toDto(articleRepo.save(a));
     }
 
-    @Cacheable(cacheNames = "content:article", key = "'id=' + #id", sync = true)
     public ContentArticleDto articleDetail(Long id) {
-        return toDto(articleRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
+        return CacheSupport.getOptional(cacheManager, "content:article", "id=" + id,
+                () -> articleRepo.findById(id).map(this::toDto))
+                .orElseThrow(() -> new IllegalArgumentException("not found"));
     }
 
     @Cacheable(cacheNames = "content:exhibitors", key = "'p=' + #page + ':s=' + #size", sync = true)
@@ -227,9 +237,10 @@ public class ContentService {
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    @Cacheable(cacheNames = "content:exhibitor", key = "'id=' + #id", sync = true)
     public ExhibitorDto exhibitorDetail(Long id) {
-        return toDto(exhibitorRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
+        return CacheSupport.getOptional(cacheManager, "content:exhibitor", "id=" + id,
+                () -> exhibitorRepo.findById(id).map(this::toDto))
+                .orElseThrow(() -> new IllegalArgumentException("not found"));
     }
 
     @Cacheable(cacheNames = "content:achievements", key = "'p=' + #page + ':s=' + #size", sync = true)
@@ -239,9 +250,10 @@ public class ContentService {
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    @Cacheable(cacheNames = "content:achievement", key = "'id=' + #id", sync = true)
     public AchievementDto achievementDetail(Long id) {
-        return toDto(achievementRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
+        return CacheSupport.getOptional(cacheManager, "content:achievement", "id=" + id,
+                () -> achievementRepo.findById(id).map(this::toDto))
+                .orElseThrow(() -> new IllegalArgumentException("not found"));
     }
 
     @Cacheable(cacheNames = "content:materials", key = "'p=' + #page + ':s=' + #size", sync = true)
@@ -265,9 +277,10 @@ public class ContentService {
         return toDto(materialRepo.save(m));
     }
 
-    @Cacheable(cacheNames = "content:material", key = "'id=' + #id", sync = true)
     public MaterialDto materialDetail(Long id) {
-        return toDto(materialRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
+        return CacheSupport.getOptional(cacheManager, "content:material", "id=" + id,
+                () -> materialRepo.findById(id).map(this::toDto))
+                .orElseThrow(() -> new IllegalArgumentException("not found"));
     }
 
     @Caching(evict = {
@@ -335,9 +348,10 @@ public class ContentService {
         return mediaRepo.findByArticleId(articleId).stream().map(this::toDto).toList();
     }
 
-    @Cacheable(cacheNames = "content:mediaItem", key = "'id=' + #id", sync = true)
     public MediaAssetDto mediaDetail(Long id) {
-        return toDto(mediaRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
+        return CacheSupport.getOptional(cacheManager, "content:mediaItem", "id=" + id,
+                () -> mediaRepo.findById(id).map(this::toDto))
+                .orElseThrow(() -> new IllegalArgumentException("not found"));
     }
 
     @Caching(evict = {

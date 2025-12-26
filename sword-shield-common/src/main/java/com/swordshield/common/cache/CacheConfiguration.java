@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
@@ -21,6 +22,8 @@ import org.springframework.cache.annotation.EnableCaching;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Configuration
 @EnableCaching
@@ -49,34 +52,74 @@ public class CacheConfiguration {
     }
 
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory connectionFactory, RedisCacheConfiguration baseConfig) {
-        RedisCacheConfiguration defaultConfig = baseConfig.entryTtl(Duration.ofMinutes(5));
+    public CacheManager cacheManager(
+            RedisConnectionFactory connectionFactory,
+            RedisCacheConfiguration baseConfig,
+            @Value("${app.cache.jitter-percent:0.1}") double jitterPercent,
+            @Value("${app.cache.negative-ttl:30s}") Duration negativeTtl) {
+        double safeJitterPercent = clamp(jitterPercent, 0.0, 0.5);
+        RedisCacheConfiguration defaultConfig = baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(5), null, safeJitterPercent));
 
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
 
         // Content: list endpoints (short TTL)
-        cacheConfigs.put("content:articles", defaultConfig.entryTtl(Duration.ofSeconds(60)));
-        cacheConfigs.put("content:exhibitors", defaultConfig.entryTtl(Duration.ofMinutes(5)));
-        cacheConfigs.put("content:achievements", defaultConfig.entryTtl(Duration.ofMinutes(5)));
-        cacheConfigs.put("content:materials", defaultConfig.entryTtl(Duration.ofMinutes(2)));
-        cacheConfigs.put("content:media", defaultConfig.entryTtl(Duration.ofMinutes(2)));
-        cacheConfigs.put("content:mediaByArticle", defaultConfig.entryTtl(Duration.ofMinutes(2)));
+        cacheConfigs.put("content:articles", baseConfig.entryTtl(ttlWithJitter(Duration.ofSeconds(60), null, safeJitterPercent)));
+        cacheConfigs.put("content:exhibitors", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(5), null, safeJitterPercent)));
+        cacheConfigs.put("content:achievements", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(5), null, safeJitterPercent)));
+        cacheConfigs.put("content:materials", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(2), null, safeJitterPercent)));
+        cacheConfigs.put("content:media", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(2), null, safeJitterPercent)));
+        cacheConfigs.put("content:mediaByArticle", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(2), null, safeJitterPercent)));
 
         // Content: detail endpoints
-        cacheConfigs.put("content:article", defaultConfig.entryTtl(Duration.ofMinutes(5)));
-        cacheConfigs.put("content:exhibitor", defaultConfig.entryTtl(Duration.ofMinutes(10)));
-        cacheConfigs.put("content:achievement", defaultConfig.entryTtl(Duration.ofMinutes(10)));
-        cacheConfigs.put("content:material", defaultConfig.entryTtl(Duration.ofMinutes(10)));
-        cacheConfigs.put("content:mediaItem", defaultConfig.entryTtl(Duration.ofMinutes(10)));
+        cacheConfigs.put("content:article", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(5), negativeTtl, safeJitterPercent)));
+        cacheConfigs.put("content:exhibitor", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(10), negativeTtl, safeJitterPercent)));
+        cacheConfigs.put("content:achievement", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(10), negativeTtl, safeJitterPercent)));
+        cacheConfigs.put("content:material", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(10), negativeTtl, safeJitterPercent)));
+        cacheConfigs.put("content:mediaItem", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(10), negativeTtl, safeJitterPercent)));
 
         // Activity
-        cacheConfigs.put("activity:list", defaultConfig.entryTtl(Duration.ofSeconds(60)));
-        cacheConfigs.put("activity:detail", defaultConfig.entryTtl(Duration.ofMinutes(5)));
+        cacheConfigs.put("activity:list", baseConfig.entryTtl(ttlWithJitter(Duration.ofSeconds(60), null, safeJitterPercent)));
+        cacheConfigs.put("activity:detail", baseConfig.entryTtl(ttlWithJitter(Duration.ofMinutes(5), negativeTtl, safeJitterPercent)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigs)
                 .build();
+    }
+
+    private RedisCacheWriter.TtlFunction ttlWithJitter(Duration positiveTtl, Duration negativeTtl, double jitterPercent) {
+        Duration positive = positiveTtl == null ? Duration.ZERO : positiveTtl;
+        Duration negative = negativeTtl;
+        double safeJitterPercent = clamp(jitterPercent, 0.0, 0.5);
+
+        return (key, value) -> {
+            Duration base = isNegativeValue(value) && negative != null ? negative : positive;
+            if (base == null || base.isZero() || base.isNegative() || safeJitterPercent <= 0.0) {
+                return base;
+            }
+
+            long baseMillis = base.toMillis();
+            long jitterMillis = (long) (baseMillis * safeJitterPercent);
+            if (jitterMillis <= 0) {
+                return base;
+            }
+            long extraMillis = ThreadLocalRandom.current().nextLong(jitterMillis + 1);
+            return base.plusMillis(extraMillis);
+        };
+    }
+
+    private boolean isNegativeValue(Object value) {
+        if (value instanceof Optional<?> optional) {
+            return optional.isEmpty();
+        }
+        return false;
+    }
+
+    private double clamp(double value, double min, double max) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            return min;
+        }
+        return Math.max(min, Math.min(max, value));
     }
 
     @Bean

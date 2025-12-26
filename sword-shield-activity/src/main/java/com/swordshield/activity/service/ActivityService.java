@@ -6,12 +6,16 @@ import com.swordshield.activity.repository.ActivityRegistrationRepository;
 import com.swordshield.activity.repository.ActivityRepository;
 import com.swordshield.api.activity.ActivityDto;
 import com.swordshield.common.PageResult;
+import com.swordshield.common.cache.CacheSupport;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Map;
@@ -20,10 +24,12 @@ import java.util.Map;
 public class ActivityService {
     private final ActivityRepository activityRepo;
     private final ActivityRegistrationRepository regRepo;
+    private final CacheManager cacheManager;
 
-    public ActivityService(ActivityRepository activityRepo, ActivityRegistrationRepository regRepo) {
+    public ActivityService(ActivityRepository activityRepo, ActivityRegistrationRepository regRepo, CacheManager cacheManager) {
         this.activityRepo = activityRepo;
         this.regRepo = regRepo;
+        this.cacheManager = cacheManager;
     }
 
     public Page<Activity> list(int page, int size, String orderBy) {
@@ -44,16 +50,17 @@ public class ActivityService {
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    @Cacheable(cacheNames = "activity:detail", key = "'id=' + #id", sync = true)
     public ActivityDto detail(Long id) {
-        return toDto(activityRepo.findById(id).orElseThrow(() ->
-            new IllegalArgumentException("活动不存在")));
+        return CacheSupport.getOptional(cacheManager, "activity:detail", "id=" + id,
+                () -> activityRepo.findById(id).map(this::toDto))
+                .orElseThrow(() -> new IllegalArgumentException("活动不存在"));
     }
 
     public boolean isRegistered(Long userId, Long activityId) {
         return regRepo.findByActivityIdAndUserId(activityId, userId).isPresent();
     }
 
+    @Transactional
     public void register(Long userId, Long activityId, String channel) {
         Activity act = activityRepo.findById(activityId).orElseThrow(() ->
             new IllegalArgumentException("活动不存在"));
@@ -64,19 +71,25 @@ public class ActivityService {
         if (act.getStartTime() != null && !now.isBefore(act.getStartTime())) {
             throw new IllegalArgumentException("活动已开始，报名已截止");
         }
-        regRepo.findByActivityIdAndUserId(activityId, userId).ifPresent(r -> {
-            throw new IllegalArgumentException("您已报名该活动，无需重复报名");
-        });
-        long count = regRepo.countByActivityId(activityId);
-        if (act.getMaxRegistrations() != null && count >= act.getMaxRegistrations()) {
-            throw new IllegalArgumentException("活动报名人数已满");
-        }
         ActivityRegistration reg = new ActivityRegistration();
         reg.setActivityId(activityId);
         reg.setUserId(userId);
         reg.setChannel(channel == null ? "web" : channel);
         reg.setRegisteredAt(Instant.now());
-        regRepo.save(reg);
+        try {
+            regRepo.save(reg);
+            regRepo.flush();
+        } catch (DataIntegrityViolationException e) {
+            if (regRepo.findByActivityIdAndUserId(activityId, userId).isPresent()) {
+                throw new IllegalArgumentException("您已报名该活动，无需重复报名");
+            }
+            throw e;
+        }
+
+        int updated = activityRepo.incrementCurrentRegistrationsIfAvailable(activityId);
+        if (updated == 0) {
+            throw new IllegalArgumentException("活动报名人数已满");
+        }
     }
 
     public Map<String, Object> getStatistics(Long activityId) {
