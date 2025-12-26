@@ -3,6 +3,11 @@ package com.swordshield.gateway.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swordshield.common.ErrorCode;
 import com.swordshield.common.Response;
+import com.swordshield.common.TraceUtils;
+import com.swordshield.gateway.GatewayTraceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -21,10 +26,14 @@ import java.util.concurrent.TimeoutException;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
-    private final ObjectMapper objectMapper;
+    private static final Logger log = LoggerFactory.getLogger(GatewayErrorWebExceptionHandler.class);
 
-    public GatewayErrorWebExceptionHandler(ObjectMapper objectMapper) {
+    private final ObjectMapper objectMapper;
+    private final GatewayTraceContext traceContext;
+
+    public GatewayErrorWebExceptionHandler(ObjectMapper objectMapper, GatewayTraceContext traceContext) {
         this.objectMapper = objectMapper;
+        this.traceContext = traceContext;
     }
 
     @Override
@@ -35,6 +44,7 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
 
         HttpStatus status = resolveStatus(ex);
         String message = resolveMessage(ex, status);
+        logException(exchange, ex, status, message);
 
         Response<Object> body = Response.error(ErrorCode.fromHttpStatus(status.value()), message);
         byte[] bytes;
@@ -49,6 +59,44 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
         exchange.getResponse().getHeaders().setContentLength(bytes.length);
         return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(bytes)));
+    }
+
+    private void logException(ServerWebExchange exchange, Throwable ex, HttpStatus status, String message) {
+        String method = exchange.getRequest().getMethod() == null ? "?" : exchange.getRequest().getMethod().name();
+        String path = exchange.getRequest().getURI().getRawPath();
+
+        GatewayTraceContext.TraceInfo traceInfo = traceContext == null ? null : traceContext.ensureTraceInfo(exchange);
+        String traceId = traceInfo == null ? null : traceInfo.traceId();
+        boolean setTraceId = traceId != null && !traceId.isBlank() && MDC.get(TraceUtils.TRACE_ID_MDC_KEY) == null;
+        boolean setOtelTraceId = traceId != null && !traceId.isBlank() && MDC.get(TraceUtils.OTEL_TRACE_ID_MDC_KEY) == null;
+        if (setTraceId) {
+            MDC.put(TraceUtils.TRACE_ID_MDC_KEY, traceId);
+        }
+        if (setOtelTraceId) {
+            MDC.put(TraceUtils.OTEL_TRACE_ID_MDC_KEY, traceId);
+        }
+        try {
+            if (status.is5xxServerError()) {
+                log.error("GW {} {} -> {} {}", method, path, status.value(), message, ex);
+                return;
+            }
+            if (status == HttpStatus.TOO_MANY_REQUESTS) {
+                log.warn("GW {} {} -> {} {}", method, path, status.value(), message);
+                return;
+            }
+            if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
+                log.info("GW {} {} -> {}", method, path, status.value());
+                return;
+            }
+            log.warn("GW {} {} -> {} {}", method, path, status.value(), message);
+        } finally {
+            if (setOtelTraceId) {
+                MDC.remove(TraceUtils.OTEL_TRACE_ID_MDC_KEY);
+            }
+            if (setTraceId) {
+                MDC.remove(TraceUtils.TRACE_ID_MDC_KEY);
+            }
+        }
     }
 
     private HttpStatus resolveStatus(Throwable ex) {

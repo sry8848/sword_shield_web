@@ -45,8 +45,9 @@ public class ContentService {
     }
 
     @Cacheable(cacheNames = "content:articles",
-            key = "'p=' + #page + ':s=' + #size + ':c=' + (#category == null ? '' : #category.trim())")
-    public PageResult<ContentArticleDto> listArticles(int page, int size, String category, String tags) {
+            key = "'p=' + #page + ':s=' + #size + ':c=' + (#category == null ? '' : #category.trim())",
+            sync = true)
+    public PageResult<ContentArticleDto> listArticles(int page, int size, String category) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "publishedAt"));
         Page<ContentArticle> p;
         if (category != null && !category.isBlank()) {
@@ -214,36 +215,36 @@ public class ContentService {
         return toDto(articleRepo.save(a));
     }
 
-    @Cacheable(cacheNames = "content:article", key = "'id=' + #id")
+    @Cacheable(cacheNames = "content:article", key = "'id=' + #id", sync = true)
     public ContentArticleDto articleDetail(Long id) {
         return toDto(articleRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
-    @Cacheable(cacheNames = "content:exhibitors", key = "'p=' + #page + ':s=' + #size")
+    @Cacheable(cacheNames = "content:exhibitors", key = "'p=' + #page + ':s=' + #size", sync = true)
     public PageResult<ExhibitorDto> listExhibitors(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size));
         Page<Exhibitor> p = exhibitorRepo.findAll(pageable);
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    @Cacheable(cacheNames = "content:exhibitor", key = "'id=' + #id")
+    @Cacheable(cacheNames = "content:exhibitor", key = "'id=' + #id", sync = true)
     public ExhibitorDto exhibitorDetail(Long id) {
         return toDto(exhibitorRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
-    @Cacheable(cacheNames = "content:achievements", key = "'p=' + #page + ':s=' + #size")
+    @Cacheable(cacheNames = "content:achievements", key = "'p=' + #page + ':s=' + #size", sync = true)
     public PageResult<AchievementDto> listAchievements(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size));
         Page<Achievement> p = achievementRepo.findAll(pageable);
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    @Cacheable(cacheNames = "content:achievement", key = "'id=' + #id")
+    @Cacheable(cacheNames = "content:achievement", key = "'id=' + #id", sync = true)
     public AchievementDto achievementDetail(Long id) {
         return toDto(achievementRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
 
-    @Cacheable(cacheNames = "content:materials", key = "'p=' + #page + ':s=' + #size")
+    @Cacheable(cacheNames = "content:materials", key = "'p=' + #page + ':s=' + #size", sync = true)
     public PageResult<MaterialDto> listMaterials(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Material> p = materialRepo.findAll(pageable);
@@ -264,7 +265,7 @@ public class ContentService {
         return toDto(materialRepo.save(m));
     }
 
-    @Cacheable(cacheNames = "content:material", key = "'id=' + #id")
+    @Cacheable(cacheNames = "content:material", key = "'id=' + #id", sync = true)
     public MaterialDto materialDetail(Long id) {
         return toDto(materialRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }
@@ -280,7 +281,9 @@ public class ContentService {
         materialRepo.deleteById(id);
     }
 
-    @Cacheable(cacheNames = "content:media", key = "'p=' + #page + ':s=' + #size + ':t=' + (#type == null ? '' : #type.trim())")
+    @Cacheable(cacheNames = "content:media",
+            key = "'p=' + #page + ':s=' + #size + ':t=' + (#type == null ? '' : #type.trim())",
+            sync = true)
     public PageResult<MediaAssetDto> listMedia(int page, int size, String type) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<MediaAsset> p;
@@ -327,12 +330,12 @@ public class ContentService {
         return toDto(mediaRepo.save(a));
     }
 
-    @Cacheable(cacheNames = "content:mediaByArticle", key = "'articleId=' + #articleId")
+    @Cacheable(cacheNames = "content:mediaByArticle", key = "'articleId=' + #articleId", sync = true)
     public java.util.List<MediaAssetDto> getMediaByArticleId(Long articleId) {
         return mediaRepo.findByArticleId(articleId).stream().map(this::toDto).toList();
     }
 
-    @Cacheable(cacheNames = "content:mediaItem", key = "'id=' + #id")
+    @Cacheable(cacheNames = "content:mediaItem", key = "'id=' + #id", sync = true)
     public MediaAssetDto mediaDetail(Long id) {
         return toDto(mediaRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found")));
     }

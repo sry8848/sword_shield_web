@@ -37,13 +37,14 @@ public class ActivityService {
     }
 
     @Cacheable(cacheNames = "activity:list",
-            key = "'p=' + #page + ':s=' + #size + ':o=' + (#orderBy == null ? '' : #orderBy.trim())")
+            key = "'p=' + #page + ':s=' + #size + ':o=' + (#orderBy == null ? '' : #orderBy.trim())",
+            sync = true)
     public PageResult<ActivityDto> listPublicActivities(int page, int size, String orderBy) {
         Page<Activity> p = list(page, size, orderBy);
         return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
-    @Cacheable(cacheNames = "activity:detail", key = "'id=' + #id")
+    @Cacheable(cacheNames = "activity:detail", key = "'id=' + #id", sync = true)
     public ActivityDto detail(Long id) {
         return toDto(activityRepo.findById(id).orElseThrow(() ->
             new IllegalArgumentException("活动不存在")));
@@ -106,11 +107,22 @@ public class ActivityService {
 
     public java.util.List<Map<String, Object>> getAllStatistics() {
         java.util.List<Activity> activities = activityRepo.findAll(Sort.by(Sort.Direction.DESC, "heat"));
+
+        java.util.Map<Long, Long> registrationCountByActivityId = java.util.Collections.emptyMap();
+        java.util.List<Long> activityIds = activities.stream().map(Activity::getId).toList();
+        if (!activityIds.isEmpty()) {
+            registrationCountByActivityId = regRepo.countRegistrationsByActivityIds(activityIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                            ActivityRegistrationRepository.ActivityRegistrationCount::getActivityId,
+                            ActivityRegistrationRepository.ActivityRegistrationCount::getRegistrations
+                    ));
+        }
+
         java.util.List<Map<String, Object>> statsList = new java.util.ArrayList<>();
 
         for (Activity activity : activities) {
-            long registrationCount = regRepo.countByActivityId(activity.getId());
-
+            long registrationCount = registrationCountByActivityId.getOrDefault(activity.getId(), 0L);
+            
             Map<String, Object> stats = new java.util.HashMap<>();
             stats.put("activityId", activity.getId());
             stats.put("activityTitle", activity.getTitle());
@@ -219,4 +231,3 @@ public class ActivityService {
         return dto;
     }
 }
-
