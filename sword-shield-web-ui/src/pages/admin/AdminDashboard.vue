@@ -3,7 +3,9 @@
     <el-container>
       <el-aside width="250px" class="admin-sidebar">
         <div class="sidebar-header">
-          <div class="logo-mark">SS</div>
+          <div class="logo-mark">
+            <el-icon><DataBoard /></el-icon>
+          </div>
           <div class="sidebar-brand-text">
             <h3>西湖论剑</h3>
             <p>管理后台 · 西湖论剑</p>
@@ -70,7 +72,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { HomeFilled, Calendar, Picture, Document, Reading, EditPen, User, SwitchButton } from '@element-plus/icons-vue'
+import { HomeFilled, Calendar, Picture, Document, Reading, EditPen, User, SwitchButton, DataBoard } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -166,12 +168,13 @@ async function logout() {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: radial-gradient(circle at 30% 0, #2563eb, #38bdf8 35%, #eff6ff 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 18px;
+  font-size: 20px;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .sidebar-brand-text h3 {

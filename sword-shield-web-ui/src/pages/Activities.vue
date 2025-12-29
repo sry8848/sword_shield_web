@@ -161,7 +161,7 @@ onMounted(fetchList)
   width: 100%;
   height: 180px;
   overflow: hidden;
-  background: linear-gradient(135deg, #ff0050 0%, #00f2ea 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
 }
 
 .card-cover img {
@@ -250,15 +250,15 @@ onMounted(fetchList)
 }
 
 .minimal-link:hover {
-  background: rgba(102, 126, 234, 0.1);
-  color: #ff0050;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
 }
 
 .minimal-link .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ff0050;
+  background: #2563eb;
   flex-shrink: 0;
 }
 

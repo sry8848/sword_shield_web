@@ -195,7 +195,7 @@ onMounted(() => {
 .page-title {
   font-size: 42px;
   font-weight: bold;
-  background: linear-gradient(135deg, #ff0050 0%, #00f2ea 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -206,7 +206,7 @@ onMounted(() => {
 }
 
 .title-icon {
-  color: #ff0050;
+  color: #2563eb;
   -webkit-text-fill-color: initial;
 }
 
@@ -266,7 +266,7 @@ onMounted(() => {
 .thumbnail-image {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -275,7 +275,7 @@ onMounted(() => {
 .thumbnail-video {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
   display: flex;
   align-items: center;
   justify-content: center;

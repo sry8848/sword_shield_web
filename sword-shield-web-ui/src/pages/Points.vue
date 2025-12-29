@@ -163,9 +163,9 @@ onMounted(reload)
   display: flex;
   align-items: center;
   padding: 22px 44px;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
   border-radius: 16px;
-  border: 2px solid #ff0050;
+  border: 2px solid #2563eb;
 }
 
 .points-info {
@@ -183,7 +183,7 @@ onMounted(reload)
 .points-value {
   font-size: 36px;
   font-weight: bold;
-  background: linear-gradient(135deg, #ff0050 0%, #00f2ea 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

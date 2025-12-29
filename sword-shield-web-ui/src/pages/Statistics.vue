@@ -231,19 +231,19 @@ onMounted(() => {
 }
 
 .stat-box-1 .stat-icon {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
 }
 
 .stat-box-2 .stat-icon {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
 }
 
 .stat-box-3 .stat-icon {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
 }
 
 .stat-box-4 .stat-icon {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
 }
 
 .stat-icon {
