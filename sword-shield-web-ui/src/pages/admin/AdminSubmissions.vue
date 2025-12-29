@@ -7,10 +7,10 @@
           <el-select
             v-model="filters.status"
             placeholder="状态"
-            clearable
             style="width: 120px"
             @change="reload"
           >
+            <el-option label="全部" :value="-1" />
             <el-option label="待审核" :value="0" />
             <el-option label="已发布" :value="1" />
           </el-select>
@@ -137,8 +137,8 @@ const total = ref(0)
 const pageSize = ref(10)
 const currentPage = ref(1)
 
-const filters = reactive<{ status: number | null }>({
-  status: 0
+const filters = reactive<{ status: number }>({
+  status: -1
 })
 
 const detailVisible = ref(false)
@@ -165,7 +165,7 @@ async function fetchList() {
       size: pageSize.value,
       category: 'UGC'
     }
-    if (filters.status !== null) params.status = filters.status
+    if (filters.status !== -1) params.status = filters.status
 
     const { data } = await adminApi.get('/content/admin/articles', { params })
     if (data.code === 0) {
@@ -357,4 +357,3 @@ onMounted(() => {
   box-shadow: 0 12px 30px rgba(148, 163, 184, 0.45);
 }
 </style>
-
