@@ -79,27 +79,43 @@
           直播与回放
         </h3>
         <div class="media-links">
-          <el-card v-if="item.liveUrl" class="media-card live-card" shadow="hover">
-            <el-icon class="media-icon live-icon"><VideoCameraFilled /></el-icon>
-            <div class="media-info">
-              <h4>直播链接</h4>
-              <p>点击进入直播间</p>
+          <div v-if="item.liveUrl" class="media-card live-card" @click="enterLive(item.liveUrl)">
+            <div class="media-card-bg"></div>
+            <div class="media-card-content">
+              <div class="media-icon-wrapper live-icon-wrapper">
+                <el-icon class="media-icon"><VideoCameraFilled /></el-icon>
+              </div>
+              <div class="media-info">
+                <h4>直播中</h4>
+                <p>点击进入直播间观看精彩内容</p>
+              </div>
+              <div class="media-action">
+                <span class="action-text">进入直播</span>
+                <el-icon class="action-arrow"><ArrowRight /></el-icon>
+              </div>
             </div>
-            <el-button type="danger" @click="enterLive(item.liveUrl)" round>
-              进入直播 →
-            </el-button>
-          </el-card>
+            <div class="live-indicator">
+              <span class="live-dot"></span>
+              <span>LIVE</span>
+            </div>
+          </div>
           
-          <el-card v-if="item.replayUrl" class="media-card replay-card" shadow="hover">
-            <el-icon class="media-icon replay-icon"><VideoPlay /></el-icon>
-            <div class="media-info">
-              <h4>回放链接</h4>
-              <p>观看录播回放</p>
+          <div v-if="item.replayUrl" class="media-card replay-card" @click="enterReplay(item.replayUrl)">
+            <div class="media-card-bg"></div>
+            <div class="media-card-content">
+              <div class="media-icon-wrapper replay-icon-wrapper">
+                <el-icon class="media-icon"><VideoPlay /></el-icon>
+              </div>
+              <div class="media-info">
+                <h4>视频回放</h4>
+                <p>观看往期精彩录播内容</p>
+              </div>
+              <div class="media-action">
+                <span class="action-text">观看回放</span>
+                <el-icon class="action-arrow"><ArrowRight /></el-icon>
+              </div>
             </div>
-            <el-button type="primary" @click="enterReplay(item.replayUrl)" round>
-              观看回放 →
-            </el-button>
-          </el-card>
+          </div>
         </div>
       </div>
 
@@ -610,45 +626,74 @@ onMounted(async () => {
 
 .media-links {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
 }
 
 .media-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-  border-radius: 12px;
-  transition: all 0.3s;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
   cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .media-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.2);
 }
 
-.live-card {
-  border-left: 4px solid #f56c6c;
-  background: linear-gradient(135deg, rgba(245, 108, 108, 0.05) 0%, rgba(245, 108, 108, 0.02) 100%);
+.media-card-bg {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.4s ease;
 }
 
-.replay-card {
-  border-left: 4px solid #409eff;
-  background: linear-gradient(135deg, rgba(64, 158, 255, 0.05) 0%, rgba(64, 158, 255, 0.02) 100%);
+.live-card .media-card-bg {
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #60a5fa 100%);
 }
 
-.media-icon {
-  font-size: 48px;
+.replay-card .media-card-bg {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e40af 100%);
+}
+
+.media-card:hover .media-card-bg {
+  opacity: 0.95;
+}
+
+.media-card-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 24px;
+}
+
+.media-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.live-icon {
-  color: #f56c6c;
+.live-icon-wrapper {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
 }
 
-.replay-icon {
-  color: #409eff;
+.replay-icon-wrapper {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+.media-icon {
+  font-size: 32px;
+  color: #ffffff;
 }
 
 .media-info {
@@ -656,16 +701,78 @@ onMounted(async () => {
 }
 
 .media-info h4 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  color: #333;
-  margin: 0 0 4px 0;
+  color: #ffffff;
+  margin: 0 0 6px 0;
 }
 
 .media-info p {
   font-size: 14px;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   margin: 0;
+}
+
+.media-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 24px;
+  transition: all 0.3s ease;
+}
+
+.media-card:hover .media-action {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(4px);
+}
+
+.action-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.action-arrow {
+  font-size: 16px;
+  color: #ffffff;
+  transition: transform 0.3s ease;
+}
+
+.media-card:hover .action-arrow {
+  transform: translateX(4px);
+}
+
+.live-indicator {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(239, 68, 68, 0.9);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.8); }
 }
 
 .interaction-section {

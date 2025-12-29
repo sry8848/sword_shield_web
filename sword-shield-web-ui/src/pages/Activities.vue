@@ -13,14 +13,14 @@
     
     <div v-if="!minimal" class="activities-grid">
       <el-card 
-        v-for="item in items" 
+        v-for="(item, index) in items" 
         :key="item.id" 
         class="activity-card"
         shadow="hover"
         @click="$router.push(`/activity/${item.id}`)"
       >
-        <div class="card-cover" v-if="item.coverUrl">
-          <img :src="item.coverUrl" :alt="item.title" />
+        <div class="card-cover">
+          <img :src="getCoverImage(item, index)" :alt="item.title" />
         </div>
         <div class="card-content">
           <h3 class="card-title">{{ item.title }}</h3>
@@ -82,6 +82,23 @@ const orderBy = ref('time')
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(12)
+
+// 默认活动封面图片库 - 会议/科技/峰会主题
+const defaultCoverImages = [
+  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=640&h=360&fit=crop', // 大型会议现场
+  'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=640&h=360&fit=crop', // 团队会议讨论
+  'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=640&h=360&fit=crop', // 数据中心/服务器
+  'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=640&h=360&fit=crop', // 网络安全主题
+  'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=640&h=360&fit=crop', // 科技工作场景
+  'https://images.unsplash.com/photo-1504384764586-bb4cdc1707b0?w=640&h=360&fit=crop', // 会议室讨论
+  'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=640&h=360&fit=crop', // 团队协作
+  'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=640&h=360&fit=crop'  // 网络安全分析
+]
+
+// 获取活动封面图，如果没有则使用默认图片
+function getCoverImage(item: any, index: number) {
+  return item.coverUrl || defaultCoverImages[index % defaultCoverImages.length]
+}
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '时间待定'
@@ -168,6 +185,11 @@ onMounted(fetchList)
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.activity-card:hover .card-cover img {
+  transform: scale(1.08);
 }
 
 .card-content {

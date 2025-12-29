@@ -20,12 +20,12 @@
         <div class="hero-carousel">
           <el-carousel 
             :interval="4000" 
-            height="220px"
+            height="340px"
             :autoplay="true"
             arrow="hover"
           >
             <el-carousel-item v-for="(item, index) in carouselItems" :key="index">
-              <div class="carousel-card">
+              <div class="carousel-card" @click="goToActivity(item.link)">
                 <img :src="item.image" :alt="item.title" class="carousel-image" />
                 <div class="carousel-overlay">
                   <div class="carousel-content">
@@ -342,39 +342,38 @@ const isLoggedIn = computed(() => {
   return !!localStorage.getItem('token')
 })
 
-// 轮播图数据
-const carouselItems = ref([
-  {
-    title: '西湖论剑·网络安全大会',
-    desc: '汇聚全球顶尖安全专家，共议数字安全未来',
-    tag: '旗舰大会',
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop'
-  },
-  {
-    title: '数字安全技术峰会',
-    desc: '探索前沿安全技术趋势与创新实践',
-    tag: '技术峰会',
-    image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&h=400&fit=crop'
-  },
-  {
-    title: '数据安全治理论坛',
-    desc: '共筑数据安全防线，护航数字经济发展',
-    tag: '高峰论坛',
-    image: 'https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&h=400&fit=crop'
-  },
-  {
-    title: 'AI安全与创新论坛',
-    desc: '探讨AI时代的安全挑战与机遇',
-    tag: '创新论坛',
-    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop'
-  },
-  {
-    title: '关键基础设施安全研讨会',
-    desc: '聚焦重点行业安全防护与合规建设',
-    tag: '闭门研讨',
-    image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=800&h=400&fit=crop'
+// 轮播图数据 - 从后端获取热门活动
+const carouselItems = ref<any[]>([])
+
+// 默认轮播图片库 - 会议/科技/峰会主题
+const defaultImages = [
+  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop', // 大型会议现场
+  'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=400&fit=crop', // 团队会议讨论
+  'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=400&fit=crop', // 数据中心/服务器
+  'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=400&fit=crop', // 网络安全主题
+  'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&h=400&fit=crop'  // 科技女性刷卡
+]
+
+// 加载轮播图活动数据
+async function loadCarouselActivities() {
+  try {
+    const { data } = await api.get('/activity/list', {
+      params: { page: 0, size: 5, orderBy: 'heat' }
+    })
+    if (data.code === 0 && data.data.items.length > 0) {
+      carouselItems.value = data.data.items.map((item: any, index: number) => ({
+        id: item.id,
+        title: item.title,
+        desc: item.summary || '点击查看活动详情',
+        tag: item.heat > 80 ? '热门活动' : item.heat > 50 ? '精选活动' : '近期活动',
+        image: item.coverUrl || defaultImages[index % defaultImages.length],
+        link: `/activity/${item.id}`
+      }))
+    }
+  } catch (error) {
+    console.error('Failed to load carousel activities:', error)
   }
-])
+}
 
 // 新增：静态示例的近期大会活动数据，后续可接入后端接口
 const featuredConferences = ref([
@@ -552,7 +551,15 @@ async function copyPosterUrl() {
   }
 }
 
+// 轮播图点击跳转
+function goToActivity(link: string) {
+  if (link) {
+    router.push(link)
+  }
+}
+
 onMounted(() => {
+  loadCarouselActivities()
   if (isLoggedIn.value) {
     loadMyActivities()
   }
@@ -618,13 +625,12 @@ onMounted(() => {
 
 /* 新增：轮播样式 */
 .hero-carousel {
-  margin-top: 24px;
-  flex: 1;
-  min-height: 240px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .hero-carousel :deep(.el-carousel__container) {
-  height: 200px;
+  height: 340px;
 }
 
 .hero-carousel :deep(.el-carousel__indicators--outside) {
@@ -660,6 +666,7 @@ onMounted(() => {
   overflow: hidden;
   position: relative;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+  cursor: pointer;
 }
 
 .carousel-image {
@@ -712,10 +719,10 @@ onMounted(() => {
 
 /* 新增：快捷入口样式 */
 .quick-access {
-  margin-top: 20px;
+  margin-top: 24px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 16px;
 }
 
 .quick-item {
@@ -757,10 +764,10 @@ onMounted(() => {
 }
 
 .hero-highlights {
-  margin-top: 20px;
+  margin-top: 24px;
   display: flex;
   flex-wrap: wrap;
-  gap: 18px;
+  gap: 24px;
 }
 
 .highlight-item {

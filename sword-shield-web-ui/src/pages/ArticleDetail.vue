@@ -24,27 +24,43 @@
         <el-divider />
         <h3 class="section-heading">直播与回放</h3>
         <div class="media-links">
-          <el-card v-if="item.liveUrl" class="media-card live-card" shadow="hover">
-            <div class="media-icon live-dot" />
-            <div class="media-info">
-              <h4>直播链接</h4>
-              <p>点击进入直播间</p>
+          <div v-if="item.liveUrl" class="media-card live-card" @click="enterLive(item.liveUrl)">
+            <div class="media-card-bg"></div>
+            <div class="media-card-content">
+              <div class="media-icon-wrapper live-icon-wrapper">
+                <el-icon class="media-icon"><VideoCameraFilled /></el-icon>
+              </div>
+              <div class="media-info">
+                <h4>直播中</h4>
+                <p>点击进入直播间观看精彩内容</p>
+              </div>
+              <div class="media-action">
+                <span class="action-text">进入直播</span>
+                <el-icon class="action-arrow"><ArrowRight /></el-icon>
+              </div>
             </div>
-            <el-button type="danger" @click="enterLive(item.liveUrl)" round>
-              进入直播 →
-            </el-button>
-          </el-card>
+            <div class="live-indicator">
+              <span class="live-dot"></span>
+              <span>LIVE</span>
+            </div>
+          </div>
           
-          <el-card v-if="item.replayUrl" class="media-card replay-card" shadow="hover">
-            <div class="media-icon replay-icon" />
-            <div class="media-info">
-              <h4>回放链接</h4>
-              <p>观看录播回放</p>
+          <div v-if="item.replayUrl" class="media-card replay-card" @click="enterReplay(item.replayUrl)">
+            <div class="media-card-bg"></div>
+            <div class="media-card-content">
+              <div class="media-icon-wrapper replay-icon-wrapper">
+                <el-icon class="media-icon"><VideoPlay /></el-icon>
+              </div>
+              <div class="media-info">
+                <h4>视频回放</h4>
+                <p>观看往期精彩录播内容</p>
+              </div>
+              <div class="media-action">
+                <span class="action-text">观看回放</span>
+                <el-icon class="action-arrow"><ArrowRight /></el-icon>
+              </div>
             </div>
-            <el-button type="primary" @click="enterReplay(item.replayUrl)" round>
-              观看回放 →
-            </el-button>
-          </el-card>
+          </div>
         </div>
       </div>
 
@@ -602,76 +618,168 @@ onMounted(async () => {
 
 /* Live & Replay section */
 .media-links-section {
-  margin: 24px 0 8px;
+  margin: 32px 0;
 }
 
 .section-heading {
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 600;
   color: #0f172a;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .media-links {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
 }
 
 .media-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 18px 18px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(209, 213, 219, 0.9);
-  background: #f9fafb;
-  transition: all 0.22s ease;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
   cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .media-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(148, 163, 184, 0.5);
-  border-color: rgba(59, 130, 246, 0.95);
-  background: #eff6ff;
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.2);
 }
 
-.live-card {
-  border-left: 4px solid #22c55e;
+.media-card-bg {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.4s ease;
 }
 
-.replay-card {
-  border-left: 4px solid #3b82f6;
+.live-card .media-card-bg {
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #60a5fa 100%);
 }
 
-.media-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
+.replay-card .media-card-bg {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e40af 100%);
+}
+
+.media-card:hover .media-card-bg {
+  opacity: 0.95;
+}
+
+.media-card-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 24px;
+}
+
+.media-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.media-icon.live-dot {
-  background: radial-gradient(circle at 25% 0, #bbf7d0, #16a34a 55%, #14532d 100%);
+.live-icon-wrapper {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
 }
 
-.media-icon.replay-icon {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+.replay-icon-wrapper {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+.media-icon {
+  font-size: 32px;
+  color: #ffffff;
+}
+
+.media-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .media-info h4 {
-  margin: 0 0 4px;
-  font-size: 14px;
-  color: #111827;
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 6px 0;
 }
 
 .media-info p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
   margin: 0;
-  font-size: 12px;
-  color: #6b7280;
+}
+
+.media-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 24px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.media-card:hover .media-action {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(4px);
+}
+
+.action-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.action-arrow {
+  font-size: 16px;
+  color: #ffffff;
+  transition: transform 0.3s ease;
+}
+
+.media-card:hover .action-arrow {
+  transform: translateX(4px);
+}
+
+.live-indicator {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(239, 68, 68, 0.9);
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.8); }
 }
 
 /* Media Gallery */
