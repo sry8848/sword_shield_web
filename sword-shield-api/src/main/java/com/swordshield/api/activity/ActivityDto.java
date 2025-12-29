@@ -2,10 +2,11 @@ package com.swordshield.api.activity;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 @Data
-public class ActivityDto {
+public class ActivityDto implements Serializable {
     private Long id;
     private String title;
     private String summary;
