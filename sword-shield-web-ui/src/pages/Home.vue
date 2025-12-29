@@ -16,6 +16,29 @@
           </el-button>
         </div>
 
+        <!-- 新增：会议图片轮播 -->
+        <div class="hero-carousel">
+          <el-carousel 
+            :interval="4000" 
+            height="220px"
+            :autoplay="true"
+            arrow="hover"
+          >
+            <el-carousel-item v-for="(item, index) in carouselItems" :key="index">
+              <div class="carousel-card">
+                <img :src="item.image" :alt="item.title" class="carousel-image" />
+                <div class="carousel-overlay">
+                  <div class="carousel-content">
+                    <span class="carousel-tag">{{ item.tag }}</span>
+                    <h4>{{ item.title }}</h4>
+                    <p>{{ item.desc }}</p>
+                  </div>
+                </div>
+              </div>
+            </el-carousel-item>
+          </el-carousel>
+        </div>
+
         <div class="hero-highlights">
           <div class="highlight-item">
             <div class="highlight-number">360°</div>
@@ -28,6 +51,26 @@
           <div class="highlight-item">
             <div class="highlight-number">多场景</div>
             <div class="highlight-label">论坛 / 展会 / 路演</div>
+          </div>
+        </div>
+
+        <!-- 新增：快捷入口 -->
+        <div class="quick-access">
+          <div class="quick-item" @click="$router.push('/activities')">
+            <div class="quick-icon"><el-icon><Calendar /></el-icon></div>
+            <span>活动报名</span>
+          </div>
+          <div class="quick-item" @click="$router.push('/materials')">
+            <div class="quick-icon"><el-icon><Download /></el-icon></div>
+            <span>资料下载</span>
+          </div>
+          <div class="quick-item" @click="$router.push('/media')">
+            <div class="quick-icon"><el-icon><VideoCamera /></el-icon></div>
+            <span>精彩回顾</span>
+          </div>
+          <div class="quick-item" @click="$router.push('/submit')">
+            <div class="quick-icon"><el-icon><EditPen /></el-icon></div>
+            <span>在线投稿</span>
           </div>
         </div>
       </div>
@@ -177,21 +220,27 @@
             <h3>推荐操作</h3>
             <ul class="side-actions">
               <li @click="$router.push('/points')">
-                <div class="action-icon action-icon-primary">SS</div>
+                <div class="action-icon action-icon-primary">
+                  <el-icon><Trophy /></el-icon>
+                </div>
                 <div class="action-text">
                   <div class="action-title">积分详情</div>
                   <div class="action-desc">查看积分余额与获取记录。</div>
                 </div>
               </li>
               <li @click="$router.push('/submit')">
-                <div class="action-icon">SS</div>
+                <div class="action-icon action-icon-secondary">
+                  <el-icon><Document /></el-icon>
+                </div>
                 <div class="action-text">
                   <div class="action-title">提交演讲/成果</div>
                   <div class="action-desc">在线管理演讲稿、PPT 与成果材料。</div>
                 </div>
               </li>
               <li @click="$router.push('/materials')">
-                <div class="action-icon">SS</div>
+                <div class="action-icon action-icon-tertiary">
+                  <el-icon><Download /></el-icon>
+                </div>
                 <div class="action-text">
                   <div class="action-title">下载大会资料</div>
                   <div class="action-desc">统一下载会议议程、手册与活动纪要。</div>
@@ -276,7 +325,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api'
 import { ElMessage } from 'element-plus'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, Trophy, Document, Download, Calendar, VideoCamera, EditPen } from '@element-plus/icons-vue'
 
 const router = useRouter()
 
@@ -292,6 +341,40 @@ const myActivitiesLoading = ref(false)
 const isLoggedIn = computed(() => {
   return !!localStorage.getItem('token')
 })
+
+// 轮播图数据
+const carouselItems = ref([
+  {
+    title: '西湖论剑·网络安全大会',
+    desc: '汇聚全球顶尖安全专家，共议数字安全未来',
+    tag: '旗舰大会',
+    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop'
+  },
+  {
+    title: '数字安全技术峰会',
+    desc: '探索前沿安全技术趋势与创新实践',
+    tag: '技术峰会',
+    image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&h=400&fit=crop'
+  },
+  {
+    title: '数据安全治理论坛',
+    desc: '共筑数据安全防线，护航数字经济发展',
+    tag: '高峰论坛',
+    image: 'https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&h=400&fit=crop'
+  },
+  {
+    title: 'AI安全与创新论坛',
+    desc: '探讨AI时代的安全挑战与机遇',
+    tag: '创新论坛',
+    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop'
+  },
+  {
+    title: '关键基础设施安全研讨会',
+    desc: '聚焦重点行业安全防护与合规建设',
+    tag: '闭门研讨',
+    image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?w=800&h=400&fit=crop'
+  }
+])
 
 // 新增：静态示例的近期大会活动数据，后续可接入后端接口
 const featuredConferences = ref([
@@ -491,12 +574,13 @@ onMounted(() => {
 }
 
 .hero-left {
-  padding: 32px 28px;
-  min-height: 640px;
+  padding: 28px 24px;
   border-radius: 24px;
   background: #f5f9ff;
   box-shadow: 0 14px 35px rgba(148, 163, 184, 0.3);
   border: 1px solid rgba(191, 219, 254, 0.9);
+  display: flex;
+  flex-direction: column;
 }
 
 .hero-badge {
@@ -526,14 +610,154 @@ onMounted(() => {
 }
 
 .hero-actions {
-  margin-top: 24px;
+  margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
 
+/* 新增：轮播样式 */
+.hero-carousel {
+  margin-top: 24px;
+  flex: 1;
+  min-height: 240px;
+}
+
+.hero-carousel :deep(.el-carousel__container) {
+  height: 200px;
+}
+
+.hero-carousel :deep(.el-carousel__indicators--outside) {
+  margin-top: 8px;
+}
+
+.hero-carousel :deep(.el-carousel__indicator--horizontal .el-carousel__button) {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: #cbd5e1;
+}
+
+.hero-carousel :deep(.el-carousel__indicator--horizontal.is-active .el-carousel__button) {
+  background: #2563eb;
+}
+
+.hero-carousel :deep(.el-carousel__arrow) {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #1f2937;
+  width: 32px;
+  height: 32px;
+}
+
+.hero-carousel :deep(.el-carousel__arrow:hover) {
+  background-color: #ffffff;
+}
+
+.carousel-card {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.carousel-card:hover .carousel-image {
+  transform: scale(1.05);
+}
+
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.3) 50%, transparent 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+}
+
+.carousel-content {
+  color: #ffffff;
+}
+
+.carousel-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(59, 130, 246, 0.9);
+  margin-bottom: 8px;
+}
+
+.carousel-content h4 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-content p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.9;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 新增：快捷入口样式 */
+.quick-access {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.quick-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(209, 213, 219, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-item:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+}
+
+.quick-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 20px;
+}
+
+.quick-item span {
+  font-size: 12px;
+  color: #374151;
+  font-weight: 500;
+}
+
 .hero-highlights {
-  margin-top: 28px;
+  margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
   gap: 18px;
@@ -1083,21 +1307,31 @@ onMounted(() => {
 }
 
 .action-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: #111827;
+  font-size: 18px;
+  color: #6b7280;
+  flex-shrink: 0;
 }
 
 .action-icon-primary {
-  background: radial-gradient(circle at 20% 0, #bfdbfe, #2563eb 40%, #1d4ed8 100%);
-  color: #f9fafb;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  color: #ffffff;
+}
+
+.action-icon-secondary {
+  background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+  color: #ffffff;
+}
+
+.action-icon-tertiary {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: #ffffff;
 }
 
 .action-text {
@@ -1132,6 +1366,10 @@ onMounted(() => {
   .conference-layout {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .quick-access {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 @media (max-width: 640px) {
@@ -1141,6 +1379,14 @@ onMounted(() => {
 
   .hero-title {
     font-size: 24px;
+  }
+
+  .hero-carousel {
+    min-height: 200px;
+  }
+
+  .quick-access {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .conference-section {

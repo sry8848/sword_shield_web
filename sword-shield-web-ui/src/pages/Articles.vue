@@ -199,15 +199,15 @@ onMounted(fetchList)
 }
 
 .minimal-link:hover {
-  background: rgba(102, 126, 234, 0.1);
-  color: #ff0050;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
 }
 
 .minimal-link .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ff0050;
+  background: #2563eb;
   flex-shrink: 0;
 }
 

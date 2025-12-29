@@ -533,7 +533,7 @@ onMounted(async () => {
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 24px;
-  background: linear-gradient(135deg, #ff0050 0%, #00f2ea 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
 }
 
 .cover-section img {
@@ -715,7 +715,7 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff0050 0%, #00f2ea 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -249,11 +249,11 @@ onMounted(load)
 }
 
 .large-avatar {
-  background: linear-gradient(135deg, #ff0050 0%, #00f2ea 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   font-size: 40px;
   font-weight: bold;
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
 }
 
 .upload-label {
@@ -295,7 +295,7 @@ onMounted(load)
 
 .save-button {
   width: 100%;
-  background: linear-gradient(135deg, #ff0050 0%, #00f2ea 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
   border: none;
   font-size: 16px;
   font-weight: 600;
@@ -305,6 +305,6 @@ onMounted(load)
 .save-button:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
 }
 </style>
