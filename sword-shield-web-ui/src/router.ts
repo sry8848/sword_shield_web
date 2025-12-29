@@ -105,12 +105,14 @@ function clearAdminAuth() {
 router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   // Admin routes authentication with deep link support
   if (to.path.startsWith('/admin')) {
+    const adminToken = localStorage.getItem('adminToken')
+    const adminTokenExpired = adminToken ? isJwtExpired(adminToken) : false
+    if (adminToken && adminTokenExpired) {
+      clearAdminAuth()
+    }
+
     if (to.path !== '/admin/login') {
-      const adminToken = localStorage.getItem('adminToken')
-      if (!adminToken || isJwtExpired(adminToken)) {
-        if (adminToken) {
-          clearAdminAuth()
-        }
+      if (!adminToken || adminTokenExpired) {
         return next({
           path: '/admin/login',
           query: { redirect: to.fullPath }

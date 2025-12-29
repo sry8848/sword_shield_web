@@ -6,6 +6,11 @@ const adminApi = axios.create({
 })
 
 adminApi.interceptors.request.use((config) => {
+  const url = config.url || ''
+  // Admin login is a public endpoint; sending an expired token will cause the gateway to reject the request.
+  if (url.includes('/admin/auth/login')) {
+    return config
+  }
   const adminToken = localStorage.getItem('adminToken')
   if (adminToken) {
     const current = config.headers ?? new AxiosHeaders()
