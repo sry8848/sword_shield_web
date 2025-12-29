@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -e
 
 : "${ROCKETMQ_NAME_SERVER:=rocketmq-namesrv:9876}"
