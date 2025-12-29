@@ -79,7 +79,8 @@ async function fetchList() {
   const { data } = await api.get('/content/articles', { 
     params: { 
       page: currentPage.value - 1, 
-      size: pageSize.value 
+      size: pageSize.value,
+      excludeCategory: 'UGC'
     } 
   })
   if (data.code === 0) {

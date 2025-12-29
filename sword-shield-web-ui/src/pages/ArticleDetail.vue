@@ -2,6 +2,9 @@
   <div class="detail-container">
     <el-card v-if="item" class="detail-card">
       <div class="detail-header">
+        <div class="detail-back">
+          <el-button text :icon="ArrowLeft" @click="goBack">返回</el-button>
+        </div>
         <h1 class="detail-title">{{ item.title }}</h1>
         <div class="detail-meta">
           <el-tag :type="getCategoryType(item.category)" size="large">{{ item.category || '通用' }}</el-tag>
@@ -181,7 +184,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Picture, VideoPlay } from '@element-plus/icons-vue'
+import { ArrowLeft, Picture, VideoPlay } from '@element-plus/icons-vue'
 import api from '../api'
 import { ElMessage } from 'element-plus'
 
@@ -221,6 +224,15 @@ function openLink(url: string) {
   if (url) {
     window.open(url, '_blank')
   }
+}
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back()
+    return
+  }
+  const fallback = item.value?.category === 'UGC' ? '/submissions' : '/articles'
+  router.push(fallback)
 }
 
 async function focusCommentBox() {
@@ -521,6 +533,10 @@ onMounted(async () => {
   margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+}
+
+.detail-back {
+  margin-bottom: 6px;
 }
 
 .detail-title {

@@ -1,6 +1,9 @@
 <template>
   <div class="submit-container">
     <el-card class="submit-card">
+      <div class="submit-back">
+        <el-button text :icon="ArrowLeft" @click="goBack">返回</el-button>
+      </div>
       <h2 class="submit-title">
         <el-icon class="title-icon"><EditPen /></el-icon>
         投稿 · 大会相关内容
@@ -34,14 +37,25 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import api from '../api'
 import { ElMessage } from 'element-plus'
 
 const form = ref({ title: '', summary: '', body: '', coverUrl: '' })
 const submitting = ref(false)
 const fileRef = ref<HTMLInputElement | null>(null)
+const router = useRouter()
 
 function triggerFile() { fileRef.value?.click() }
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back()
+    return
+  }
+  router.push('/submissions')
+}
 
 async function onFile(e: Event) {
   const files = (e.target as HTMLInputElement).files
@@ -81,6 +95,7 @@ async function submit() {
 <style scoped>
 .submit-container { max-width: 900px; margin: 0 auto; }
 .submit-card { border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+.submit-back { margin-bottom: 6px; }
 .submit-title { margin: 0 0 8px; font-size: 24px; display: flex; align-items: center; gap: 8px; }
 .title-icon { color: #667eea; }
 .submit-desc { margin: 0 0 16px; color: #666; }

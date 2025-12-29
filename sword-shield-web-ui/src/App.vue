@@ -57,7 +57,7 @@
               <router-link to="/materials" class="nav-link">资料下载</router-link>
               <router-link to="/media" class="nav-link">媒体中心</router-link>
               <router-link to="/statistics" class="nav-link">数据看板</router-link>
-              <router-link to="/submit" class="nav-link">在线投稿</router-link>
+              <router-link to="/submissions" class="nav-link">用户投稿</router-link>
               <router-link to="/points" class="nav-link">积分详情</router-link>
             </nav>
           </div>

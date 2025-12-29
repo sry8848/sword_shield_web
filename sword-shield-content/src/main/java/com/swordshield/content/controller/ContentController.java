@@ -27,11 +27,12 @@ public class ContentController {
     public ContentController(ContentService service) { this.service = service; }
 
     @GetMapping("/articles")
-    @Operation(summary = "文章列表", description = "按分页、分类筛选文章")
+    @Operation(summary = "文章列表", description = "按分页、分类筛选文章，支持通过 excludeCategory 排除指定分类")
     public Response<PageResult<ContentArticleDto>> articles(@RequestParam(name = "page", defaultValue = "0") int page,
                                                   @RequestParam(name = "size", defaultValue = "10") int size,
-                                                  @RequestParam(name = "category", required = false) String category) {
-        return Response.ok(service.listArticles(page, size, category));
+                                                  @RequestParam(name = "category", required = false) String category,
+                                                  @RequestParam(name = "excludeCategory", required = false) String excludeCategory) {
+        return Response.ok(service.listArticles(page, size, category, excludeCategory));
     }
 
     @GetMapping("/article")

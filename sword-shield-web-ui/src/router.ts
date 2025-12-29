@@ -13,6 +13,7 @@ import Profile from './pages/Profile.vue'
 import Points from './pages/Points.vue'
 import Statistics from './pages/Statistics.vue'
 import UGCSubmit from './pages/UGCSubmit.vue'
+import UserSubmissions from './pages/UserSubmissions.vue'
 import AdminLogin from './pages/admin/AdminLogin.vue'
 import AdminDashboard from './pages/admin/AdminDashboard.vue'
 import AdminHome from './pages/admin/AdminHome.vue'
@@ -44,6 +45,7 @@ const routes = [
   { path: '/achievements', component: Achievements },
   { path: '/materials', component: Materials },
   { path: '/media', component: Media },
+  { path: '/submissions', component: UserSubmissions },
   { path: '/submit', component: UGCSubmit },
   { path: '/admin/login', component: AdminLogin },
   {

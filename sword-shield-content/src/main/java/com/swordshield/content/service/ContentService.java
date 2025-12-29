@@ -54,13 +54,15 @@ public class ContentService {
     }
 
     @Cacheable(cacheNames = "content:articles",
-            key = "'p=' + #page + ':s=' + #size + ':c=' + (#category == null ? '' : #category.trim())",
+            key = "'p=' + #page + ':s=' + #size + ':c=' + (#category == null ? '' : #category.trim()) + ':x=' + (#excludeCategory == null ? '' : #excludeCategory.trim())",
             sync = true)
-    public PageResult<ContentArticleDto> listArticles(int page, int size, String category) {
+    public PageResult<ContentArticleDto> listArticles(int page, int size, String category, String excludeCategory) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, size), Sort.by(Sort.Direction.DESC, "publishedAt"));
         Page<ContentArticle> p;
         if (category != null && !category.isBlank()) {
-            p = articleRepo.findPublishedArticlesByCategory(category, pageable);
+            p = articleRepo.findPublishedArticlesByCategory(category.trim(), pageable);
+        } else if (excludeCategory != null && !excludeCategory.isBlank()) {
+            p = articleRepo.findPublishedArticlesExcludeCategory(excludeCategory.trim(), pageable);
         } else {
             // Only return published articles (status = 1 and publishedAt is not null)
             p = articleRepo.findPublishedArticles(pageable);
