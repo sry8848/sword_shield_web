@@ -14,7 +14,7 @@ services:
       - --explicit_defaults_for_timestamp=1
       - --skip-ssl
     ports:
-      - "3306:3306"
+      - "13306:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
       - ./db/sword_shield.sql:/docker-entrypoint-initdb.d/sword_shield.sql:ro

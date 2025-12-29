@@ -25,7 +25,7 @@ dependencies:
   # 是否在业务服务启动前等待外部依赖服务可用
   enabled: true
   mysqlHost: mysql
-  mysqlPort: 3306
+  mysqlPort: 13306
   nacosHost: nacos
   nacosPort: 8848
 

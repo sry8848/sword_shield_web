@@ -56,7 +56,7 @@ kubectl get svc -n sword-shield
 
 如需导入内置示例数据（`db/sword_shield.sql`），可在本机通过 NodePort 连接 MySQL：
 ```bash
-mysql -h 127.0.0.1 -P 3306 -u root -p123456 sword_shield < db/sword_shield.sql
+mysql -h 127.0.0.1 -P 13306 -u root -p123456 sword_shield < db/sword_shield.sql
 ```
 
 如需排查某个 Pod 启动异常，可使用：
@@ -68,7 +68,7 @@ kubectl logs -n sword-shield <pod-name>
 - 网关：宿主机 `http://localhost:8080` （NodePort 30080 透出）
 - 前端：宿主机 `http://localhost` （NodePort 30000 透出到 80）
 - Nacos 控制台：`http://localhost:8848`
-- MySQL：`localhost:3306`（NodePort 30306）；图形客户端可直连
+- MySQL：`localhost:13306`（NodePort 30306）；图形客户端可直连
 - MinIO API/Console：`http://localhost:9000` / `http://localhost:9001`
 - Elasticsearch HTTP：`http://localhost:9200`
 - Kibana：`http://localhost:5601`
@@ -81,7 +81,7 @@ kubectl logs -n sword-shield <pod-name>
   ```yaml
   env:
     - name: SPRING_DATASOURCE_URL
-      value: jdbc:mysql://<mysql-host>:3306/sword_shield?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      value: jdbc:mysql://<mysql-host>:13306/sword_shield?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     - name: SPRING_DATASOURCE_USERNAME
       value: root
     - name: SPRING_DATASOURCE_PASSWORD

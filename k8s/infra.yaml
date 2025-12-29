@@ -170,13 +170,13 @@ spec:
             - --explicit_defaults_for_timestamp=1
             - --skip-ssl
           ports:
-            - containerPort: 3306
+            - containerPort: 13306
           volumeMounts:
             - name: data
               mountPath: /var/lib/mysql
           readinessProbe:
             tcpSocket:
-              port: 3306
+              port: 13306
             initialDelaySeconds: 60
             periodSeconds: 15
             timeoutSeconds: 5
@@ -195,8 +195,8 @@ spec:
   selector:
     app: mysql
   ports:
-    - port: 3306
-      targetPort: 3306
+    - port: 13306
+      targetPort: 13306
       nodePort: 30306
 ---
 apiVersion: apps/v1

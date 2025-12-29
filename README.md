@@ -147,7 +147,7 @@ docker-compose up -d
 - Kibana：`http://127.0.0.1:5601`
 
 数据库默认值：
-- MySQL：`root/123456`，DB：`sword_shield`，端口 `3306`
+- MySQL：`root/123456`，DB：`sword_shield`，端口 `13306`
 
 ### 2) 启动后端服务
 建议方式：

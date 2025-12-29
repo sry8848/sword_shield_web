@@ -21,10 +21,10 @@ spec:
             - -c
             - |
               set -e
-              echo "waiting for mysql at mysql:3306..."
+              echo "waiting for mysql at mysql:13306..."
               mysql_ok=0
               for i in $(seq 1 150); do
-                if nc -z mysql 3306 2>/dev/null; then
+                if nc -z mysql 13306 2>/dev/null; then
                   echo "mysql is available"
                   mysql_ok=1
                   break
@@ -125,10 +125,10 @@ spec:
             - -c
             - |
               set -e
-              echo "waiting for mysql at mysql:3306..."
+              echo "waiting for mysql at mysql:13306..."
               mysql_ok=0
               for i in $(seq 1 150); do
-                if nc -z mysql 3306 2>/dev/null; then
+                if nc -z mysql 13306 2>/dev/null; then
                   echo "mysql is available"
                   mysql_ok=1
                   break
@@ -165,7 +165,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -233,10 +233,10 @@ spec:
             - -c
             - |
               set -e
-              echo "waiting for mysql at mysql:3306..."
+              echo "waiting for mysql at mysql:13306..."
               mysql_ok=0
               for i in $(seq 1 150); do
-                if nc -z mysql 3306 2>/dev/null; then
+                if nc -z mysql 13306 2>/dev/null; then
                   echo "mysql is available"
                   mysql_ok=1
                   break
@@ -273,7 +273,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -341,10 +341,10 @@ spec:
             - -c
             - |
               set -e
-              echo "waiting for mysql at mysql:3306..."
+              echo "waiting for mysql at mysql:13306..."
               mysql_ok=0
               for i in $(seq 1 150); do
-                if nc -z mysql 3306 2>/dev/null; then
+                if nc -z mysql 13306 2>/dev/null; then
                   echo "mysql is available"
                   mysql_ok=1
                   break
@@ -381,7 +381,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -449,10 +449,10 @@ spec:
             - -c
             - |
               set -e
-              echo "waiting for mysql at mysql:3306..."
+              echo "waiting for mysql at mysql:13306..."
               mysql_ok=0
               for i in $(seq 1 150); do
-                if nc -z mysql 3306 2>/dev/null; then
+                if nc -z mysql 13306 2>/dev/null; then
                   echo "mysql is available"
                   mysql_ok=1
                   break
@@ -489,7 +489,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -557,10 +557,10 @@ spec:
             - -c
             - |
               set -e
-              echo "waiting for mysql at mysql:3306..."
+              echo "waiting for mysql at mysql:13306..."
               mysql_ok=0
               for i in $(seq 1 150); do
-                if nc -z mysql 3306 2>/dev/null; then
+                if nc -z mysql 13306 2>/dev/null; then
                   echo "mysql is available"
                   mysql_ok=1
                   break
@@ -597,7 +597,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -667,10 +667,10 @@ spec:
             - -c
             - |
               set -e
-              echo "waiting for mysql at mysql:3306..."
+              echo "waiting for mysql at mysql:13306..."
               mysql_ok=0
               for i in $(seq 1 150); do
-                if nc -z mysql 3306 2>/dev/null; then
+                if nc -z mysql 13306 2>/dev/null; then
                   echo "mysql is available"
                   mysql_ok=1
                   break
@@ -707,7 +707,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD

@@ -10,7 +10,7 @@ nodes:
         hostPort: 80
         protocol: TCP
       - containerPort: 30306
-        hostPort: 3306
+        hostPort: 13306
         protocol: TCP
       - containerPort: 30848
         hostPort: 8848

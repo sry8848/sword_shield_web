@@ -198,7 +198,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -329,7 +329,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -460,7 +460,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -591,7 +591,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -722,7 +722,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
@@ -855,7 +855,7 @@ spec:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -Xms256m -Xmx256m"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+              value: "jdbc:mysql://mysql:13306/sword_shield?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
