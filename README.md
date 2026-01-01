@@ -1,6 +1,6 @@
 # sword-shield-web
 
-Java 17 + Spring Boot 3.2 微服务示例工程：对外使用 Spring Cloud Gateway 统一暴露 HTTP API（`/api/**`），对内服务间调用使用 Dubbo RPC。配套 Vue 3 + Vite 前端，并内置 `docker-compose` 一键拉起基础设施与可观测链路（Prometheus/Grafana、Jaeger/OTel、ELK 等），同时提供 K8s/Helm 交付示例。
+Java 17 + Spring Boot 3.2 微服务示例工程：对外使用 Spring Cloud Gateway 统一暴露 HTTP API（`/api/**`），对内服务间调用使用 Dubbo RPC。配套 Vue 3 + Vite 前端，并内置 `docker-compose.yml` 一键拉起基础设施（MySQL/Redis/Nacos/RocketMQ/MinIO）；可观测链路（Prometheus/Grafana、Jaeger/OTel、ELK 等）见 `docker-compose.full.yml`，同时提供 K8s/Helm 交付示例。
 
 ## 目录
 - [架构概览](#架构概览)
@@ -88,7 +88,7 @@ flowchart LR
 - **异步任务与幂等**：内容服务将“海报生成 + 上传”异步化（RocketMQ），具备削峰、失败重试与消费幂等（状态原子迁移）。
 - **对象存储能力**：MinIO 集成 + 预签名 URL，覆盖上传与访问的常见场景。
 - **可观测一键就绪**：Actuator + Micrometer 指标；Prometheus/Grafana；OTLP 链路追踪（Jaeger）；Logstash→Elasticsearch→Kibana 日志链路；并提供 Micrometer/Javaagent 双模式避免“双重埋点”。
-- **交付友好**：各服务提供 Dockerfile（多阶段缓存构建）、`docker-compose.yml` 本地依赖、`k8s/` 清单与 `helm/` Chart；探针使用标准 `liveness/readiness`，便于集群运行。
+- **交付友好**：各服务提供 Dockerfile（多阶段缓存构建）、`docker-compose.min.yml`（基础设施）、`docker-compose.yml`（基础设施 + 可观测链路）、`k8s/` 清单与 `helm/` Chart；探针使用标准 `liveness/readiness`，便于集群运行。
 - **前端工程化**：Vue 3 + Vite + TypeScript + Element Plus + Axios + Vue Router，前后端分离开发。
 
 ## 技术栈
@@ -132,19 +132,24 @@ flowchart LR
 ### 1) 启动基础设施（推荐）
 在仓库根目录执行：
 ```sh
+docker-compose -f docker-compose.min.yml up -d
+```
+
+如需同时拉起可观测链路（Prometheus/Grafana、Jaeger、ELK、Sentinel Dashboard、RocketMQ Dashboard 等）：
+```sh
 docker-compose up -d
 ```
 
-常用地址（默认配置）：
+常用地址：
 - 网关聚合 Swagger UI：`http://localhost:8080/swagger-ui.html`
 - Nacos：`http://127.0.0.1:8848/nacos`
 - MinIO Console：`http://localhost:9001/browser`（`admin/admin123456`）
-- RocketMQ Dashboard：`http://localhost:8081`（`rocketmq/1234567`）
-- Sentinel Dashboard：`http://localhost:8858`（`sentinel/sentinel`）
-- Jaeger：`http://localhost:16686`
-- Prometheus：`http://localhost:9090`
-- Grafana：`http://localhost:3000`（`admin/admin`，已预置 Prometheus 数据源）
-- Kibana：`http://127.0.0.1:5601`
+- RocketMQ Dashboard（仅 `docker-compose.yml`）：`http://localhost:8081`（`rocketmq/1234567`）
+- Sentinel Dashboard（仅 `docker-compose.yml`）：`http://localhost:8858`（`sentinel/sentinel`）
+- Jaeger（仅 `docker-compose.yml`）：`http://localhost:16686`
+- Prometheus（仅 `docker-compose.yml`）：`http://localhost:9090`
+- Grafana（仅 `docker-compose.yml`）：`http://localhost:3000`（`admin/admin`，已预置 Prometheus 数据源）
+- Kibana（仅 `docker-compose.yml`）：`http://127.0.0.1:5601`
 
 数据库默认值：
 - MySQL：`root/123456`，DB：`sword_shield`，端口 `13306`

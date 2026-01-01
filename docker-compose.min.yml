@@ -1,0 +1,121 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ss_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: "sword_shield"
+      TZ: "Asia/Shanghai"
+      MYSQL_INITDB_SKIP_TZINFO: 1
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --explicit_defaults_for_timestamp=1
+      - --skip-ssl
+    ports:
+      - "13306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./db/sword_shield.sql:/docker-entrypoint-initdb.d/sword_shield.sql:ro
+    restart: unless-stopped
+
+  nacos:
+    image: nacos/nacos-server:v2.3.2-slim
+    container_name: ss_nacos
+    environment:
+      MODE: standalone
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - ./data/nacos:/home/nacos/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2.4
+    container_name: ss_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: ss_minio
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123456
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./data/minio:/data
+    restart: unless-stopped
+
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.4
+    platform: linux/amd64
+    container_name: ss_rocketmq_namesrv
+    ports:
+      - "9876:9876"
+    command: sh mqnamesrv
+    restart: unless-stopped
+
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.4
+    platform: linux/amd64
+    container_name: ss_rocketmq_broker
+    user: root
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    depends_on:
+      - rocketmq-namesrv
+    volumes:
+      - rocketmq_store:/home/rocketmq/store
+      - ./scripts/rocketmq/broker.conf:/home/rocketmq/broker.conf.template:ro
+      - ./scripts/rocketmq/start-broker.sh:/home/rocketmq/start-broker.sh:ro
+    environment:
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      ROCKETMQ_BROKER_IP1: ${ROCKETMQ_BROKER_IP1:-127.0.0.1}
+      ROCKETMQ_DISK_MAX_USED_SPACE_RATIO: ${ROCKETMQ_DISK_MAX_USED_SPACE_RATIO:-98}
+      ROCKETMQ_DISK_SPACE_WARNING_LEVEL_RATIO: ${ROCKETMQ_DISK_SPACE_WARNING_LEVEL_RATIO:-98}
+      ROCKETMQ_DISK_SPACE_CLEAN_FORCIBLY_RATIO: ${ROCKETMQ_DISK_SPACE_CLEAN_FORCIBLY_RATIO:-97}
+    command: sh /home/rocketmq/start-broker.sh
+    restart: unless-stopped
+
+  rocketmq-init:
+    image: apache/rocketmq:5.3.4
+    platform: linux/amd64
+    container_name: ss_rocketmq_init
+    depends_on:
+      - rocketmq-namesrv
+      - rocketmq-broker
+    environment:
+      ROCKETMQ_INIT_TOPIC: ${POSTER_MQ_TOPIC:-sword-shield-poster-jobs}
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -e
+        topic="$$ROCKETMQ_INIT_TOPIC"
+        echo "initializing rocketmq topic: $$topic"
+        i=1
+        while [ "$$i" -le 30 ]; do
+          if /home/rocketmq/rocketmq-5.3.4/bin/mqadmin updateTopic -n rocketmq-namesrv:9876 -b rocketmq-broker:10911 -t "$$topic" -r 4 -w 4 >/dev/null 2>&1; then
+            echo "topic ready: $$topic"
+            exit 0
+          fi
+          i=$$((i + 1))
+          sleep 2
+        done
+        echo "failed to init topic: $$topic"
+        exit 1
+    restart: "no"
+
+volumes:
+  rocketmq_store:
