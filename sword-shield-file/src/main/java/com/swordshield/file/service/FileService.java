@@ -10,6 +10,14 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.time.Instant;
 
+/**
+ * 文件服务核心应用服务。
+ *
+ * <p>封装对 MinIO 的写入与预签名 URL 生成，并将对象存储中的文件元数据持久化到
+ * {@link com.swordshield.file.domain.AssetFile}。
+ *
+ * <p>对外/跨服务返回的数据结构使用 {@link com.swordshield.api.file.AssetFileDto}。
+ */
 @Service
 public class FileService {
     private final MinioClient minio;

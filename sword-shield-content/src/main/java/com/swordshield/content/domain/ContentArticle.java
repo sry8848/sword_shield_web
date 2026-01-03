@@ -3,29 +3,59 @@ package com.swordshield.content.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
+/**
+ * 内容文章（Domain Entity）。
+ *
+ * <p>表示站内文章/资讯内容，通常与数据库表 {@code content_article} 对应，包含正文、封面、分类、作者、发布状态等信息。
+ */
 @Entity
 @Table(name = "content_article")
 public class ContentArticle {
+    /** 文章主键 ID。 */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /** 文章标题。 */
     private String title;
+
+    /** 文章摘要/简介（用于列表展示）。 */
     private String summary;
+
+    /** 文章正文内容（LONGTEXT）。 */
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String body;
+
+    /** 封面图片 URL（可为空）。 */
     private String coverUrl;
+
+    /** 文章分类/频道（例如 通用/UGC/公告 等）。 */
     private String category;
+
+    /** 作者名称/署名（可为空）。 */
     private String author;
+
+    /** 阅读量/浏览次数。 */
     private int views;
+
+    /** 直播链接（可为空）。 */
     private String liveUrl;
+
+    /** 回放链接（可为空）。 */
     private String replayUrl;
-    private int status; // 0-draft, 1-published
+
+    /** 状态：0-草稿（draft），1-发布（published）。 */
+    private int status;
+
+    /** 发布时间（发布时写入；草稿状态通常为空）。 */
     private Instant publishedAt;
 
+    /** 创建时间（由数据库写入/维护）。 */
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 
+    /** 更新时间（由数据库写入/维护）。 */
     @Column(name = "updated_at", insertable = false, updatable = false)
     private Instant updatedAt;
 
@@ -58,4 +88,3 @@ public class ContentArticle {
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }
-

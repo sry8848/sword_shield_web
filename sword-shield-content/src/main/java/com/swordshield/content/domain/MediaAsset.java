@@ -3,21 +3,39 @@ package com.swordshield.content.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
+/**
+ * 媒体资源（Domain Entity）。
+ *
+ * <p>用于管理图片/视频等媒体资源，包含对象存储 Key、封面、关联文章等元数据。
+ */
 @Entity
 @Table(name = "media_asset")
 public class MediaAsset {
+    /** 媒体资源主键 ID。 */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /** 资源标题。 */
     private String title;
+
+    /** 资源摘要/说明（可为空）。 */
     @Column(length = 1000)
     private String summary;
-    // image | video
+
+    /** 资源类型：image | video。 */
     private String type;
-    // MinIO object key
+
+    /** 对象存储（MinIO）中的对象 Key（路径/文件名）。 */
     private String objectName;
+
+    /** 封面图片 URL（可为空）。 */
     private String coverUrl;
+
+    /** 关联文章 ID（可为空；用于将媒体挂载到某篇文章）。 */
     private Long articleId;
+
+    /** 创建时间。 */
     private Instant createdAt;
 
     public Long getId() { return id; }

@@ -20,6 +20,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 积分应用服务。
+ *
+ * <p>提供积分汇总、积分流水查询，以及活动签到得分等用例；相关领域对象包括：
+ * {@link com.swordshield.user.domain.UserPoints}、{@link com.swordshield.user.domain.PointsTxn}、
+ * {@link com.swordshield.user.domain.ActivityCheckin}。
+ */
 @Service
 public class PointsService {
     private static final int ACTIVITY_CHECKIN_POINTS = 10;
@@ -128,4 +135,3 @@ public class PointsService {
         return dto;
     }
 }
-

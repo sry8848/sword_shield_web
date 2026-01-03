@@ -17,11 +17,18 @@ import java.util.Optional;
  * - Consumer：将当前 traceparent / X-Trace-Id 写入 Dubbo attachments
  * - Provider：从 attachments 恢复到 MDC，保证日志可关联
  *
- * 说明：该 Filter 仅负责“传播/关联”，不负责创建 span（span 由 Micrometer/Javaagent 等负责）。
+ * 说明：该 Filter 仅负责"传播/关联"，不负责创建 span（span 由 Micrometer/Javaagent 等负责）。
  */
 public class TraceContextFilter implements Filter {
 
     @Override
+    /**
+     * 执行 Dubbo 调用并处理 trace 上下文传递
+     *
+     * @param invoker 调用器
+     * @param invocation 调用信息
+     * @return 调用结果
+     */
     public Result invoke(Invoker<?> invoker, Invocation invocation) {
         String side = invoker.getUrl().getParameter(CommonConstants.SIDE_KEY);
         boolean isConsumer = CommonConstants.CONSUMER_SIDE.equals(side);
@@ -39,6 +46,11 @@ public class TraceContextFilter implements Filter {
         return invoker.invoke(invocation);
     }
 
+    /**
+     * 在消费者端注入 trace 上下文到调用附件中
+     *
+     * @param invocation 调用信息
+     */
     private void inject(Invocation invocation) {
         Optional<String> traceParent = TraceUtils.currentTraceParent();
         if (traceParent.isPresent()) {
@@ -54,6 +66,13 @@ public class TraceContextFilter implements Filter {
                 .ifPresent(traceId -> invocation.setAttachment(TraceUtils.TRACE_ID_HEADER, traceId));
     }
 
+    /**
+     * 在提供者端设置 MDC 上下文并执行调用
+     *
+     * @param invocation 调用信息
+     * @param supplier 调用执行器
+     * @return 调用结果
+     */
     private Result withMdc(Invocation invocation, SupplierWithResult supplier) {
         String incomingTraceId = invocation.getAttachment(TraceUtils.TRACE_ID_HEADER);
         String incomingTraceParent = invocation.getAttachment(TraceUtils.TRACEPARENT_HEADER);
@@ -66,6 +85,7 @@ public class TraceContextFilter implements Filter {
         String prevTraceId = MDC.get(TraceUtils.TRACE_ID_MDC_KEY);
         String prevOtelTraceId = MDC.get(TraceUtils.OTEL_TRACE_ID_MDC_KEY);
 
+        // 判断是否需要设置 MDC，避免覆盖已存在的值
         boolean setTraceId = !StringUtils.hasText(prevTraceId);
         boolean setOtelTraceId = !StringUtils.hasText(prevOtelTraceId);
 
@@ -85,6 +105,7 @@ public class TraceContextFilter implements Filter {
         try {
             return supplier.get();
         } finally {
+            // 恢复 MDC 状态，只在当前线程设置的值与期望值一致时才移除
             if (setTraceId) {
                 String current = MDC.get(TraceUtils.TRACE_ID_MDC_KEY);
                 if (traceId.equals(current)) {
@@ -100,6 +121,13 @@ public class TraceContextFilter implements Filter {
         }
     }
 
+    /**
+     * 解析并获取 traceId
+     *
+     * @param incomingTraceId 传入的 traceId
+     * @param incomingTraceParent 传入的 traceParent
+     * @return 解析后的 traceId
+     */
     private String resolveTraceId(String incomingTraceId, String incomingTraceParent) {
         if (StringUtils.hasText(incomingTraceId)) {
             return TraceUtils.ensureW3cTraceId(incomingTraceId);

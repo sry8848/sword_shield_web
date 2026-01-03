@@ -15,6 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 
+/**
+ * 互动服务核心应用服务。
+ *
+ * <p>提供评论列表/发布、点赞/取消点赞、分享记录等能力，目标对象通过 {@code targetType}/{@code targetId} 进行抽象化关联。
+ */
 @Service
 public class InteractionService {
     private final CommentRepository commentRepo;

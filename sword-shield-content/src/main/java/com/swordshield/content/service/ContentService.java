@@ -30,6 +30,12 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * 内容服务的核心应用服务。
+ *
+ * <p>聚合文章/展商/成果/素材/媒体资源等用例：负责查询、管理端 CRUD、投稿提交等逻辑，
+ * 并在领域对象（{@code com.swordshield.content.domain}）与对外 DTO（{@code com.swordshield.content.dto}）之间做转换。
+ */
 @Service
 public class ContentService {
     private final ContentArticleRepository articleRepo;

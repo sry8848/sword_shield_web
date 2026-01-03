@@ -17,6 +17,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * 海报任务投递重试服务。
+ *
+ * <p>负责将待处理的海报任务投递到消息队列，并提供失败重试（指数退避 + 抖动）。
+ * 投递相关状态记录在 {@link com.swordshield.content.domain.PosterJob} 中。
+ */
 @Service
 public class PosterJobDispatchRetryService {
     private static final Logger log = LoggerFactory.getLogger(PosterJobDispatchRetryService.class);
@@ -162,4 +168,3 @@ public class PosterJobDispatchRetryService {
         }
     }
 }
-

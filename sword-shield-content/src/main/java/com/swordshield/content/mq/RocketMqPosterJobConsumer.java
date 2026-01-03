@@ -18,6 +18,10 @@ import org.springframework.util.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * RocketMQ海报任务消费者
+ * 负责从RocketMQ中消费海报生成任务消息，并调用处理器处理任务
+ */
 @Component
 @ConditionalOnProperty(prefix = "app.poster.mq", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class RocketMqPosterJobConsumer {
@@ -30,6 +34,13 @@ public class RocketMqPosterJobConsumer {
 
     private DefaultMQPushConsumer consumer;
 
+    /**
+     * 构造函数
+     * @param processor 海报任务处理器
+     * @param consumerGroup 消费者组名
+     * @param nameServer NameServer地址
+     * @param topic 订阅的主题
+     */
     public RocketMqPosterJobConsumer(PosterJobProcessor processor,
                                      @Value("${app.poster.mq.consumer-group}") String consumerGroup,
                                      @Value("${app.poster.mq.name-server}") String nameServer,
@@ -40,6 +51,11 @@ public class RocketMqPosterJobConsumer {
         this.topic = topic;
     }
 
+    /**
+     * 启动RocketMQ消费者
+     * 初始化消费者配置，设置消息监听器，订阅主题并启动消费者
+     * @throws Exception 启动过程中可能抛出的异常
+     */
     @PostConstruct
     public void start() throws Exception {
         if (!StringUtils.hasText(nameServer)) {
@@ -76,6 +92,10 @@ public class RocketMqPosterJobConsumer {
         log.info("RocketMQ poster consumer started, group={}, nameServer={}, topic={}", consumerGroup, nameServer, topic);
     }
 
+    /**
+     * 停止RocketMQ消费者
+     * 在应用关闭时优雅地关闭消费者
+     */
     @PreDestroy
     public void stop() {
         if (consumer != null) {
@@ -87,3 +107,4 @@ public class RocketMqPosterJobConsumer {
         }
     }
 }
+

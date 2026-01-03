@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
+/**
+ * 网关追踪上下文管理器，负责处理分布式追踪信息的获取、缓存和传播
+ */
 @Component
 public class GatewayTraceContext {
     private static final String EXCHANGE_TRACE_ID_ATTR = "ss.traceId";
@@ -15,10 +18,19 @@ public class GatewayTraceContext {
 
     private final Tracer tracer;
 
+    /**
+     * 构造函数
+     * @param tracer 追踪器实例，用于获取当前活动的追踪上下文
+     */
     public GatewayTraceContext(Tracer tracer) {
         this.tracer = tracer;
     }
 
+    /**
+     * 确保交换对象中存在追踪信息，按优先级获取：活动span > 缓存 > 请求头 > 新生成
+     * @param exchange 服务器Web交换对象，包含请求和响应信息
+     * @return 包含追踪ID和traceparent的追踪信息对象
+     */
     public TraceInfo ensureTraceInfo(ServerWebExchange exchange) {
         // Prefer the active Micrometer trace/span if present; it is the source of truth for propagation and Jaeger.
         TraceInfo fromSpan = currentTraceInfoFromSpan();
@@ -45,6 +57,11 @@ public class GatewayTraceContext {
         return computed;
     }
 
+    /**
+     * 将追踪信息缓存到交换对象的属性中
+     * @param exchange 服务器Web交换对象
+     * @param traceInfo 追踪信息对象
+     */
     private void cacheTraceInfo(ServerWebExchange exchange, TraceInfo traceInfo) {
         if (traceInfo == null || !StringUtils.hasText(traceInfo.traceId()) || !StringUtils.hasText(traceInfo.traceParent())) {
             return;
@@ -53,6 +70,10 @@ public class GatewayTraceContext {
         exchange.getAttributes().putIfAbsent(EXCHANGE_TRACEPARENT_ATTR, traceInfo.traceParent());
     }
 
+    /**
+     * 从当前活动的span中获取追踪信息
+     * @return 追踪信息对象，如果当前没有活动span则返回null
+     */
     private TraceInfo currentTraceInfoFromSpan() {
         Span span = tracer.currentSpan();
         if (span == null) {
@@ -69,5 +90,10 @@ public class GatewayTraceContext {
         return new TraceInfo(traceId, traceParent);
     }
 
+    /**
+     * 追踪信息记录类，包含追踪ID和traceparent字符串
+     * @param traceId 追踪ID
+     * @param traceParent W3C traceparent字符串
+     */
     public record TraceInfo(String traceId, String traceParent) {}
 }

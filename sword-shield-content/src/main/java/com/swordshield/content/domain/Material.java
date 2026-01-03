@@ -3,18 +3,35 @@ package com.swordshield.content.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
+/**
+ * 演讲/资料素材（Domain Entity）。
+ *
+ * <p>记录上传到对象存储（MinIO）的素材元数据（对象 Key、类型、大小等），用于后续下载或关联展示。
+ */
 @Entity
 @Table(name = "material")
 public class Material {
+    /** 素材主键 ID。 */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /** 素材标题。 */
     private String title;
+
+    /** 讲师/分享者（可为空）。 */
     private String speaker;
-    // MinIO object key
+
+    /** 对象存储（MinIO）中的对象 Key（路径/文件名）。 */
     private String objectName;
+
+    /** 文件 MIME 类型（可为空）。 */
     private String contentType;
+
+    /** 文件大小（字节）。 */
     private long size;
+
+    /** 创建时间。 */
     private Instant createdAt;
 
     public Long getId() { return id; }

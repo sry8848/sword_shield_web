@@ -2,12 +2,26 @@ package com.swordshield.common;
 
 import java.util.List;
 
+/**
+ * 分页结果类
+ * 用于封装分页查询的结果数据，包含当前页数据列表、总记录数、当前页码和每页大小
+ * @param <T> 分页数据的泛型类型
+ */
 public class PageResult<T> {
-    private List<T> items;
-    private long total;
-    private int page;
-    private int size;
+    private List<T> items;  // 当前页的数据列表
+    private long total;     // 总记录数
+    private int page;       // 当前页码
+    private int size;       // 每页大小
 
+    /**
+     * 创建分页结果对象的静态工厂方法
+     * @param items 当前页的数据列表
+     * @param total 总记录数
+     * @param page 当前页码
+     * @param size 每页大小
+     * @param <T> 分页数据的泛型类型
+     * @return PageResult<T> 分页结果对象
+     */
     public static <T> PageResult<T> of(List<T> items, long total, int page, int size) {
         PageResult<T> r = new PageResult<>();
         r.items = items;

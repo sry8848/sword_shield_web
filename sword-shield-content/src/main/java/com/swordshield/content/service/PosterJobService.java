@@ -14,6 +14,12 @@ import org.springframework.util.StringUtils;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * 海报任务服务。
+ *
+ * <p>负责创建海报生成任务（落库为 {@link com.swordshield.content.domain.PosterJob}），
+ * 并触发投递（由 {@link com.swordshield.content.service.PosterJobDispatchRetryService} 负责重试与调度）。
+ */
 @Service
 public class PosterJobService {
     private static final Logger log = LoggerFactory.getLogger(PosterJobService.class);

@@ -3,27 +3,63 @@ package com.swordshield.activity.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
+/**
+ * 活动领域对象（Domain Entity）。
+ *
+ * <p>表示一个可展示/可报名的活动，通常与数据库表 {@code activity} 对应，包含活动的基础信息与状态。
+ */
 @Entity
 @Table(name = "activity")
 public class Activity {
+    /** 活动主键 ID。 */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /** 活动标题（必填）。 */
     @Column(nullable = false)
     private String title;
+
+    /** 活动摘要/简介（用于列表展示，可为空）。 */
     private String summary;
+
+    /** 活动封面图片 URL（可为空）。 */
     private String coverUrl;
+
+    /** 活动开始时间（可为空）。 */
     private Instant startTime;
+
+    /** 活动结束时间（可为空）。 */
     private Instant endTime;
+
+    /** 活动地点/地址（可为空）。 */
     private String location;
+
+    /** 演讲嘉宾/讲师信息（可为空）。 */
     private String speaker;
+
+    /** 直播链接（可为空）。 */
     private String liveUrl;
+
+    /** 回放链接（可为空）。 */
     private String replayUrl;
+
+    /** 最大可报名人数；为空表示不限制。 */
     private Integer maxRegistrations;
+
+    /** 当前报名人数（用于展示与名额限制）。 */
     private Integer currentRegistrations;
+
+    /** 热度/人气值（用于排序与展示）。 */
     private Integer heat;
-    private Integer status;  // 0-下线, 1-发布
+
+    /** 状态：0-下线，1-发布。 */
+    private Integer status;
+
+    /** 创建时间（通常由服务端写入）。 */
     private Instant createdAt;
+
+    /** 更新时间（通常由服务端写入）。 */
     private Instant updatedAt;
 
     public Long getId() { return id; }

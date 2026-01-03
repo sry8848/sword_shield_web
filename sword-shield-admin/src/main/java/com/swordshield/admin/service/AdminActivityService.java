@@ -11,6 +11,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 后台活动管理聚合服务。
+ *
+ * <p>管理端通过 Dubbo/RPC 调用活动服务的管理接口（{@link com.swordshield.api.activity.rpc.ActivityAdminRpcService}），
+ * 并将结果包装为统一的 {@link com.swordshield.common.Response} 返回给管理端 Controller。
+ */
 @Service
 public class AdminActivityService {
     @DubboReference(check = false)

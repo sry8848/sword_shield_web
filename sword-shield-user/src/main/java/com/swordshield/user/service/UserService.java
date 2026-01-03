@@ -11,6 +11,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+/**
+ * 用户账户应用服务。
+ *
+ * <p>负责注册、登录（签发 JWT）、以及用户资料查询/更新等用例。
+ * 领域对象为 {@link com.swordshield.user.domain.User}，接口层 DTO 位于 {@code com.swordshield.user.dto}。
+ */
 @Service
 public class UserService {
     private final UserRepository repo;
@@ -103,4 +109,3 @@ public class UserService {
         return dto;
     }
 }
-

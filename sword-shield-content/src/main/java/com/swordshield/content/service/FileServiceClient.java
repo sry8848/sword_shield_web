@@ -8,6 +8,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+/**
+ * 文件服务 RPC 客户端（内容服务侧）。
+ *
+ * <p>用于调用文件服务内部接口上传文件并获取预签名 URL（例如海报生成后上传）。
+ * 该类只负责远程调用与鉴权头解析，不承载内容业务规则。
+ */
 @Service
 public class FileServiceClient {
     private static final Logger log = LoggerFactory.getLogger(FileServiceClient.class);
@@ -17,10 +23,24 @@ public class FileServiceClient {
     @DubboReference(check = false)
     private FileInternalRpcService fileInternalRpcService;
 
+    /**
+     * 构造函数
+     *
+     * @param serviceAuthorization 服务授权信息，从配置文件中获取
+     */
     public FileServiceClient(@Value("${file.service.authorization:}") String serviceAuthorization) {
         this.serviceAuthorization = serviceAuthorization == null ? "" : serviceAuthorization.trim();
     }
 
+    /**
+     * 上传文件并获取预签名URL
+     *
+     * @param bytes 文件字节数组
+     * @param filename 文件名
+     * @param authorization 授权信息
+     * @param expireSeconds 过期时间（秒）
+     * @return 预签名URL，失败时返回null
+     */
     public String uploadAndPresign(byte[] bytes, String filename, String authorization, int expireSeconds) {
         String authHeader = resolveAuthorization(authorization);
         if (!StringUtils.hasText(authHeader)) {
@@ -36,6 +56,12 @@ public class FileServiceClient {
         }
     }
 
+    /**
+     * 解析授权信息，优先使用传入的authorization，如果为空则使用服务级别的授权
+     *
+     * @param authorization 传入的授权信息
+     * @return 解析后的授权头信息
+     */
     private String resolveAuthorization(String authorization) {
         if (StringUtils.hasText(authorization)) {
             return authorization;
@@ -43,10 +69,21 @@ public class FileServiceClient {
         return serviceAuthorization.isBlank() ? null : serviceAuthorization;
     }
 
+    /**
+     * 检查是否配置了服务级别的授权信息
+     *
+     * @return 如果配置了服务授权返回true，否则返回false
+     */
     public boolean hasServiceAuthorization() {
         return !serviceAuthorization.isBlank();
     }
 
+    /**
+     * 根据文件扩展名猜测内容类型
+     *
+     * @param filename 文件名
+     * @return 对应的MIME类型，无法识别时返回null
+     */
     private String guessContentType(String filename) {
         if (!StringUtils.hasText(filename)) {
             return null;

@@ -13,6 +13,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+/**
+ * 活动后台管理服务（管理员侧用例）。
+ *
+ * <p>提供活动的增删改查，并负责相关缓存失效；对外数据结构沿用
+ * {@link com.swordshield.api.activity.ActivityDto} 作为管理端与活动服务之间的契约 DTO。
+ */
 @Service
 public class ActivityAdminService {
     private final ActivityRepository activityRepo;

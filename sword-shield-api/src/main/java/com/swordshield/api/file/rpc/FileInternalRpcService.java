@@ -1,5 +1,10 @@
 package com.swordshield.api.file.rpc;
 
+/**
+ * 文件服务内部 RPC 接口。
+ *
+ * <p>用于其它服务（如内容服务）在服务端侧上传文件并获取预签名 URL；该接口通常不直接暴露给外部客户端。
+ */
 public interface FileInternalRpcService {
     /**
      * 内部服务上传文件并返回可访问的预签名 URL（常用于内容服务生成海报/媒体资源）。
@@ -12,4 +17,3 @@ public interface FileInternalRpcService {
      */
     String uploadAndPresign(byte[] bytes, String filename, String contentType, String authorization, int expireSeconds);
 }
-

@@ -5,6 +5,11 @@ import com.swordshield.api.common.PageResult;
 
 import java.util.List;
 
+/**
+ * 活动服务（管理端）RPC 接口。
+ *
+ * <p>提供管理员侧的活动管理能力（CRUD），供管理后台等服务通过 Dubbo 调用。
+ */
 public interface ActivityAdminRpcService {
     List<ActivityDto> getAll();
 
@@ -18,4 +23,3 @@ public interface ActivityAdminRpcService {
 
     void delete(Long id);
 }
-

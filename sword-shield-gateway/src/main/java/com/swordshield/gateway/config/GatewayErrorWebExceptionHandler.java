@@ -23,6 +23,10 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * 网关错误处理异常处理器
+ * 负责处理网关层的异常，统一返回格式化的错误响应
+ */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
@@ -31,11 +35,22 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
     private final ObjectMapper objectMapper;
     private final GatewayTraceContext traceContext;
 
+    /**
+     * 构造函数
+     * @param objectMapper JSON对象映射器，用于序列化响应体
+     * @param traceContext 链路追踪上下文，用于获取和设置追踪信息
+     */
     public GatewayErrorWebExceptionHandler(ObjectMapper objectMapper, GatewayTraceContext traceContext) {
         this.objectMapper = objectMapper;
         this.traceContext = traceContext;
     }
 
+    /**
+     * 处理异常并返回统一格式的错误响应
+     * @param exchange 服务器Web交换对象
+     * @param ex 抛出的异常对象
+     * @return Mono<Void> 异步处理结果
+     */
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
         if (exchange.getResponse().isCommitted()) {
@@ -61,6 +76,14 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
         return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(bytes)));
     }
 
+    /**
+     * 记录异常日志，根据状态码级别选择不同的日志级别
+     * 同时处理链路追踪ID的设置和清理
+     * @param exchange 服务器Web交换对象
+     * @param ex 抛出的异常对象
+     * @param status HTTP状态码
+     * @param message 异常消息
+     */
     private void logException(ServerWebExchange exchange, Throwable ex, HttpStatus status, String message) {
         String method = exchange.getRequest().getMethod() == null ? "?" : exchange.getRequest().getMethod().name();
         String path = exchange.getRequest().getURI().getRawPath();
@@ -99,6 +122,11 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
         }
     }
 
+    /**
+     * 根据异常类型解析对应的HTTP状态码
+     * @param ex 抛出的异常对象
+     * @return HttpStatus 对应的HTTP状态码
+     */
     private HttpStatus resolveStatus(Throwable ex) {
         if (ex instanceof ResponseStatusException rse) {
             return HttpStatus.valueOf(rse.getStatusCode().value());
@@ -127,6 +155,12 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
+    /**
+     * 根据异常和状态码解析错误消息
+     * @param ex 抛出的异常对象
+     * @param status HTTP状态码
+     * @return String 解析后的错误消息
+     */
     private String resolveMessage(Throwable ex, HttpStatus status) {
         if (status == HttpStatus.SERVICE_UNAVAILABLE) {
             String msg = safeMessage(ex);
@@ -149,6 +183,11 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
         return msg == null ? "Internal server error" : msg;
     }
 
+    /**
+     * 安全获取异常消息，避免返回过长或敏感信息
+     * @param ex 异常对象
+     * @return String 安全的异常消息
+     */
     private String safeMessage(Throwable ex) {
         if (ex == null) return null;
         String msg = ex.getMessage();
@@ -158,6 +197,12 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
         return msg.length() > 300 ? msg.substring(0, 300) : msg;
     }
 
+    /**
+     * 检查异常链中是否包含指定类型的异常
+     * @param ex 异常对象
+     * @param type 要检查的异常类型
+     * @return boolean 是否包含指定类型的异常
+     */
     private boolean hasCause(Throwable ex, Class<? extends Throwable> type) {
         Throwable cur = ex;
         int depth = 0;
@@ -168,6 +213,11 @@ public class GatewayErrorWebExceptionHandler implements WebExceptionHandler {
         return false;
     }
 
+    /**
+     * 转义JSON字符串中的特殊字符
+     * @param s 原始字符串
+     * @return String 转义后的字符串
+     */
     private String escapeJson(String s) {
         if (s == null) return "";
         return s.replace("\\", "\\\\").replace("\"", "\\\"");

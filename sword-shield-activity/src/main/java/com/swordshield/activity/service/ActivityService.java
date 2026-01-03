@@ -20,6 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * 活动服务（用户侧用例）。
+ *
+ * <p>负责活动列表/详情查询、报名等用例，并基于领域对象
+ * {@link com.swordshield.activity.domain.Activity} 与
+ * {@link com.swordshield.activity.domain.ActivityRegistration} 完成数据读写。
+ *
+ * <p>对外返回的活动数据使用跨服务 DTO：{@link com.swordshield.api.activity.ActivityDto}。
+ */
 @Service
 public class ActivityService {
     private final ActivityRepository activityRepo;

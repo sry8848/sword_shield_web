@@ -35,6 +35,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 网关安全配置类
+ * 配置Spring Security WebFlux安全策略，包括JWT认证、路径权限控制等
+ */
 @Configuration
 @EnableWebFluxSecurity
 @EnableConfigurationProperties(GatewaySecurityProperties.class)
@@ -47,6 +51,15 @@ public class SecurityConfig {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * 配置安全过滤器链
+     * 设置CSRF、HTTP基本认证、表单登录、登出等安全策略，配置路径权限和JWT认证
+     *
+     * @param http 安全配置对象
+     * @param props 网关安全属性配置
+     * @param jwtAuthConverter JWT认证转换器
+     * @return 安全过滤器链
+     */
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
                                                          GatewaySecurityProperties props,
@@ -64,8 +77,8 @@ public class SecurityConfig {
                         .accessDeniedHandler(jsonAccessDeniedHandler())
                 )
                 .authorizeExchange(exchanges -> {
-                    // Some endpoints share the same path for both public reads and admin writes.
-                    // Enforce admin authorization by HTTP method first, then apply permit-all paths.
+                    // 配置特定路径的管理员权限要求
+                    // 某些端点对公共读取和管理员写入使用相同路径，首先按HTTP方法强制管理员授权
                     exchanges.pathMatchers(HttpMethod.POST, "/api/content/material").hasRole("ADMIN");
                     exchanges.pathMatchers(HttpMethod.DELETE, "/api/content/material/**").hasRole("ADMIN");
                     exchanges.pathMatchers(HttpMethod.POST, "/api/content/media").hasRole("ADMIN");
@@ -85,6 +98,13 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * 创建JWT解码器
+     * 根据配置的密钥创建NimbusReactiveJwtDecoder，用于解码和验证JWT令牌
+     *
+     * @param jwtSecretProperty JWT密钥配置属性
+     * @return JWT解码器
+     */
     @Bean
     public ReactiveJwtDecoder reactiveJwtDecoder(@Value("${jwt.secret:}") String jwtSecretProperty) {
         String secret = resolveSecret(jwtSecretProperty);
@@ -97,6 +117,12 @@ public class SecurityConfig {
         return decoder;
     }
 
+    /**
+     * 创建JWT认证转换器
+     * 将JWT转换为认证令牌，设置权限转换逻辑
+     *
+     * @return JWT认证转换器
+     */
     @Bean
     public Converter<Jwt, ? extends Mono<? extends AbstractAuthenticationToken>> jwtAuthenticationConverter() {
         JwtAuthenticationConverter delegate = new JwtAuthenticationConverter();
@@ -104,6 +130,13 @@ public class SecurityConfig {
         return new ReactiveJwtAuthenticationConverterAdapter(delegate);
     }
 
+    /**
+     * 从JWT主题中提取权限信息
+     * 根据主题是否以管理员前缀开头来分配管理员权限
+     *
+     * @param jwt JWT令牌
+     * @return 权限列表
+     */
     private List<GrantedAuthority> authoritiesFromSubject(Jwt jwt) {
         String subject = jwt == null ? null : jwt.getSubject();
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -113,6 +146,13 @@ public class SecurityConfig {
         return authorities;
     }
 
+    /**
+     * 解析JWT密钥
+     * 按优先级从配置属性、环境变量、系统属性中获取JWT密钥，如果都未配置则使用默认密钥
+     *
+     * @param jwtSecretProperty JWT密钥配置属性
+     * @return 解析后的密钥
+     */
     private String resolveSecret(String jwtSecretProperty) {
         if (StringUtils.hasText(jwtSecretProperty)) {
             return jwtSecretProperty.trim();
@@ -128,14 +168,35 @@ public class SecurityConfig {
         return DEFAULT_SECRET;
     }
 
+    /**
+     * 创建JSON认证入口点
+     * 当用户未认证时返回JSON格式的错误响应
+     *
+     * @return 认证入口点处理器
+     */
     private ServerAuthenticationEntryPoint jsonAuthEntryPoint() {
         return (exchange, ex) -> writeJson(exchange, HttpStatus.UNAUTHORIZED, Response.error(ErrorCode.UNAUTHORIZED, "未登录，请先登录"));
     }
 
+    /**
+     * 创建JSON访问拒绝处理器
+     * 当用户无权限访问时返回JSON格式的错误响应
+     *
+     * @return 访问拒绝处理器
+     */
     private ServerAccessDeniedHandler jsonAccessDeniedHandler() {
         return (exchange, ex) -> writeJson(exchange, HttpStatus.FORBIDDEN, Response.error(ErrorCode.FORBIDDEN, "无权限访问"));
     }
 
+    /**
+     * 将对象写入响应
+     * 将指定对象序列化为JSON并写入HTTP响应
+     *
+     * @param exchange 服务器Web交换对象
+     * @param status HTTP状态码
+     * @param body 响应体对象
+     * @return Mono<Void> 异步操作结果
+     */
     private Mono<Void> writeJson(ServerWebExchange exchange, HttpStatus status, Object body) {
         byte[] bytes;
         try {

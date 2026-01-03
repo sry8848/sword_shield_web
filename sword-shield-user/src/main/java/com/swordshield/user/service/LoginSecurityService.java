@@ -12,6 +12,12 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 登录安全与风控服务。
+ *
+ * <p>基于 Redis 实现登录请求频率限制，以及按用户/IP 维度的失败次数统计与临时锁定，用于降低暴力破解风险。
+ * 当 Redis 不可用时采取 fail-open 策略避免阻断正常登录。
+ */
 @Service
 public class LoginSecurityService {
     private static final Logger log = LoggerFactory.getLogger(LoginSecurityService.class);

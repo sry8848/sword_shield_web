@@ -12,6 +12,16 @@ import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 
+/**
+ * 海报任务处理器。
+ *
+ * <p>消费任务 ID，执行「渲染 → 上传 → 回写结果」流程：
+ * <ul>
+ *   <li>渲染由 {@link com.swordshield.content.service.PosterRenderService} 生成 PNG 字节</li>
+ *   <li>上传由 {@link com.swordshield.content.service.FileServiceClient} 调用文件服务完成</li>
+ *   <li>状态更新回写到 {@link com.swordshield.content.domain.PosterJob}</li>
+ * </ul>
+ */
 @Service
 public class PosterJobProcessor {
     private static final Logger log = LoggerFactory.getLogger(PosterJobProcessor.class);
@@ -77,4 +87,3 @@ public class PosterJobProcessor {
         }
     }
 }
-

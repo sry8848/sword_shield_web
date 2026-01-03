@@ -7,6 +7,11 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 
+/**
+ * 海报渲染服务。
+ *
+ * <p>根据标题与副标题渲染一张 PNG 海报并返回字节数组，供海报任务处理器上传到文件服务。
+ */
 @Service
 public class PosterRenderService {
     public byte[] renderPng(String title, String subtitle) throws Exception {
@@ -421,4 +426,3 @@ public class PosterRenderService {
         return topLeft || topRight || bottomLeft;
     }
 }
-

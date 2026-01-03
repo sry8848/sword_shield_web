@@ -9,16 +9,23 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * Cache helper for "negative caching" (cache penetration protection):
- * cache {@code Optional.empty()} for a short TTL instead of repeatedly hitting DB for non-existent resources.
- * <p>
- * Fail-open: when cache infra is unavailable, it falls back to loader.
+ * 缓存支持工具类，提供缓存操作的便捷方法
  */
 public final class CacheSupport {
     private static final Logger log = LoggerFactory.getLogger(CacheSupport.class);
 
     private CacheSupport() {}
 
+    /**
+     * 从缓存中获取值，如果缓存中不存在则通过loader加载
+     *
+     * @param cacheManager 缓存管理器，可以为null
+     * @param cacheName 缓存名称
+     * @param key 缓存键
+     * @param loader 加载器，用于在缓存未命中时加载数据
+     * @param <T> 返回值类型
+     * @return 包装在Optional中的缓存值或加载值
+     */
     public static <T> Optional<T> getOptional(CacheManager cacheManager,
                                               String cacheName,
                                               Object key,
@@ -26,6 +33,7 @@ public final class CacheSupport {
         if (loader == null) {
             return Optional.empty();
         }
+        // 获取缓存实例，如果cacheManager或cacheName为null则返回null
         Cache cache = cacheManager == null ? null : cacheManager.getCache(cacheName);
         if (cache == null) {
             Optional<T> loaded = loader.get();

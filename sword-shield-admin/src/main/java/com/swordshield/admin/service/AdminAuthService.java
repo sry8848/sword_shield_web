@@ -7,6 +7,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 
+/**
+ * 后台管理员鉴权服务。
+ *
+ * <p>负责管理员账号密码校验、状态检查，并签发管理端使用的 JWT。
+ */
 @Service
 public class AdminAuthService {
     private final AdminUserRepository adminUserRepo;
