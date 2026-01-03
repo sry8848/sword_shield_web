@@ -62,6 +62,15 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 积分页。
+ *
+ * - 展示积分汇总（total/available/used）与积分流水列表。
+ *
+ * 依赖接口：
+ * - GET `/user/points`
+ * - GET `/user/points/txns`
+ */
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api'
@@ -212,4 +221,3 @@ onMounted(reload)
   padding: 20px 0 6px;
 }
 </style>
-

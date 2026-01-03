@@ -108,11 +108,21 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 活动直播/回放页。
+ *
+ * - 根据活动的 `liveUrl` / `replayUrl` 在页面内尝试直接播放（video）或内嵌（iframe）。
+ * - `mode` 来自路由 query：`?mode=pre|live|replay`，用于手动切换/调试。
+ *
+ * 依赖接口：
+ * - GET `/activity/detail`：获取活动信息（含直播/回放链接、开始/结束时间）。
+ */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import api from '../api'
 
+// 页面模式：pre=未开始（倒计时），live=直播，replay=回放
 type Mode = 'pre' | 'live' | 'replay'
 
 const route = useRoute()

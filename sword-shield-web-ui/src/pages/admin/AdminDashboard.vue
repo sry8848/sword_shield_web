@@ -69,6 +69,12 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 后台管理布局页（Dashboard Shell）。
+ *
+ * - 提供左侧菜单 + 顶部标题区域，并通过子路由渲染各管理模块页面。
+ * - 登出时清理管理员 localStorage 并跳转回 `/admin/login`。
+ */
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'

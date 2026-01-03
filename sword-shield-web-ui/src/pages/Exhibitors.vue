@@ -36,6 +36,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 展商列表页。
+ *
+ * - 分页展示参展单位信息（名称、Logo、品牌、介绍、官网/视频链接）。
+ *
+ * 依赖接口：
+ * - GET `/content/exhibitors`
+ *
+ * 数据字段主要对应后端 `ExhibitorDto`：`id/name/logoUrl/introduction/website/brand/videoUrl`。
+ */
 import { ref, onMounted } from 'vue'
 import api from '../api'
 import { ElMessage } from 'element-plus'

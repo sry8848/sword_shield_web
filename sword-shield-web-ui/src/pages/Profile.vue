@@ -81,6 +81,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 用户资料页。
+ *
+ * - 展示并编辑个人资料（昵称、性别、联系方式、头像等）。
+ * - 支持头像上传：上传文件 → 生成预签名 URL → 保存为 avatarUrl。
+ *
+ * 依赖接口（部分）：
+ * - GET `/user/profile`、PUT `/user/profile`
+ * - POST `/file/upload`、GET `/file/presigned`
+ */
 import { reactive, ref, onMounted } from 'vue'
 import { Avatar, Camera } from '@element-plus/icons-vue'
 import api from '../api'

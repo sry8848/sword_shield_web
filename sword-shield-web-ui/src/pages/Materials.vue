@@ -29,6 +29,17 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 资料下载页（用户端）。
+ *
+ * - 分页展示已发布资料（讲义/课件等），通过“预签名 URL”生成临时下载链接。
+ *
+ * 依赖接口：
+ * - GET `/content/materials`：资料列表
+ * - GET `/file/presigned`：根据 `objectName` 获取临时下载链接
+ *
+ * 数据字段主要对应后端 `MaterialDto`：`id/title/speaker/objectName/contentType/size/createdAt`。
+ */
 import { ref, onMounted } from 'vue'
 import api from '../api'
 import { ElMessage } from 'element-plus'

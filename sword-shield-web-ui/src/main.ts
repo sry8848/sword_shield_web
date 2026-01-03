@@ -1,3 +1,10 @@
+/**
+ * 前端应用入口。
+ *
+ * - 初始化 Vue App
+ * - 注册 Router
+ * - 引入并注册 Element Plus 与全量图标（便于页面直接使用）
+ */
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'

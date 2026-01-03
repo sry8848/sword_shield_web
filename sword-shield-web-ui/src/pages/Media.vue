@@ -111,6 +111,18 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 媒体中心页。
+ *
+ * - 展示图片/视频等媒体资产，支持按类型筛选与预览。
+ * - 通过文件服务的预签名 URL 获取可访问的临时链接。
+ *
+ * 依赖接口：
+ * - GET `/content/media`：媒体列表（可按 type 过滤）
+ * - GET `/file/presigned`：获取预览链接
+ *
+ * 数据字段主要对应后端 `MediaAssetDto`：`id/title/summary/type/objectName/coverUrl/articleId/createdAt`。
+ */
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Calendar, Camera, Film, Grid, Picture, VideoCamera, VideoPlay } from '@element-plus/icons-vue'

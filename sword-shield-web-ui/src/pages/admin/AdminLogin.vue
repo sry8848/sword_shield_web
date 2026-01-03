@@ -43,6 +43,15 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 管理员登录页。
+ *
+ * - 调用后端管理员登录接口换取 JWT，并写入 localStorage：`adminToken/adminId/adminUsername/adminNickname`。
+ * - 登录成功后根据 query `redirect` 跳转到后台目标页面（默认 `/admin/dashboard`）。
+ *
+ * 依赖接口：
+ * - POST `/admin/auth/login`
+ */
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import adminApi from '../../adminApi'

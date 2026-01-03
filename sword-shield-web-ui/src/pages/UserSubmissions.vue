@@ -54,21 +54,49 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 用户投稿列表页（UGC）。
+ *
+ * - 展示已发布的用户投稿内容（后端通常以 `category=UGC` 且 `status=published` 的文章为准）。
+ * - 点击卡片进入文章详情页查看全文。
+ *
+ * 依赖接口：
+ * - GET `/content/articles?category=UGC`
+ */
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChatLineSquare } from '@element-plus/icons-vue'
 import api from '../api'
 
 type Submission = {
+  /** 投稿文章 ID。 */
   id: number
+
+  /** 标题。 */
   title: string
+
+  /** 摘要/简介（可为空）。 */
   summary?: string
+
+  /** 正文（列表场景通常不返回/不使用）。 */
   body?: string
+
+  /** 封面图片 URL（可为空）。 */
   coverUrl?: string | null
+
+  /** 分类（UGC）。 */
   category?: string
+
+  /** 状态（0-草稿，1-发布；以服务端约定为准）。 */
   status?: number
+
+  /** 发布时间（发布后才有）。 */
   publishedAt?: string | null
+
+  /** 创建时间。 */
   createdAt?: string | null
+
+  /** 更新时间。 */
   updatedAt?: string | null
 }
 

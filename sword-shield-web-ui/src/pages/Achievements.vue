@@ -22,6 +22,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 成果展示页。
+ *
+ * - 分页展示大会成果条目（标题、描述、关联文件链接）。
+ *
+ * 依赖接口：
+ * - GET `/content/achievements`
+ *
+ * 数据字段主要对应后端 `AchievementDto`：`id/title/description/fileUrl`。
+ */
 import { ref, onMounted } from 'vue'
 import api from '../api'
 import { ElMessage } from 'element-plus'

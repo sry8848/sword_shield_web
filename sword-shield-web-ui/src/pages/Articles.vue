@@ -49,6 +49,17 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 资讯列表页面 / 组件。
+ *
+ * - `minimal` 模式用于首页：仅展示标题列表。
+ * - 默认模式展示资讯卡片，并提供分页。
+ *
+ * 依赖接口：
+ * - GET `/content/articles`：分页获取资讯列表（通过 `excludeCategory=UGC` 排除用户投稿）。
+ *
+ * 数据字段主要对应后端 `ContentArticleDto`：`id/title/summary/category/publishedAt` 等。
+ */
 import { onMounted, ref, defineProps } from 'vue'
 import api from '../api'
 
@@ -225,4 +236,3 @@ onMounted(fetchList)
   padding: 20px 0;
 }
 </style>
-

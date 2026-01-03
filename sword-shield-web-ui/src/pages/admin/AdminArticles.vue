@@ -146,23 +146,57 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 后台资讯管理页。
+ *
+ * - 管理员对文章（非 UGC）进行增删改查（CRUD），支持草稿/发布状态与分类筛选。
+ *
+ * 依赖接口：
+ * - GET `/content/admin/articles`
+ * - POST `/content/admin/articles`
+ * - PUT `/content/admin/articles/:id`
+ * - DELETE `/content/admin/articles/:id`
+ */
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import adminApi from '../../adminApi'
 
 type Article = {
+  /** 文章 ID（编辑/删除时存在）。 */
   id?: number
+
+  /** 标题。 */
   title: string
+
+  /** 摘要/简介。 */
   summary: string
+
+  /** 正文内容。 */
   body: string
+
+  /** 封面图片 URL（可为空）。 */
   coverUrl?: string
+
+  /** 分类/频道（可为空）。 */
   category?: string
+
+  /** 作者署名（可为空）。 */
   author?: string
+
+  /** 直播链接（可为空）。 */
   liveUrl?: string
+
+  /** 回放链接（可为空）。 */
   replayUrl?: string
+
+  /** 状态：0-草稿，1-发布。 */
   status: number
+
+  /** 发布时间（发布后才有）。 */
   publishedAt?: string | null
+
+  /** 更新时间。 */
   updatedAt?: string | null
 }
 

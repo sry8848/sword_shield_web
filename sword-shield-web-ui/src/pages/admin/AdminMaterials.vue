@@ -97,6 +97,17 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 后台资料管理页。
+ *
+ * - 上传资料文件（MinIO），并在内容服务侧创建素材记录。
+ * - 支持列表查看、复制下载链接（预签名 URL）、删除资料等操作。
+ *
+ * 依赖接口（部分）：
+ * - POST `/file/upload`
+ * - POST `/content/material`、GET `/content/materials`、DELETE `/content/material/:id`
+ * - GET `/file/presigned`
+ */
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload } from '@element-plus/icons-vue'

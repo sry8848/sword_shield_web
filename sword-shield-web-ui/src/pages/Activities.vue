@@ -72,6 +72,17 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 活动列表页面 / 组件。
+ *
+ * - `minimal` 模式用于首页等场景：仅展示标题列表（不分页、不展示详情卡片）。
+ * - 默认模式展示活动卡片、支持按时间/热度排序，并提供分页。
+ *
+ * 依赖接口：
+ * - GET `/activity/list`：分页获取已发布活动列表。
+ *
+ * 数据字段主要对应后端 `ActivityDto`：`id/title/summary/coverUrl/startTime/location/heat` 等。
+ */
 import { onMounted, ref, defineProps } from 'vue'
 import api from '../api'
 
@@ -297,4 +308,3 @@ onMounted(fetchList)
   padding: 20px 0;
 }
 </style>
-

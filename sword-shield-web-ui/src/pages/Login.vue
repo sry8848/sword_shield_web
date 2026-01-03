@@ -49,6 +49,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 用户登录页。
+ *
+ * - 调用后端登录接口换取 JWT，并写入 localStorage：`token/userId/username/userAvatar`。
+ * - 登录成功后根据 query `redirect` 跳回原页面。
+ *
+ * 依赖接口：
+ * - POST `/user/login`
+ * - GET `/user/profile`（用于补齐头像/昵称）
+ */
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../api'

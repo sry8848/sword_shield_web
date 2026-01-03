@@ -97,6 +97,14 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 数据看板（活动统计）。
+ *
+ * - 汇总展示各活动的报名数、报名率、热度等统计指标，并提供跳转到活动详情的入口。
+ *
+ * 依赖接口：
+ * - GET `/activity/statistics/all`
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api'

@@ -194,6 +194,18 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 后台媒体管理页。
+ *
+ * - 上传图片/视频文件（MinIO），并在内容服务侧创建媒体资源记录（可关联文章）。
+ * - 支持筛选、预览（预签名 URL）、删除等操作。
+ *
+ * 依赖接口（部分）：
+ * - POST `/file/upload`
+ * - POST `/content/media`、GET `/content/media`、DELETE `/content/media/:id`
+ * - GET `/content/articles`（用于关联文章下拉）
+ * - GET `/file/presigned`
+ */
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Camera, CircleCheck, Delete, List, Picture, Promotion, Upload, VideoCamera, View } from '@element-plus/icons-vue'

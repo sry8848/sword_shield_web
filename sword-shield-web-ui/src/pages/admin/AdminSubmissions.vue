@@ -112,20 +112,49 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 后台投稿审核页（UGC）。
+ *
+ * - 展示用户投稿文章（category=UGC），支持查看详情、通过发布、删除等操作。
+ *
+ * 依赖接口：
+ * - GET `/content/admin/articles?category=UGC`
+ * - PUT `/content/admin/articles/:id`（通过并发布）
+ * - DELETE `/content/admin/articles/:id`
+ */
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import adminApi from '../../adminApi'
 
 type Submission = {
+  /** 投稿文章 ID。 */
   id?: number
+
+  /** 标题。 */
   title: string
+
+  /** 摘要/简介。 */
   summary: string
+
+  /** 正文内容。 */
   body: string
+
+  /** 封面图片 URL（可为空）。 */
   coverUrl?: string
+
+  /** 分类（UGC）。 */
   category?: string
+
+  /** 状态：0-草稿，1-发布（以服务端约定为准）。 */
   status: number
+
+  /** 创建时间。 */
   createdAt?: string | null
+
+  /** 更新时间。 */
   updatedAt?: string | null
+
+  /** 发布时间（发布后才有）。 */
   publishedAt?: string | null
 }
 

@@ -108,11 +108,21 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 资讯/文章直播/回放页（伪直播展示）。
+ *
+ * - 文章本身没有排期字段，这里以“进入页面时刻”作为伪直播计时基准。
+ * - `mode` 来自路由 query：`?mode=pre|live|replay`，用于手动切换/调试。
+ *
+ * 依赖接口：
+ * - GET `/content/article`：获取文章信息（含 `liveUrl` / `replayUrl`）。
+ */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import api from '../api'
 
+// 页面模式：pre=未开始（调试用），live=直播，replay=回放
 type Mode = 'pre' | 'live' | 'replay'
 
 const route = useRoute()

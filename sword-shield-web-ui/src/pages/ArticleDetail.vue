@@ -198,6 +198,21 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 资讯/文章详情页。
+ *
+ * - 展示文章正文与元信息（分类、发布时间等）。
+ * - 支持评论/点赞/分享互动，并展示关联媒体资源（图片/视频）与下载/预览能力。
+ * - 支持生成“分享海报”（后端异步任务：创建任务 → 轮询状态 → 打开结果 URL）。
+ *
+ * 依赖接口（部分）：
+ * - GET `/content/article`
+ * - GET `/content/media/by-article`、GET `/content/media`
+ * - GET `/file/presigned`（下载/预览）
+ * - GET `/interaction/comments`、POST `/interaction/comment`
+ * - POST `/interaction/like`、GET `/interaction/likes/count`、POST `/interaction/share`
+ * - POST `/content/poster`、GET `/content/poster/jobs/:jobId`
+ */
 import { nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Picture, VideoPlay } from '@element-plus/icons-vue'

@@ -88,6 +88,13 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 根组件（App Shell）。
+ *
+ * - 用户端：渲染顶部导航/页脚，并根据 localStorage 中的 `token/username/userAvatar` 展示登录状态。
+ * - 管理端：当路由以 `/admin` 开头时，交由后台布局组件渲染（本组件仅透传 `<router-view />`）。
+ * - 通过监听 `user-login` 自定义事件与 `storage` 事件，保证多标签页/跨页面状态同步。
+ */
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { DataBoard, Lock } from '@element-plus/icons-vue'

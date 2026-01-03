@@ -1,3 +1,10 @@
+/**
+ * 前端路由与鉴权守卫。
+ *
+ * - `/admin/**`：管理端路由，使用 `adminToken` 鉴权；未登录会跳转到 `/admin/login`（支持 redirect 深链）。
+ * - 其它路由：用户端路由，使用 `token` 鉴权；标记为 `meta.public` 的路由允许匿名访问。
+ * - 内置 JWT 过期判断：若 token 过期会清理 localStorage 并触发重新登录。
+ */
 import { createRouter, createWebHistory } from 'vue-router'
 import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
 import Login from './pages/Login.vue'
@@ -65,6 +72,7 @@ const routes = [
 const router = createRouter({ history: createWebHistory(), routes })
 
 type JwtPayload = {
+  /** JWT 过期时间（秒级时间戳）。 */
   exp?: number
 }
 

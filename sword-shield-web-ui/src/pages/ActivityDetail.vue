@@ -183,6 +183,19 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 活动详情页。
+ *
+ * - 展示活动基本信息（标题、时间、地点、限额、直播/回放链接）。
+ * - 提供报名、活动签到、分享、评论与点赞等互动能力。
+ *
+ * 依赖接口（部分）：
+ * - GET `/activity/detail`
+ * - GET `/activity/registration/status`、POST `/activity/register`
+ * - GET `/user/activity-checkin/status`、POST `/user/activity-checkin`
+ * - GET `/interaction/comments`、POST `/interaction/comment`
+ * - POST `/interaction/like`、GET `/interaction/likes/count`、POST `/interaction/share`
+ */
 import { nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api'

@@ -36,6 +36,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 用户投稿页（UGC）。
+ *
+ * - 支持上传封面图并提交文章内容。
+ * - 投稿默认使用 `category=UGC`，由后台审核后发布。
+ *
+ * 依赖接口：
+ * - POST `/file/upload`、GET `/file/presigned`（封面上传）
+ * - POST `/content/article/submit`
+ */
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft } from '@element-plus/icons-vue'

@@ -319,6 +319,17 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 首页（用户端）。
+ *
+ * - 复用 `Activities` / `Articles`（minimal 模式）展示热门活动与最新资讯。
+ * - 登录后展示“我报名的活动”，并提供海报生成等互动入口。
+ *
+ * 依赖接口（部分）：
+ * - GET `/activity/list`：热门活动/轮播数据
+ * - GET `/activity/my-registrations`：我的报名活动
+ * - POST `/content/poster`、GET `/content/poster/jobs/:jobId`：海报生成任务
+ */
 import Activities from './Activities.vue'
 import Articles from './Articles.vue'
 import { ref, onMounted, computed } from 'vue'

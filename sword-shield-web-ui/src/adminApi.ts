@@ -1,3 +1,10 @@
+/**
+ * 管理后台 API 客户端（axios 实例）。
+ *
+ * - 与前台共用 `/api` 前缀（由网关区分路径）。
+ * - 请求拦截器：除登录接口外，从 localStorage 读取 `adminToken` 并注入 Authorization。
+ * - 之所以跳过 `/admin/auth/login`：避免携带过期 token 被网关提前拒绝导致无法登录。
+ */
 import axios, { AxiosHeaders } from 'axios'
 
 const adminApi = axios.create({

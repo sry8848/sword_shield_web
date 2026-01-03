@@ -58,6 +58,14 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 用户注册页。
+ *
+ * - 提交用户名/密码/确认密码完成注册，成功后跳转到登录页。
+ *
+ * 依赖接口：
+ * - POST `/user/register`
+ */
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api'

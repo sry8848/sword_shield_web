@@ -124,25 +124,63 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 后台活动管理页。
+ *
+ * - 管理员对活动进行增删改查（CRUD），并支持设置发布状态、报名限额、直播/回放链接等字段。
+ *
+ * 依赖接口：
+ * - GET `/admin/activities`
+ * - POST `/admin/activities`
+ * - PUT `/admin/activities/:id`
+ * - DELETE `/admin/activities/:id`
+ */
 import { ref, onMounted } from 'vue'
 import adminApi from '../../adminApi'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 
 interface Activity {
+  /** 活动 ID（编辑/删除时存在）。 */
   id?: number
+
+  /** 活动标题。 */
   title: string
+
+  /** 嘉宾/讲师（可为空）。 */
   speaker?: string
+
+  /** 活动摘要/简介（可为空）。 */
   summary?: string
+
+  /** 开始时间（ISO 字符串/可被 Date 解析的字符串）。 */
   startTime: string
+
+  /** 结束时间（ISO 字符串/可被 Date 解析的字符串）。 */
   endTime: string
+
+  /** 报名人数上限（可为空表示不限制）。 */
   maxRegistrations?: number
+
+  /** 活动地点（可为空）。 */
   location?: string
+
+  /** 直播链接（可为空）。 */
   liveUrl?: string
+
+  /** 回放链接（可为空）。 */
   replayUrl?: string
+
+  /** 封面图片 URL（可为空）。 */
   coverUrl?: string
+
+  /** 状态：0-下线，1-发布。 */
   status: number
+
+  /** 当前报名人数（后端统计字段）。 */
   currentRegistrations?: number
+
+  /** 热度/人气值（后端统计字段）。 */
   heat?: number
 }
 

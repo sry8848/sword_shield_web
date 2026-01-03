@@ -73,6 +73,14 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 后台首页（概览）。
+ *
+ * - 展示活动数量、发布状态、报名数、热度等聚合指标（基于活动列表计算）。
+ *
+ * 依赖接口：
+ * - GET `/admin/activities`
+ */
 import { ref, onMounted } from 'vue'
 import adminApi from '../../adminApi'
 import { Calendar, SuccessFilled, User, TrendCharts } from '@element-plus/icons-vue'
