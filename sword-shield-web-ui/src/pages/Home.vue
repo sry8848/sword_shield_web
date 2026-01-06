@@ -356,13 +356,13 @@ const isLoggedIn = computed(() => {
 // 轮播图数据 - 从后端获取热门活动
 const carouselItems = ref<any[]>([])
 
-// 默认轮播图片库 - 会议/科技/峰会主题
+// 默认轮播图片库 - 网络安全/会议/科技主题（与活动主题匹配）
 const defaultImages = [
-  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop', // 大型会议现场
-  'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=400&fit=crop', // 团队会议讨论
-  'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=400&fit=crop', // 数据中心/服务器
-  'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=400&fit=crop', // 网络安全主题
-  'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&h=400&fit=crop'  // 科技女性刷卡
+  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=450&fit=crop', // 大型会议现场 - 对应开幕式
+  'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=450&fit=crop', // 网络安全主题 - 对应攻防演练
+  'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=450&fit=crop', // 数据隐私保护 - 对应数据安全
+  'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=450&fit=crop', // AI人工智能 - 对应AI安全
+  'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&h=450&fit=crop'  // 云计算服务器 - 对应云安全
 ]
 
 // 加载轮播图活动数据
