@@ -116,7 +116,7 @@
         <div class="comment-input-area">
           <el-input 
             ref="commentInputRef"
-            v-model="comment" 
+            v-model="comment"
             type="textarea" 
             :rows="3"
             placeholder="写下你的想法..."
@@ -129,7 +129,6 @@
               type="primary" 
               @click="postComment" 
               :loading="commenting"
-              :disabled="!comment.trim()"
             >
               发表评论
             </el-button>
@@ -147,7 +146,7 @@
             </div>
             <div class="comment-main">
               <div class="comment-header">
-                <span class="user-name">用户_{{ c.userId?.substring(0, 6) || '匿名' }}</span>
+                <span class="user-name">用户_{{ c.userId != null ? String(c.userId).substring(0, 6) : '匿名' }}</span>
                 <span class="time-ago">{{ formatDate(c.createdAt) }}</span>
               </div>
               <div class="comment-body">
@@ -242,6 +241,19 @@ const mediaPreviewVisible = ref(false)
 const mediaPreviewUrl = ref('')
 const currentMedia = ref<any>(null)
 
+function getRouteId(): string {
+  const paramId = Array.isArray(route.params.id) ? route.params.id[0] : (route.params.id as any)
+  const queryId = Array.isArray(route.query.id) ? route.query.id[0] : (route.query.id as any)
+  const id = paramId ?? queryId
+  return id == null ? '' : String(id)
+}
+
+function getTargetId(): string | number {
+  const idStr = getRouteId()
+  const n = Number(idStr)
+  return Number.isNaN(n) ? idStr : n
+}
+
 function formatDate(dateStr: string) {
   if (!dateStr) return ''
   const date = new Date(dateStr)
@@ -280,14 +292,20 @@ async function focusCommentBox() {
 
 
 async function load() {
-  const { data } = await api.get('/content/article', { params: { id: route.params.id } })
+  const id = getRouteId()
+  if (!id) {
+    ElMessage.error('未指定文章 ID')
+    return
+  }
+
+  const { data } = await api.get('/content/article', { params: { id } })
   if (data.code === 0) item.value = data.data
   
   // Load initial like count
   const likeCountRes = await api.get('/interaction/likes/count', { 
     params: { 
       targetType: 'article', 
-      targetId: Number(route.params.id) 
+      targetId: getTargetId() 
     } 
   })
   if (likeCountRes.data.code === 0) {
@@ -301,7 +319,7 @@ async function load() {
 async function loadRelatedMedia() {
   try {
     const { data } = await api.get('/content/media/by-article', {
-      params: { articleId: Number(route.params.id) }
+      params: { articleId: getTargetId() }
     })
     if (data.code === 0) {
       relatedMedia.value = data.data
@@ -351,7 +369,7 @@ async function loadComments() {
   const { data } = await api.get('/interaction/comments', { 
     params: { 
       targetType: 'article', 
-      targetId: Number(route.params.id), 
+      targetId: getTargetId(), 
       page: 0, 
       size: 10 
     } 
@@ -383,7 +401,7 @@ async function postComment() {
   try {
     const { data } = await api.post('/interaction/comment', { 
       targetType: 'article', 
-      targetId: Number(route.params.id), 
+      targetId: getTargetId(), 
       content: comment.value 
     })
     if (data.code === 0) {
@@ -415,7 +433,7 @@ async function like() {
   try {
     const { data } = await api.post('/interaction/like', { 
       targetType: 'article', 
-      targetId: Number(route.params.id) 
+      targetId: getTargetId() 
     })
     if (data.code === 0) {
       likeCount.value = data.data.count
@@ -451,7 +469,7 @@ async function share() {
     }
     const { data } = await api.post('/interaction/share', {
       targetType: 'article',
-      targetId: Number(route.params.id),
+      targetId: getTargetId(),
       channel: 'link'
     })
     if (data.code === 0) {
