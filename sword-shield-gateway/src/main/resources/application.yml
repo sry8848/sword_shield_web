@@ -27,6 +27,7 @@ gateway:
       - /api/content/achievement**
       - /api/content/material**
       - /api/content/media**
+      - /api/content/media/**
       - /api/content/poster**
       - /api/file/presigned**
       - /api/interaction/comments**

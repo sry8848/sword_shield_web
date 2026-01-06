@@ -351,7 +351,8 @@ public class ContentService {
         return toDto(mediaRepo.save(a));
     }
 
-    @Cacheable(cacheNames = "content:mediaByArticle", key = "'articleId=' + #articleId", sync = true)
+    // Note: @Cacheable removed due to GenericJackson2JsonRedisSerializer issues with List<T> generic types.
+    // TODO: Consider using a wrapper class or manual caching via CacheSupport for list results.
     public java.util.List<MediaAssetDto> getMediaByArticleId(Long articleId) {
         return mediaRepo.findByArticleId(articleId).stream().map(this::toDto).toList();
     }

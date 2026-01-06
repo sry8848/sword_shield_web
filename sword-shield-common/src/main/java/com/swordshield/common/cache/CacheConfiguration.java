@@ -33,7 +33,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @EnableCaching
 public class CacheConfiguration {
     private static final Logger log = LoggerFactory.getLogger(CacheConfiguration.class);
-    private static final String CACHE_PREFIX_VERSION = "v1";
+    private static final String CACHE_PREFIX_VERSION = "v2";
 
     /**
      * 配置Redis缓存序列化配置
