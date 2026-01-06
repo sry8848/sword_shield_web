@@ -42,7 +42,8 @@
       >
         <div class="media-thumbnail">
           <div v-if="item.type === 'image'" class="thumbnail-image">
-            <el-icon class="media-icon"><Picture /></el-icon>
+            <img v-if="getThumbSrc(item)" :src="getThumbSrc(item)" class="thumbnail-cover" alt="缩略图" />
+            <el-icon v-else class="media-icon"><Picture /></el-icon>
             <div class="media-type-badge image-badge">
               <el-icon class="badge-icon"><Picture /></el-icon>
               图片
@@ -137,6 +138,44 @@ const loading = ref(false)
 const previewVisible = ref(false)
 const previewUrl = ref('')
 const currentMedia = ref<any>(null)
+const thumbUrlMap = ref<Record<string, string>>({})
+
+function isProbablyUrl(value: any) {
+  if (!value || typeof value !== 'string') return false
+  return /^https?:\/\//i.test(value) || value.startsWith('/') || value.startsWith('data:') || value.startsWith('blob:')
+}
+
+function resolveObjectName(item: any) {
+  return item?.objectName || item?.coverUrl || ''
+}
+
+function getThumbSrc(item: any) {
+  if (!item) return ''
+  const cached = thumbUrlMap.value[String(item.id)]
+  if (cached) return cached
+  if (isProbablyUrl(item.coverUrl)) return item.coverUrl
+  return ''
+}
+
+async function ensureThumbUrls(list: any[]) {
+  const imageItems = (list || []).filter((x) => x?.type === 'image')
+  const targets = imageItems.filter((x) => {
+    const id = String(x.id)
+    if (thumbUrlMap.value[id]) return false
+    if (isProbablyUrl(x.coverUrl)) return false
+    return !!resolveObjectName(x)
+  })
+
+  await Promise.allSettled(
+    targets.map(async (item) => {
+      const objectName = resolveObjectName(item)
+      const { data } = await api.get('/file/presigned', { params: { objectName, expireSeconds: 600 } })
+      if (data.code === 0 && data.data) {
+        thumbUrlMap.value[String(item.id)] = data.data
+      }
+    })
+  )
+}
 
 async function loadMedia(page = 1) {
   loading.value = true
@@ -155,6 +194,7 @@ async function loadMedia(page = 1) {
     if (data.code === 0) {
       items.value = data.data.items
       total.value = data.data.total
+      ensureThumbUrls(items.value)
     }
   } catch (error) {
     ElMessage.error('加载失败，请稍后重试')
@@ -164,18 +204,27 @@ async function loadMedia(page = 1) {
 }
 
 async function openPreview(item: any) {
+  previewUrl.value = ''
+  currentMedia.value = item
   try {
-    const { data } = await api.get('/file/presigned', {
-      params: {
-        objectName: item.objectName,
-        expireSeconds: 600
-      }
-    })
-    
-    if (data.code === 0) {
-      previewUrl.value = data.data
-      currentMedia.value = item
+    if (item?.type === 'image' && isProbablyUrl(item.coverUrl)) {
+      previewUrl.value = item.coverUrl
       previewVisible.value = true
+      return
+    }
+
+    const objectName = resolveObjectName(item)
+    if (!objectName) {
+      ElMessage.error('缺少文件标识，无法预览')
+      return
+    }
+
+    const { data } = await api.get('/file/presigned', { params: { objectName, expireSeconds: 600 } })
+    if (data.code === 0 && data.data) {
+      previewUrl.value = data.data
+      previewVisible.value = true
+    } else {
+      ElMessage.error(data.message || '获取预览链接失败')
     }
   } catch (error) {
     ElMessage.error('获取预览链接失败')
@@ -282,6 +331,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.thumbnail-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .thumbnail-video {
