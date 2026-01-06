@@ -3,6 +3,7 @@ package com.swordshield.activity;
 import com.swordshield.activity.domain.Activity;
 import com.swordshield.activity.repository.ActivityRegistrationRepository;
 import com.swordshield.activity.repository.ActivityRepository;
+import com.swordshield.activity.repository.LikeRecordRepository;
 import com.swordshield.activity.service.ActivityService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,9 @@ public class ActivityServiceTest {
     void testRegisterTimeWindowAndCapacity() {
         ActivityRepository ar = Mockito.mock(ActivityRepository.class);
         ActivityRegistrationRepository rr = Mockito.mock(ActivityRegistrationRepository.class);
+        LikeRecordRepository likeRecordRepository = Mockito.mock(LikeRecordRepository.class);
         CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        ActivityService service = new ActivityService(ar, rr, cacheManager);
+        ActivityService service = new ActivityService(ar, rr, likeRecordRepository, cacheManager);
 
         Instant now = Instant.now();
         Activity act = new Activity();

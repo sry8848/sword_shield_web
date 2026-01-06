@@ -1,6 +1,7 @@
 package com.swordshield.activity.repository;
 
 import com.swordshield.activity.domain.Activity;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,8 @@ import org.springframework.data.repository.query.Param;
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     Page<Activity> findByStatus(int status, Pageable pageable);
 
+  java.util.List<Activity> findByStatus(int status, Sort sort);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update Activity a
@@ -19,5 +22,13 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
                and (a.maxRegistrations is null or coalesce(a.currentRegistrations, 0) < a.maxRegistrations)
             """)
     int incrementCurrentRegistrationsIfAvailable(@Param("id") Long id);
+
+        @Modifying(clearAutomatically = true, flushAutomatically = true)
+        @Query("""
+          update Activity a
+             set a.views = coalesce(a.views, 0) + 1
+           where a.id = :id
+          """)
+        int incrementViews(@Param("id") Long id);
 }
 

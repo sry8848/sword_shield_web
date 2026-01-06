@@ -89,5 +89,20 @@ public class InteractionController {
         long count = service.countLikes(targetType, targetId);
         return Response.ok(Map.of("count", count));
     }
+
+    @GetMapping("/likes/state")
+    @Operation(summary = "点赞状态查询", description = "查询当前用户是否已点赞，并返回点赞总数（需携带用户 JWT）")
+    public Response<Map<String, Object>> likeState(
+            @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Bearer {token}", required = true)
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @RequestHeader(name = "X-User-Id", required = false) String userIdHeader,
+            @RequestParam("targetType") String targetType,
+            @RequestParam("targetId") Long targetId
+    ) {
+        Long userId = AuthUtils.requireUserId(userIdHeader, authorization);
+        boolean liked = service.isLiked(userId, targetType, targetId);
+        long count = service.countLikes(targetType, targetId);
+        return Response.ok(Map.of("liked", liked, "count", count));
+    }
 }
 

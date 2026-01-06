@@ -4,11 +4,10 @@ import com.swordshield.activity.domain.Activity;
 import com.swordshield.activity.domain.ActivityRegistration;
 import com.swordshield.activity.repository.ActivityRegistrationRepository;
 import com.swordshield.activity.repository.ActivityRepository;
+import com.swordshield.activity.repository.LikeRecordRepository;
 import com.swordshield.api.activity.ActivityDto;
 import com.swordshield.common.PageResult;
-import com.swordshield.common.cache.CacheSupport;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,11 +32,13 @@ import java.util.Map;
 public class ActivityService {
     private final ActivityRepository activityRepo;
     private final ActivityRegistrationRepository regRepo;
+    private final LikeRecordRepository likeRecordRepo;
     private final CacheManager cacheManager;
 
-    public ActivityService(ActivityRepository activityRepo, ActivityRegistrationRepository regRepo, CacheManager cacheManager) {
+    public ActivityService(ActivityRepository activityRepo, ActivityRegistrationRepository regRepo, LikeRecordRepository likeRecordRepo, CacheManager cacheManager) {
         this.activityRepo = activityRepo;
         this.regRepo = regRepo;
+        this.likeRecordRepo = likeRecordRepo;
         this.cacheManager = cacheManager;
     }
 
@@ -51,18 +52,26 @@ public class ActivityService {
         return activityRepo.findByStatus(1, pageable);
     }
 
-    @Cacheable(cacheNames = "activity:list",
-            key = "'p=' + #page + ':s=' + #size + ':o=' + (#orderBy == null ? '' : #orderBy.trim())",
-            sync = true)
     public PageResult<ActivityDto> listPublicActivities(int page, int size, String orderBy) {
-        Page<Activity> p = list(page, size, orderBy);
-        return PageResult.of(p.getContent().stream().map(this::toDto).toList(), p.getTotalElements(), p.getNumber(), p.getSize());
+        String normalized = orderBy == null ? "time" : orderBy.trim();
+        if ("heat".equalsIgnoreCase(normalized)) {
+            // 热度为动态指标（报名+浏览+点赞），需要按动态热度全量排序后分页，保证排序正确。
+            java.util.List<Activity> all = activityRepo.findByStatus(1, Sort.by(Sort.Direction.ASC, "id"));
+            return computeAndPageByHeat(all, page, size);
+        }
+
+        Page<Activity> p = list(page, size, normalized);
+        java.util.List<ActivityDto> dtos = toDtosWithDynamicHeat(p.getContent());
+        return PageResult.of(dtos, p.getTotalElements(), p.getNumber(), p.getSize());
     }
 
+    @Transactional
     public ActivityDto detail(Long id) {
-        return CacheSupport.getOptional(cacheManager, "activity:detail", "id=" + id,
-                () -> activityRepo.findById(id).map(this::toDto))
-                .orElseThrow(() -> new IllegalArgumentException("活动不存在"));
+        // 记录一次浏览（不依赖缓存，保证浏览量与热度动态更新）。
+        activityRepo.incrementViews(id);
+
+        Activity a = activityRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("活动不存在"));
+        return toDtoWithDynamicHeat(a);
     }
 
     public boolean isRegistered(Long userId, Long activityId) {
@@ -105,13 +114,20 @@ public class ActivityService {
         Activity activity = activityRepo.findById(activityId).orElseThrow(() -> new IllegalArgumentException("活动不存在"));
         long registrationCount = regRepo.countByActivityId(activityId);
 
+        long likeCount = likeRecordRepo.countLikesByTargetIds("activity", java.util.List.of(activityId)).stream()
+            .findFirst()
+            .map(LikeRecordRepository.LikeCount::getCnt)
+            .orElse(0L);
+        long views = activity.getViews() == null ? 0L : activity.getViews();
+        long dynamicHeat = registrationCount + views + likeCount;
+
         Map<String, Object> stats = new java.util.HashMap<>();
         stats.put("activityId", activityId);
         stats.put("activityTitle", activity.getTitle());
         stats.put("registrationCount", registrationCount);
         stats.put("maxRegistrations", activity.getMaxRegistrations());
         stats.put("currentRegistrations", activity.getCurrentRegistrations());
-        stats.put("heat", activity.getHeat());
+        stats.put("heat", dynamicHeat);
         stats.put("startTime", activity.getStartTime());
         stats.put("endTime", activity.getEndTime());
         stats.put("location", activity.getLocation());
@@ -142,15 +158,27 @@ public class ActivityService {
 
         java.util.List<Map<String, Object>> statsList = new java.util.ArrayList<>();
 
+        java.util.Map<Long, Long> likeCountByActivityId = java.util.Collections.emptyMap();
+        if (!activityIds.isEmpty()) {
+            likeCountByActivityId = likeRecordRepo.countLikesByTargetIds("activity", activityIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                            LikeRecordRepository.LikeCount::getTargetId,
+                            LikeRecordRepository.LikeCount::getCnt
+                    ));
+        }
+
         for (Activity activity : activities) {
             long registrationCount = registrationCountByActivityId.getOrDefault(activity.getId(), 0L);
+            long likeCount = likeCountByActivityId.getOrDefault(activity.getId(), 0L);
+            long views = activity.getViews() == null ? 0L : activity.getViews();
+            long dynamicHeat = registrationCount + views + likeCount;
             
             Map<String, Object> stats = new java.util.HashMap<>();
             stats.put("activityId", activity.getId());
             stats.put("activityTitle", activity.getTitle());
             stats.put("registrationCount", registrationCount);
             stats.put("maxRegistrations", activity.getMaxRegistrations());
-            stats.put("heat", activity.getHeat());
+            stats.put("heat", dynamicHeat);
             stats.put("startTime", activity.getStartTime());
 
             if (activity.getMaxRegistrations() != null && activity.getMaxRegistrations() > 0) {
@@ -251,5 +279,65 @@ public class ActivityService {
         dto.setCreatedAt(a.getCreatedAt());
         dto.setUpdatedAt(a.getUpdatedAt());
         return dto;
+    }
+
+    private java.util.List<ActivityDto> toDtosWithDynamicHeat(java.util.List<Activity> activities) {
+        if (activities == null || activities.isEmpty()) {
+            return java.util.List.of();
+        }
+
+        java.util.List<Long> ids = activities.stream().map(Activity::getId).toList();
+
+        java.util.Map<Long, Long> registrationsById = regRepo.countRegistrationsByActivityIds(ids).stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        ActivityRegistrationRepository.ActivityRegistrationCount::getActivityId,
+                        ActivityRegistrationRepository.ActivityRegistrationCount::getRegistrations
+                ));
+
+        java.util.Map<Long, Long> likesById = likeRecordRepo.countLikesByTargetIds("activity", ids).stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        LikeRecordRepository.LikeCount::getTargetId,
+                        LikeRecordRepository.LikeCount::getCnt
+                ));
+
+        return activities.stream().map((a) -> {
+            long registrations = registrationsById.getOrDefault(a.getId(), a.getCurrentRegistrations() == null ? 0L : a.getCurrentRegistrations().longValue());
+            long views = a.getViews() == null ? 0L : a.getViews();
+            long likes = likesById.getOrDefault(a.getId(), 0L);
+            long heat = registrations + views + likes;
+            ActivityDto dto = toDto(a);
+            dto.setHeat((int) Math.min(Integer.MAX_VALUE, heat));
+            return dto;
+        }).toList();
+    }
+
+    private ActivityDto toDtoWithDynamicHeat(Activity a) {
+        java.util.List<ActivityDto> list = toDtosWithDynamicHeat(java.util.List.of(a));
+        return list.isEmpty() ? toDto(a) : list.get(0);
+    }
+
+    private PageResult<ActivityDto> computeAndPageByHeat(java.util.List<Activity> activities, int page, int size) {
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(100, Math.max(1, size));
+
+        java.util.List<ActivityDto> dtos = toDtosWithDynamicHeat(activities);
+        dtos = dtos.stream()
+                .sorted((a, b) -> {
+                    int ha = a.getHeat() == null ? 0 : a.getHeat();
+                    int hb = b.getHeat() == null ? 0 : b.getHeat();
+                    int cmp = Integer.compare(hb, ha);
+                    if (cmp != 0) return cmp;
+                    // 热度相同按 id 倒序，稳定一些
+                    long ia = a.getId() == null ? 0 : a.getId();
+                    long ib = b.getId() == null ? 0 : b.getId();
+                    return Long.compare(ib, ia);
+                })
+                .toList();
+
+        long total = dtos.size();
+        int from = Math.min(dtos.size(), safePage * safeSize);
+        int to = Math.min(dtos.size(), from + safeSize);
+        java.util.List<ActivityDto> pageItems = dtos.subList(from, to);
+        return PageResult.of(pageItems, total, safePage, safeSize);
     }
 }

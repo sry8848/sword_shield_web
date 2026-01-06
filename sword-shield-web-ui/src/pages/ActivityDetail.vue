@@ -137,10 +137,13 @@
             <el-icon class="heading-icon"><ChatDotRound /></el-icon>
             评论区
           </h3>
-          <el-button size="small" @click="like" :loading="liking">
+          <el-button size="small" @click="like" :loading="liking" :type="liked ? 'primary' : ''">
             <span>
-              <el-icon class="inline-icon"><StarFilled /></el-icon>
-              {{ likeCount }}
+              <el-icon class="inline-icon">
+                <StarFilled v-if="liked" />
+                <Star v-else />
+              </el-icon>
+              {{ liked ? '已点赞' : '点赞' }} {{ likeCount }}
             </span>
           </el-button>
         </div>
@@ -178,9 +181,12 @@
             <div class="comment-content">
               <div class="comment-text">{{ c.content }}</div>
               <div class="comment-actions">
-                <el-button size="small" @click="likeComment(c)" :loading="c._liking">
-                  <el-icon class="inline-icon"><StarFilled /></el-icon>
-                  {{ c.likeCount ?? 0 }}
+                <el-button size="small" @click="likeComment(c)" :loading="c._liking" :type="c.isLiked ? 'primary' : ''">
+                  <el-icon class="inline-icon">
+                    <StarFilled v-if="c.isLiked" />
+                    <Star v-else />
+                  </el-icon>
+                  {{ c.isLiked ? '已点赞' : '点赞' }} {{ c.likeCount ?? 0 }}
                 </el-button>
               </div>
               <div class="comment-time">{{ formatDate(c.createdAt) }}</div>
@@ -217,6 +223,7 @@ const item = ref<any>(null)
 const comments = ref<any[]>([])
 const comment = ref('')
 const likeCount = ref(0)
+const liked = ref(false)
 const registering = ref(false)
 const commenting = ref(false)
 const liking = ref(false)
@@ -298,13 +305,25 @@ async function load() {
     await loadRegistrationStatus()
     await loadCheckinStatus()
   }
-  
-  // Load initial like count
-  const likeCountRes = await api.get('/interaction/likes/count', { 
-    params: { 
-      targetType: 'activity', 
-      targetId: Number(route.params.id) 
-    } 
+
+  const targetId = Number(route.params.id)
+  if (!Number.isFinite(targetId)) return
+
+  const token = localStorage.getItem('token')
+  if (token) {
+    const stateRes = await api.get('/interaction/likes/state', {
+      params: { targetType: 'activity', targetId },
+    })
+    if (stateRes.data.code === 0) {
+      likeCount.value = stateRes.data.data.count
+      liked.value = !!stateRes.data.data.liked
+      return
+    }
+    liked.value = false
+  }
+
+  const likeCountRes = await api.get('/interaction/likes/count', {
+    params: { targetType: 'activity', targetId },
   })
   if (likeCountRes.data.code === 0) {
     likeCount.value = likeCountRes.data.data.count
@@ -454,11 +473,20 @@ async function loadComments() {
   })
   if (data.code === 0) {
     comments.value = data.data.items
-    // fetch like counts per comment
+    const token = localStorage.getItem('token')
     await Promise.all(comments.value.map(async (c: any) => {
+      c._liking = false
+      c.isLiked = false
+      if (token) {
+        const { data: state } = await api.get('/interaction/likes/state', { params: { targetType: 'comment', targetId: c.id } })
+        if (state?.code === 0) {
+          c.likeCount = state?.data?.count ?? 0
+          c.isLiked = !!state?.data?.liked
+          return
+        }
+      }
       const { data: cnt } = await api.get('/interaction/likes/count', { params: { targetType: 'comment', targetId: c.id } })
       c.likeCount = cnt?.data?.count ?? 0
-      c._liking = false
     }))
   }
 }
@@ -510,12 +538,28 @@ async function like() {
   
   liking.value = true
   try {
-    const { data } = await api.post('/interaction/like', { 
-      targetType: 'activity', 
-      targetId: Number(route.params.id) 
-    })
+    const targetId = Number(route.params.id)
+    if (!Number.isFinite(targetId)) {
+      ElMessage.error('活动 ID 无效')
+      return
+    }
+
+    if (liked.value) {
+      const { data } = await api.post('/interaction/unlike', { targetType: 'activity', targetId })
+      if (data.code === 0) {
+        likeCount.value = data.data.count
+        liked.value = false
+        ElMessage.success('已取消点赞')
+      } else {
+        ElMessage.error(data.message || '操作失败')
+      }
+      return
+    }
+
+    const { data } = await api.post('/interaction/like', { targetType: 'activity', targetId })
     if (data.code === 0) {
       likeCount.value = data.data.count
+      liked.value = true
       ElMessage.success('点赞成功')
     } else {
       ElMessage.error(data.message || '操作失败')
@@ -563,9 +607,22 @@ async function likeComment(c: any) {
   
   c._liking = true
   try {
+    if (c.isLiked) {
+      const { data } = await api.post('/interaction/unlike', { targetType: 'comment', targetId: c.id })
+      if (data.code === 0) {
+        c.likeCount = data.data.count
+        c.isLiked = false
+        ElMessage.success('已取消点赞')
+      } else {
+        ElMessage.error(data.message || '操作失败')
+      }
+      return
+    }
+
     const { data } = await api.post('/interaction/like', { targetType: 'comment', targetId: c.id })
     if (data.code === 0) {
       c.likeCount = data.data.count
+      c.isLiked = true
       ElMessage.success('点赞成功')
     } else {
       ElMessage.error(data.message || '操作失败')

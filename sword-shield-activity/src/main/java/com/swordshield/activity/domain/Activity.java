@@ -50,6 +50,9 @@ public class Activity {
     /** 当前报名人数（用于展示与名额限制）。 */
     private Integer currentRegistrations;
 
+    /** 浏览量（用于热度计算与展示，可为空）。 */
+    private Integer views;
+
     /** 热度/人气值（用于排序与展示）。 */
     private Integer heat;
 
@@ -86,6 +89,8 @@ public class Activity {
     public void setMaxRegistrations(Integer maxRegistrations) { this.maxRegistrations = maxRegistrations; }
     public Integer getCurrentRegistrations() { return currentRegistrations; }
     public void setCurrentRegistrations(Integer currentRegistrations) { this.currentRegistrations = currentRegistrations; }
+    public Integer getViews() { return views; }
+    public void setViews(Integer views) { this.views = views; }
     public Integer getHeat() { return heat; }
     public void setHeat(Integer heat) { this.heat = heat; }
     public Integer getStatus() { return status; }

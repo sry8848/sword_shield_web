@@ -42,11 +42,11 @@
               plain 
               round 
               size="large"
-              :icon="likeCount > 0 ? StarFilled : Star"
+              :icon="liked ? StarFilled : Star"
               @click="like" 
               :loading="liking"
             >
-              {{ likeCount > 0 ? `赞同 ${likeCount}` : '点赞' }}
+              {{ liked ? `已点赞 ${likeCount}` : (likeCount > 0 ? `点赞 ${likeCount}` : '点赞') }}
             </el-button>
             <el-button 
               round 
@@ -161,7 +161,7 @@
                   :type="c.isLiked ? 'primary' : 'default'"
                 >
                   <el-icon style="margin-right: 4px"><component :is="c.isLiked ? StarFilled : Star" /></el-icon>
-                   {{ c.likeCount > 0 ? c.likeCount : '赞' }}
+                   {{ c.isLiked ? '已点赞' : '点赞' }} {{ c.likeCount ?? 0 }}
                 </el-button>
                 <el-button link size="small">回复</el-button>
               </div>
@@ -230,6 +230,7 @@ const item = ref<any>(null)
 const comments = ref<any[]>([])
 const comment = ref('')
 const likeCount = ref(0)
+const liked = ref(false)
 const commenting = ref(false)
 const liking = ref(false)
 const sharing = ref(false)
@@ -300,16 +301,27 @@ async function load() {
 
   const { data } = await api.get('/content/article', { params: { id } })
   if (data.code === 0) item.value = data.data
-  
-  // Load initial like count
-  const likeCountRes = await api.get('/interaction/likes/count', { 
-    params: { 
-      targetType: 'article', 
-      targetId: getTargetId() 
-    } 
-  })
-  if (likeCountRes.data.code === 0) {
-    likeCount.value = likeCountRes.data.data.count
+
+  const token = localStorage.getItem('token')
+  if (token) {
+    const stateRes = await api.get('/interaction/likes/state', {
+      params: { targetType: 'article', targetId: getTargetId() },
+    })
+    if (stateRes.data.code === 0) {
+      likeCount.value = stateRes.data.data.count
+      liked.value = !!stateRes.data.data.liked
+    } else {
+      liked.value = false
+    }
+  }
+
+  if (!token || !liked.value) {
+    const likeCountRes = await api.get('/interaction/likes/count', {
+      params: { targetType: 'article', targetId: getTargetId() },
+    })
+    if (likeCountRes.data.code === 0) {
+      likeCount.value = likeCountRes.data.data.count
+    }
   }
   
   // Load related media
@@ -376,10 +388,20 @@ async function loadComments() {
   })
   if (data.code === 0) {
     comments.value = data.data.items
+    const token = localStorage.getItem('token')
     await Promise.all(comments.value.map(async (c: any) => {
+      c._liking = false
+      c.isLiked = false
+      if (token) {
+        const { data: state } = await api.get('/interaction/likes/state', { params: { targetType: 'comment', targetId: c.id } })
+        if (state?.code === 0) {
+          c.likeCount = state?.data?.count ?? 0
+          c.isLiked = !!state?.data?.liked
+          return
+        }
+      }
       const { data: cnt } = await api.get('/interaction/likes/count', { params: { targetType: 'comment', targetId: c.id } })
       c.likeCount = cnt?.data?.count ?? 0
-      c._liking = false
     }))
   }
 }
@@ -431,12 +453,22 @@ async function like() {
   
   liking.value = true
   try {
-    const { data } = await api.post('/interaction/like', { 
-      targetType: 'article', 
-      targetId: getTargetId() 
-    })
+    if (liked.value) {
+      const { data } = await api.post('/interaction/unlike', { targetType: 'article', targetId: getTargetId() })
+      if (data.code === 0) {
+        likeCount.value = data.data.count
+        liked.value = false
+        ElMessage.success('已取消点赞')
+      } else {
+        ElMessage.error(data.message || '操作失败')
+      }
+      return
+    }
+
+    const { data } = await api.post('/interaction/like', { targetType: 'article', targetId: getTargetId() })
     if (data.code === 0) {
       likeCount.value = data.data.count
+      liked.value = true
       ElMessage.success('点赞成功')
     } else {
       ElMessage.error(data.message || '操作失败')
@@ -542,9 +574,22 @@ async function likeComment(c: any) {
   
   c._liking = true
   try {
+    if (c.isLiked) {
+      const { data } = await api.post('/interaction/unlike', { targetType: 'comment', targetId: c.id })
+      if (data.code === 0) {
+        c.likeCount = data.data.count
+        c.isLiked = false
+        ElMessage.success('已取消点赞')
+      } else {
+        ElMessage.error(data.message || '操作失败')
+      }
+      return
+    }
+
     const { data } = await api.post('/interaction/like', { targetType: 'comment', targetId: c.id })
     if (data.code === 0) {
       c.likeCount = data.data.count
+      c.isLiked = true
       ElMessage.success('点赞成功')
     } else {
       ElMessage.error(data.message || '操作失败')

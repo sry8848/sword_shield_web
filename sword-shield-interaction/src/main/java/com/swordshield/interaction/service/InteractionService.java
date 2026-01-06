@@ -53,9 +53,9 @@ public class InteractionService {
 
     @Transactional
     public synchronized long like(Long userId, String targetType, Long targetId) {
-        // Double-check to prevent duplicate likes
+        // Idempotent: if already liked, just return current count
         if (likeRepo.findByUserIdAndTargetTypeAndTargetId(userId, targetType, targetId).isPresent()) {
-            throw new IllegalArgumentException("您已点赞，无需重复点赞");
+            return likeRepo.countByTargetTypeAndTargetId(targetType, targetId);
         }
         
         Like l = new Like();
@@ -67,8 +67,8 @@ public class InteractionService {
         try {
             likeRepo.save(l);
         } catch (Exception e) {
-            // Handle unique constraint violation
-            throw new IllegalArgumentException("您已点赞，无需重复点赞");
+            // Idempotent behavior under concurrent requests / unique constraint
+            return likeRepo.countByTargetTypeAndTargetId(targetType, targetId);
         }
         
         return likeRepo.countByTargetTypeAndTargetId(targetType, targetId);
@@ -76,9 +76,11 @@ public class InteractionService {
 
     @Transactional
     public long unlike(Long userId, String targetType, Long targetId) {
-        Like l = likeRepo.findByUserIdAndTargetTypeAndTargetId(userId, targetType, targetId)
-            .orElseThrow(() -> new IllegalArgumentException("您还未点赞，无法取消点赞"));
-        likeRepo.delete(l);
+        // Idempotent: if not liked, just return current count
+        Like l = likeRepo.findByUserIdAndTargetTypeAndTargetId(userId, targetType, targetId).orElse(null);
+        if (l != null) {
+            likeRepo.delete(l);
+        }
         return likeRepo.countByTargetTypeAndTargetId(targetType, targetId);
     }
 
@@ -94,6 +96,10 @@ public class InteractionService {
 
     public long countLikes(String targetType, Long targetId) {
         return likeRepo.countByTargetTypeAndTargetId(targetType, targetId);
+    }
+
+    public boolean isLiked(Long userId, String targetType, Long targetId) {
+        return likeRepo.findByUserIdAndTargetTypeAndTargetId(userId, targetType, targetId).isPresent();
     }
 
     private CommentDto toDto(Comment c) {

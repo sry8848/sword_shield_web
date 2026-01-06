@@ -67,6 +67,9 @@ public class ActivityAdminService {
         if (entity.getCurrentRegistrations() == null) {
             entity.setCurrentRegistrations(0);
         }
+        if (entity.getViews() == null) {
+            entity.setViews(0);
+        }
         if (entity.getHeat() == null) {
             entity.setHeat(0);
         }

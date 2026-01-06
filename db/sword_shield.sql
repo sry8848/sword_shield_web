@@ -30,6 +30,7 @@ CREATE TABLE `activity` (
   `replay_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '回放链接',
   `max_registrations` int(11) DEFAULT NULL COMMENT '报名人数上限',
   `current_registrations` int(11) DEFAULT '0' COMMENT '当前报名人数',
+  `views` int(11) DEFAULT '0' COMMENT '浏览量',
   `heat` int(11) DEFAULT '0' COMMENT '热度值',
   `status` int(11) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
