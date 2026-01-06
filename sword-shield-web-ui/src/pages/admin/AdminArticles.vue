@@ -119,14 +119,6 @@
           <el-input v-model="form.coverUrl" placeholder="可选" />
         </el-form-item>
 
-        <el-form-item label="直播链接">
-          <el-input v-model="form.liveUrl" placeholder="可选" />
-        </el-form-item>
-
-        <el-form-item label="回放链接">
-          <el-input v-model="form.replayUrl" placeholder="可选" />
-        </el-form-item>
-
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio :label="0">草稿</el-radio>
@@ -184,12 +176,6 @@ type Article = {
   /** 作者署名（可为空）。 */
   author?: string
 
-  /** 直播链接（可为空）。 */
-  liveUrl?: string
-
-  /** 回放链接（可为空）。 */
-  replayUrl?: string
-
   /** 状态：0-草稿，1-发布。 */
   status: number
 
@@ -224,8 +210,6 @@ const form = reactive<Article>({
   coverUrl: '',
   category: '通用',
   author: '',
-  liveUrl: '',
-  replayUrl: '',
   status: 1
 })
 
@@ -293,8 +277,6 @@ function showCreateDialog() {
     coverUrl: '',
     category: '通用',
     author: '',
-    liveUrl: '',
-    replayUrl: '',
     status: 1
   })
   dialogVisible.value = true
@@ -310,8 +292,6 @@ function showEditDialog(row: Article) {
     coverUrl: row.coverUrl || '',
     category: row.category || '通用',
     author: row.author || '',
-    liveUrl: row.liveUrl || '',
-    replayUrl: row.replayUrl || '',
     status: typeof row.status === 'number' ? row.status : 0
   })
   dialogVisible.value = true
@@ -331,8 +311,6 @@ async function submitForm() {
       coverUrl: form.coverUrl || null,
       category: form.category || '通用',
       author: form.author || null,
-      liveUrl: form.liveUrl || null,
-      replayUrl: form.replayUrl || null,
       status: form.status
     }
 

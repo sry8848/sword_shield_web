@@ -15,7 +15,6 @@ import ActivityDetail from './pages/ActivityDetail.vue'
 import ActivityLive from './pages/ActivityLive.vue'
 import Articles from './pages/Articles.vue'
 import ArticleDetail from './pages/ArticleDetail.vue'
-import ArticleLive from './pages/ArticleLive.vue'
 import Profile from './pages/Profile.vue'
 import Points from './pages/Points.vue'
 import Statistics from './pages/Statistics.vue'
@@ -43,7 +42,6 @@ const routes = [
   { path: '/activity/:id/live', component: ActivityLive },
   { path: '/articles', component: Articles },
   { path: '/article/:id', component: ArticleDetail },
-  { path: '/article/:id/live', component: ArticleLive },
   { path: '/profile', component: Profile },
   { path: '/checkin', redirect: '/points' },
   { path: '/points', component: Points },

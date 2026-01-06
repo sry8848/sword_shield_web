@@ -1,131 +1,119 @@
 <template>
-  <div class="detail-container">
-    <el-card v-if="item" class="detail-card">
-      <div class="detail-header">
-        <div class="detail-back">
-          <el-button text :icon="ArrowLeft" @click="goBack">返回</el-button>
-        </div>
-        <h1 class="detail-title">{{ item.title }}</h1>
-        <div class="detail-meta">
-          <el-tag :type="getCategoryType(item.category)" size="large">{{ item.category || '通用' }}</el-tag>
-          <span class="publish-date">{{ formatDate(item.publishedAt) }}</span>
-        </div>
+  <div class="article-page">
+    <div class="article-container">
+      
+      <!-- Navigation / Breadcrumb -->
+      <div class="nav-header">
+        <el-button link :icon="ArrowLeft" @click="goBack" class="back-link">
+          返回列表
+        </el-button>
       </div>
 
-      <el-divider />
-
-      <div class="detail-content">
-        <p class="summary">{{ item.summary }}</p>
-        <div class="body-content" v-html="item.body" />
-      </div>
-
-      <!-- Live & Replay Links Section -->
-      <div v-if="item.liveUrl || item.replayUrl" class="media-links-section">
-        <el-divider />
-        <h3 class="section-heading">直播与回放</h3>
-        <div class="media-links">
-          <div v-if="item.liveUrl" class="media-card live-card" @click="enterLive(item.liveUrl)">
-            <div class="media-card-bg"></div>
-            <div class="media-card-content">
-              <div class="media-icon-wrapper live-icon-wrapper">
-                <el-icon class="media-icon"><VideoCameraFilled /></el-icon>
-              </div>
-              <div class="media-info">
-                <h4>直播中</h4>
-                <p>点击进入直播间观看精彩内容</p>
-              </div>
-              <div class="media-action">
-                <span class="action-text">进入直播</span>
-                <el-icon class="action-arrow"><ArrowRight /></el-icon>
-              </div>
-            </div>
-            <div class="live-indicator">
-              <span class="live-dot"></span>
-              <span>LIVE</span>
-            </div>
+      <el-card v-if="item" class="article-card" shadow="never">
+        
+        <!-- Article Header -->
+        <header class="article-header">
+          <div class="article-meta-top">
+             <el-tag :type="getCategoryType(item.category)" effect="light" round size="small">
+               {{ item.category || '通用' }}
+             </el-tag>
+             <span class="publish-date">{{ formatDate(item.publishedAt) }}</span>
           </div>
-          
-          <div v-if="item.replayUrl" class="media-card replay-card" @click="enterReplay(item.replayUrl)">
-            <div class="media-card-bg"></div>
-            <div class="media-card-content">
-              <div class="media-icon-wrapper replay-icon-wrapper">
-                <el-icon class="media-icon"><VideoPlay /></el-icon>
-              </div>
-              <div class="media-info">
-                <h4>视频回放</h4>
-                <p>观看往期精彩录播内容</p>
-              </div>
-              <div class="media-action">
-                <span class="action-text">观看回放</span>
-                <el-icon class="action-arrow"><ArrowRight /></el-icon>
-              </div>
-            </div>
-          </div>
+          <h1 class="article-title">{{ item.title }}</h1>
+        </header>
+
+        <!-- Summary / Lead -->
+        <div class="article-summary" v-if="item.summary">
+          <p>{{ item.summary }}</p>
         </div>
-      </div>
+
+        <el-divider border-style="dashed" />
+
+        <!-- Main Body -->
+        <div class="article-body">
+          <div class="typo-content" v-html="item.body"></div>
+        </div>
+
+        <!-- Action Bar (Like/Share) -->
+        <div class="article-actions">
+           <el-button-group>
+            <el-button 
+              type="primary" 
+              plain 
+              round 
+              size="large"
+              :icon="likeCount > 0 ? StarFilled : Star"
+              @click="like" 
+              :loading="liking"
+            >
+              {{ likeCount > 0 ? `赞同 ${likeCount}` : '点赞' }}
+            </el-button>
+            <el-button 
+              round 
+              size="large"
+              :icon="Share"
+              @click="share" 
+              :loading="sharing"
+            >
+              分享
+            </el-button>
+          </el-button-group>
+        </div>
+      </el-card>
 
       <!-- Media Gallery Section -->
-      <div v-if="relatedMedia.length > 0" class="media-gallery-section">
-        <el-divider />
-        <h3 class="section-heading">精彩花絮</h3>
+      <div v-if="relatedMedia.length > 0" class="section-container media-section">
+        <h3 class="section-heading">
+          <span class="icon-wrapper"><el-icon><VideoCamera /></el-icon></span>
+          精彩花絮
+        </h3>
         <div class="gallery-grid">
-          <el-card 
+          <div 
             v-for="media in relatedMedia" 
             :key="media.id" 
-            class="gallery-card"
-            shadow="hover"
+            class="media-card"
             @click="previewMedia(media)"
           >
-            <div class="gallery-thumbnail">
-              <div v-if="media.type === 'image'" class="thumbnail-image">
-                <img 
-                  v-if="media.thumbnailUrl" 
-                  :src="media.thumbnailUrl" 
-                  class="thumbnail-img"
-                  :alt="media.title"
-                />
-                <el-icon v-else class="gallery-icon"><Picture /></el-icon>
+            <div class="media-cover">
+              <img 
+                v-if="media.type === 'image' && media.thumbnailUrl" 
+                :src="media.thumbnailUrl" 
+                class="cover-img"
+                :alt="media.title"
+              />
+              <img 
+                v-else-if="media.type === 'video' && media.coverUrl" 
+                :src="media.coverUrl" 
+                class="cover-img"
+                :alt="media.title"
+              />
+              <div class="placeholder-icon" v-else>
+                 <el-icon v-if="media.type === 'image'"><Picture /></el-icon>
+                 <el-icon v-else><VideoPlay /></el-icon>
               </div>
-              <div v-else class="thumbnail-video">
-                <img 
-                  v-if="media.coverUrl" 
-                  :src="media.coverUrl" 
-                  class="thumbnail-img"
-                  :alt="media.title"
-                />
-                <el-icon v-else class="gallery-icon"><VideoPlay /></el-icon>
-                <div class="play-overlay">
-                  <el-icon class="play-icon"><VideoPlay /></el-icon>
-                </div>
-              </div>
-              <div class="media-type-badge" :class="media.type === 'image' ? 'image-badge' : 'video-badge'">
+              
+              <div class="media-badge" :class="media.type">
                 {{ media.type === 'image' ? '图片' : '视频' }}
               </div>
+              
+              <div class="play-overlay" v-if="media.type === 'video'">
+                 <el-icon><VideoPlay /></el-icon>
+              </div>
             </div>
-            <div class="gallery-info">
-              <h4 class="gallery-title">{{ media.title }}</h4>
-              <p class="gallery-summary" v-if="media.summary">{{ media.summary }}</p>
+            <div class="media-info">
+              <h4 class="media-title" :title="media.title">{{ media.title }}</h4>
             </div>
-          </el-card>
+          </div>
         </div>
       </div>
 
-      <el-divider />
-
-      <div class="interaction-section">
+      <!-- Comments Section -->
+      <div class="section-container comments-section">
         <div class="section-title">
-          <h3>评论区</h3>
-          <div>
-            <el-button size="small" @click="like" :loading="liking" style="margin-right: 8px;">
-              <span>赞同 {{ likeCount }}</span>
-            </el-button>
-            <el-button size="small" @click="share" :loading="sharing">
-              <span>分享</span>
-            </el-button>
-          </div>
+          <h3>评论 {{ comments.length > 0 ? `(${comments.length})` : '' }}</h3>
         </div>
 
-        <div class="comment-form">
+        <div class="comment-input-area">
           <el-input 
             ref="commentInputRef"
             v-model="comment" 
@@ -134,64 +122,82 @@
             placeholder="写下你的想法..."
             maxlength="500"
             show-word-limit
+            resize="none"
           />
-          <el-button 
-            type="primary" 
-            @click="postComment" 
-            :loading="commenting"
-            style="margin-top: 12px;"
-          >
-            发表评论
-          </el-button>
+          <div class="input-actions">
+            <el-button 
+              type="primary" 
+              @click="postComment" 
+              :loading="commenting"
+              :disabled="!comment.trim()"
+            >
+              发表评论
+            </el-button>
+          </div>
         </div>
 
         <div class="comments-list">
-          <div v-if="comments.length === 0" class="empty-comments">
-            <el-empty description="还没有评论，快来发表第一条吧！" :image-size="96">
-              <el-button type="primary" @click="focusCommentBox">去评论</el-button>
-            </el-empty>
+          <div v-if="comments.length === 0" class="empty-state">
+            <el-empty description="暂无评论，来坐沙发！" :image-size="80" />
           </div>
+          
           <div v-for="c in comments" :key="c.id" class="comment-item">
-            <div class="comment-avatar-mark">U</div>
-            <div class="comment-content">
-              <div class="comment-text">{{ c.content }}</div>
-              <div class="comment-actions">
-                <el-button size="small" @click="likeComment(c)" :loading="c._liking">
-                  赞 {{ c.likeCount ?? 0 }}
-                </el-button>
+            <div class="comment-avatar">
+              {{ 'U' }}
+            </div>
+            <div class="comment-main">
+              <div class="comment-header">
+                <span class="user-name">用户_{{ c.userId?.substring(0, 6) || '匿名' }}</span>
+                <span class="time-ago">{{ formatDate(c.createdAt) }}</span>
               </div>
-              <div class="comment-time">{{ formatDate(c.createdAt) }}</div>
+              <div class="comment-body">
+                {{ c.content }}
+              </div>
+              <div class="comment-footer">
+                <el-button 
+                  link 
+                  size="small" 
+                  @click="likeComment(c)" 
+                  :loading="c._liking"
+                  :type="c.isLiked ? 'primary' : 'default'"
+                >
+                  <el-icon style="margin-right: 4px"><component :is="c.isLiked ? StarFilled : Star" /></el-icon>
+                   {{ c.likeCount > 0 ? c.likeCount : '赞' }}
+                </el-button>
+                <el-button link size="small">回复</el-button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </el-card>
+    </div>
 
     <!-- Media Preview Dialog -->
     <el-dialog 
       v-model="mediaPreviewVisible" 
       :title="currentMedia?.title"
-      width="80%"
-      center
+      width="800px"
+      align-center
       destroy-on-close
+      class="media-preview-dialog"
     >
-      <div class="media-preview-content">
+      <div class="preview-container">
         <img 
           v-if="currentMedia?.type === 'image'" 
           :src="mediaPreviewUrl" 
-          class="preview-media-image"
-          alt="预览图片"
+          class="preview-img"
+          alt="预览"
         />
         <video 
           v-else 
           :src="mediaPreviewUrl" 
           controls 
           autoplay
-          class="preview-media-video"
+          class="preview-video"
         ></video>
-        <p v-if="currentMedia?.summary" class="preview-media-description">
+        <div v-if="currentMedia?.summary" class="preview-desc">
           {{ currentMedia.summary }}
-        </p>
+        </div>
       </div>
     </el-dialog>
   </div>
@@ -215,7 +221,7 @@
  */
 import { nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Picture, VideoPlay } from '@element-plus/icons-vue'
+import { ArrowLeft, Picture, VideoPlay, VideoCamera, Star, StarFilled, Share } from '@element-plus/icons-vue'
 import api from '../api'
 import { ElMessage } from 'element-plus'
 
@@ -230,6 +236,7 @@ const liking = ref(false)
 const sharing = ref(false)
 const commentInputRef = ref<any>(null)
 
+
 const relatedMedia = ref<any[]>([])
 const mediaPreviewVisible = ref(false)
 const mediaPreviewUrl = ref('')
@@ -238,7 +245,7 @@ const currentMedia = ref<any>(null)
 function formatDate(dateStr: string) {
   if (!dateStr) return ''
   const date = new Date(dateStr)
-  return date.toLocaleString('zh-CN')
+  return date.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
 function getCategoryType(category: string) {
@@ -271,15 +278,6 @@ async function focusCommentBox() {
   commentInputRef.value?.focus?.()
 }
 
-function enterLive(url: string) {
-  if (!url) return
-  router.push(`/article/${route.params.id}/live?mode=live`)
-}
-
-function enterReplay(url: string) {
-  if (!url) return
-  router.push(`/article/${route.params.id}/live?mode=replay`)
-}
 
 async function load() {
   const { data } = await api.get('/content/article', { params: { id: route.params.id } })
@@ -540,517 +538,309 @@ async function likeComment(c: any) {
   }
 }
 
-onMounted(async () => { 
+onMounted(async () => {
   await load()
   await loadComments()
 })
 </script>
 
 <style scoped>
-.detail-container {
-  max-width: 1240px;
-  margin: 24px auto 40px;
-}
-
-.detail-card {
-  border-radius: 24px;
-  padding: 24px 24px 20px;
-  background: #ffffff;
-  border: 1px solid rgba(191, 219, 254, 0.9);
-  box-shadow: 0 16px 40px rgba(148, 163, 184, 0.38);
-}
-
-.detail-header {
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(229, 231, 235, 0.9);
-}
-
-.detail-back {
-  margin-bottom: 6px;
-}
-
-.detail-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 12px 0;
-  line-height: 1.35;
-}
-
-.detail-meta {
+.article-page {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  padding: 24px 16px;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: center;
 }
 
-.publish-date {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.detail-content {
-  margin: 20px 0 16px;
-}
-
-.summary {
-  font-size: 15px;
-  line-height: 1.7;
-  color: #1f2937;
-  font-weight: 500;
-  padding: 12px 16px;
-  background: linear-gradient(120deg, #eff6ff 0%, #eef2ff 100%);
-  border-radius: 16px;
-  border: 1px solid rgba(191, 219, 254, 0.9);
-  box-shadow: 0 10px 28px rgba(129, 140, 248, 0.22);
-  margin-bottom: 24px;
-}
-
-.body-content {
-  font-size: 15px;
-  line-height: 1.8;
-  color: #111827;
-}
-
-.body-content :deep(h1),
-.body-content :deep(h2),
-.body-content :deep(h3) {
-  margin-top: 22px;
-  margin-bottom: 12px;
-  color: #0f172a;
-}
-
-.body-content :deep(p) {
-  margin-bottom: 14px;
-}
-
-.body-content :deep(img) {
-  max-width: 100%;
-  border-radius: 12px;
-  margin: 18px 0;
-  box-shadow: 0 10px 26px rgba(148, 163, 184, 0.4);
-}
-
-/* Live & Replay section */
-.media-links-section {
-  margin: 32px 0;
-}
-
-.section-heading {
-  font-size: 20px;
-  font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 20px;
-}
-
-.media-links {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+.article-container {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
 }
 
-.media-card {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+.nav-header {
+  margin-bottom: -8px;
 }
-
-.media-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.2);
-}
-
-.media-card-bg {
-  position: absolute;
-  inset: 0;
-  transition: opacity 0.4s ease;
-}
-
-.live-card .media-card-bg {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #60a5fa 100%);
-}
-
-.replay-card .media-card-bg {
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e40af 100%);
-}
-
-.media-card:hover .media-card-bg {
-  opacity: 0.95;
-}
-
-.media-card-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 28px 24px;
-}
-
-.media-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.live-icon-wrapper {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-}
-
-.replay-icon-wrapper {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-}
-
-.media-icon {
-  font-size: 32px;
-  color: #ffffff;
-}
-
-.media-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.media-info h4 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0 0 6px 0;
-}
-
-.media-info p {
+.back-link {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
+  color: #606266;
+}
+.back-link:hover {
+  color: #409eff;
 }
 
-.media-action {
+/* Article Card */
+.article-card {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  overflow: visible; /* To allow sticky elements if needed */
+}
+
+/* Article Header */
+.article-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-top: 10px;
+}
+
+.article-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.4;
+  margin: 16px 0;
+}
+
+.article-meta-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Summary */
+.article-summary {
+  background-color: #f8fafc;
+  border-left: 4px solid #409eff;
+  padding: 16px 20px;
+  border-radius: 4px;
+  margin-bottom: 30px;
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* Body Content */
+.article-body {
+  margin-bottom: 40px;
+}
+.typo-content {
+  color: #334155;
+  font-size: 17px;
+  line-height: 1.8;
+  word-wrap: break-word;
+}
+/* Deep selector for v-html content styles */
+.typo-content :deep(p) {
+  margin-bottom: 1.5em;
+}
+.typo-content :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  margin: 20px auto;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+.typo-content :deep(h2), .typo-content :deep(h3) {
+  color: #1e293b;
+  font-weight: 600;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+
+/* Actions */
+.article-actions {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0 10px;
+}
+
+/* Section Common Styles */
+.section-container {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.section-heading, .section-title h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 20px 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  border-radius: 24px;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
 }
-
-.media-card:hover .media-action {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateX(4px);
-}
-
-.action-text {
-  font-size: 14px;
-  font-weight: 500;
-  color: #ffffff;
-  white-space: nowrap;
-}
-
-.action-arrow {
-  font-size: 16px;
-  color: #ffffff;
-  transition: transform 0.3s ease;
-}
-
-.media-card:hover .action-arrow {
-  transform: translateX(4px);
-}
-
-.live-indicator {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 2;
+.icon-wrapper {
+  color: #409eff;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(239, 68, 68, 0.9);
-  border-radius: 16px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-  letter-spacing: 1px;
 }
 
-.live-dot {
-  width: 6px;
-  height: 6px;
-  background: #ffffff;
-  border-radius: 50%;
-  animation: livePulse 1.5s ease-in-out infinite;
-}
-
-@keyframes livePulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.8); }
-}
-
-/* Media Gallery */
-.media-gallery-section {
-  margin: 28px 0 12px;
-}
-
+/* Gallery Grid */
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
 }
 
-.gallery-card {
-  border-radius: 18px;
-  overflow: hidden;
+.media-card {
   cursor: pointer;
-  border: 1px solid rgba(209, 213, 219, 0.9);
-  box-shadow: 0 8px 22px rgba(148, 163, 184, 0.4);
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-}
-
-.gallery-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 32px rgba(148, 163, 184, 0.6);
-  border-color: rgba(59, 130, 246, 0.95);
-}
-
-.gallery-thumbnail {
-  height: 170px;
-  position: relative;
+  border-radius: 12px;
   overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff;
+  border: 1px solid #f3f4f6;
+}
+.media-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-.thumbnail-image {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
+.media-cover {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
 }
-
-.thumbnail-img {
+.cover-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  position: absolute;
-  top: 0;
-  left: 0;
 }
-
-.thumbnail-video {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #1d4ed8 0%, #4f46e5 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.gallery-icon {
+.placeholder-icon {
   font-size: 40px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #cbd5e1;
 }
+
+.media-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+}
+.media-badge.image { background: rgba(59, 130, 246, 0.9); }
+.media-badge.video { background: rgba(239, 68, 68, 0.9); }
 
 .play-overlay {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 52px;
-  height: 52px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 999px;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.22s ease;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.play-overlay .el-icon {
+  font-size: 32px;
+  color: white;
+}
+.media-card:hover .play-overlay {
+  opacity: 1;
 }
 
-.gallery-card:hover .play-overlay {
-  background: #ffffff;
-  transform: translate(-50%, -50%) scale(1.06);
+.media-info {
+  padding: 12px;
 }
-
-.play-icon {
-  font-size: 22px;
-  color: #2563eb;
-}
-
-.media-type-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.image-badge {
-  background: rgba(34, 197, 94, 0.9);
-}
-
-.video-badge {
-  background: rgba(59, 130, 246, 0.9);
-}
-
-.gallery-info {
-  padding: 10px 12px 12px;
-}
-
-.gallery-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 4px 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.gallery-summary {
-  font-size: 12px;
-  color: #6b7280;
+.media-title {
   margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
-  line-height: 1.4;
-}
-
-/* Media preview */
-.media-preview-content {
-  text-align: center;
-}
-
-.preview-media-image {
-  max-width: 100%;
-  max-height: 70vh;
-  border-radius: 12px;
-}
-
-.preview-media-video {
-  width: 100%;
-  max-height: 70vh;
-  border-radius: 12px;
-}
-
-.preview-media-description {
-  margin-top: 18px;
-  color: #4b5563;
   font-size: 14px;
-  line-height: 1.7;
-  text-align: left;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Interaction / comments */
-.interaction-section {
-  margin-top: 20px;
-  padding-top: 12px;
+/* Comments */
+.comment-input-area {
+  margin-bottom: 30px;
 }
-
-.section-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.section-title h3 {
-  font-size: 18px;
-  color: #0f172a;
-  margin: 0;
-}
-
-.comment-form {
-  margin-bottom: 24px;
+.input-actions {
+  margin-top: 12px;
+  text-align: right;
 }
 
 .comments-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-
-.empty-comments {
-  text-align: center;
-  padding: 18px 10px 8px;
+  gap: 20px;
 }
 
 .comment-item {
   display: flex;
-  padding: 16px 14px;
-  background: #f9fafb;
-  border-radius: 16px;
-  border: 1px solid rgba(209, 213, 219, 0.9);
+  gap: 16px;
 }
 
-.comment-avatar-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  background: #e0ecff;
-  color: #1d4ed8;
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
   font-weight: 600;
-  margin-right: 10px;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
-.comment-content {
+.comment-main {
   flex: 1;
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 12px;
+  border-bottom-left-radius: 2px; /* Chat bubble style */
 }
 
-.comment-text {
-  font-size: 14px;
-  color: #111827;
-  line-height: 1.6;
-  margin-bottom: 8px;
-}
-
-.comment-actions {
+.comment-header {
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 6px;
+  font-size: 13px;
 }
-
-.comment-time {
-  font-size: 12px;
+.user-name {
+  font-weight: 600;
+  color: #374151;
+}
+.time-ago {
   color: #9ca3af;
 }
 
-@media (max-width: 768px) {
-  .detail-card {
-    border-radius: 18px;
-    padding: 18px 14px 16px;
-  }
+.comment-body {
+  font-size: 14px;
+  color: #1f2937;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+}
 
-  .detail-title {
+.comment-footer {
+  display: flex;
+  gap: 12px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .article-title {
     font-size: 22px;
   }
-
-  .media-links {
-    grid-template-columns: minmax(0, 1fr);
+  .article-card, .section-container {
+    padding: 16px;
+    border-radius: 0;
   }
-
+  .article-page {
+    padding: 0;
+  }
   .gallery-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 1fr;
   }
 }
 </style>

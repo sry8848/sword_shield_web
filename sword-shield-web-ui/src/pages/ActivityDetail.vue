@@ -79,7 +79,12 @@
           直播与回放
         </h3>
         <div class="media-links">
-          <div v-if="item.liveUrl" class="media-card live-card" @click="enterLive(item.liveUrl)">
+          <div
+            v-if="item.liveUrl"
+            class="media-card live-card"
+            :class="{ disabled: !liveEnabled }"
+            @click="enterLive(item.liveUrl)"
+          >
             <div class="media-card-bg"></div>
             <div class="media-card-content">
               <div class="media-icon-wrapper live-icon-wrapper">
@@ -94,13 +99,18 @@
                 <el-icon class="action-arrow"><ArrowRight /></el-icon>
               </div>
             </div>
-            <div class="live-indicator">
+            <div v-if="liveEnabled" class="live-indicator">
               <span class="live-dot"></span>
               <span>LIVE</span>
             </div>
           </div>
           
-          <div v-if="item.replayUrl" class="media-card replay-card" @click="enterReplay(item.replayUrl)">
+          <div
+            v-if="item.replayUrl"
+            class="media-card replay-card"
+            :class="{ disabled: !replayEnabled }"
+            @click="enterReplay(item.replayUrl)"
+          >
             <div class="media-card-bg"></div>
             <div class="media-card-content">
               <div class="media-icon-wrapper replay-icon-wrapper">
@@ -196,7 +206,7 @@
  * - GET `/interaction/comments`、POST `/interaction/comment`
  * - POST `/interaction/like`、GET `/interaction/likes/count`、POST `/interaction/share`
  */
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api'
 import { ElMessage } from 'element-plus'
@@ -220,6 +230,36 @@ const canRegister = ref(true)
 const registerHint = ref('')
 const registered = ref(false)
 
+const nowMs = ref(Date.now())
+let nowTimer: number | null = null
+
+const startMs = computed(() => {
+  const t = item.value?.startTime
+  const ms = t ? new Date(t).getTime() : NaN
+  return Number.isFinite(ms) ? ms : null
+})
+
+const endMs = computed(() => {
+  const t = item.value?.endTime
+  const ms = t ? new Date(t).getTime() : NaN
+  return Number.isFinite(ms) ? ms : null
+})
+
+const liveEnabled = computed(() => {
+  if (!item.value?.liveUrl) return false
+  // 严格按时间窗：开始后（含）且结束前（不含）可进入直播
+  if (startMs.value != null && nowMs.value < startMs.value) return false
+  if (endMs.value != null && nowMs.value >= endMs.value) return false
+  return true
+})
+
+const replayEnabled = computed(() => {
+  if (!item.value?.replayUrl) return false
+  // 结束后（含）才可观看回放；若未配置结束时间，则保持可用（向后兼容）
+  if (endMs.value == null) return true
+  return nowMs.value >= endMs.value
+})
+
 function formatDate(dateStr: string) {
   if (!dateStr) return ''
   const date = new Date(dateStr)
@@ -239,11 +279,13 @@ function openLink(url: string) {
 
 function enterLive(url: string) {
   if (!url) return
+  if (!liveEnabled.value) return
   router.push(`/activity/${route.params.id}/live?mode=live`)
 }
 
 function enterReplay(url: string) {
   if (!url) return
+  if (!replayEnabled.value) return
   router.push(`/activity/${route.params.id}/live?mode=replay`)
 }
 
@@ -535,9 +577,22 @@ async function likeComment(c: any) {
   }
 }
 
-onMounted(async () => { 
+onMounted(async () => {
   await load()
   await loadComments()
+  nowTimer = window.setInterval(() => {
+    nowMs.value = Date.now()
+    // 报名/签到按钮也依赖时间窗，顺带刷新
+    computeRegisterWindow()
+    computeCheckinWindow()
+  }, 30_000)
+})
+
+onBeforeUnmount(() => {
+  if (nowTimer != null) {
+    window.clearInterval(nowTimer)
+    nowTimer = null
+  }
 })
 </script>
 
@@ -650,6 +705,13 @@ onMounted(async () => {
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.media-card.disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  filter: grayscale(0.85);
+  pointer-events: none;
 }
 
 .media-card:hover {

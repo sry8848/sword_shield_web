@@ -153,11 +153,21 @@ const modeOverride = computed<Mode | null>(() => {
 })
 
 const startMs = computed(() => {
-  // Article 没有活动时间字段，伪直播用“进入页面时刻”作为开始基准
+  const t = item.value?.startTime
+  if (t) {
+    const ms = new Date(t).getTime()
+    if (Number.isFinite(ms)) return ms
+  }
+  // 若未提供排期字段，伪直播用“进入页面时刻”作为开始基准
   return sessionStartMs.value
 })
 
-const endMs = computed(() => null as number | null)
+const endMs = computed(() => {
+  const t = item.value?.endTime
+  if (!t) return null
+  const ms = new Date(t).getTime()
+  return Number.isFinite(ms) ? ms : null
+})
 
 const expectedSeconds = computed(() => {
   return Math.max(0, Math.floor((nowMs.value - startMs.value) / 1000))
@@ -191,6 +201,20 @@ function computeMode() {
   if (!liveUrl.value && !replayUrl.value) {
     mode.value = 'replay'
     return
+  }
+  // 若提供了 endTime 且已结束：回放
+  if (endMs.value != null && nowMs.value >= endMs.value) {
+    mode.value = 'replay'
+    return
+  }
+  // 若提供了 startTime 且未开始：pre
+  const rawStart = item.value?.startTime
+  if (rawStart) {
+    const ms = new Date(rawStart).getTime()
+    if (Number.isFinite(ms) && nowMs.value < ms) {
+      mode.value = 'pre'
+      return
+    }
   }
   // 默认：有直播就当直播，否则当回放
   mode.value = liveUrl.value ? 'live' : 'replay'
