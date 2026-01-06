@@ -2,7 +2,7 @@
   <div class="home-page">
     <section class="hero-panel">
       <div class="hero-left">
-        <div class="hero-badge">剑盾数字安全 · 会议运营平台</div>
+        <div class="hero-badge">西湖论剑 · 会议运营平台</div>
         <h1 class="hero-title">构建会议活动的数字安全防线</h1>
         <p class="hero-subtitle">
           聚焦会议全流程数字安全管理，为主办方提供活动报名、签到管理、内容分发与数据分析的一体化能力。
