@@ -4,21 +4,35 @@ import { api } from '../api/client'
 import type { Activity } from '@xhlj/shared'
 import ActivityCard from '../components/ActivityCard.vue'
 const keyword = ref('')
+const page = ref(1)
+const pageSize = 12
+const total = ref(0)
 const activities = ref<Activity[]>([])
 const loading = ref(false)
 const error = ref('')
+/** 根据关键词加载当前页的公开场次。 */
 async function load() {
   loading.value = true; error.value = ''
-  try { activities.value = (await api.activities.list({ keyword: keyword.value, page: 1, pageSize: 50 })).records }
+  try {
+    const result = await api.activities.list({ keyword: keyword.value, page: page.value, pageSize })
+    activities.value = result.items
+    total.value = result.pageInfo.total
+  }
   catch (err) { error.value = err instanceof Error ? err.message : '活动加载失败' }
   finally { loading.value = false }
+}
+/** 搜索新关键词时从第一页开始。 */
+function search() {
+  page.value = 1
+  return load()
 }
 onMounted(load)
 </script>
 <template>
   <section class="page-container list-page"><div class="intro"><span class="section-kicker">AGENDA & ATTENDANCE</span><h1>议程与参会</h1><p>浏览大会场次，了解活动时间、地点与报名状态。</p></div>
-    <div class="filter-bar surface-card"><el-input v-model="keyword" placeholder="搜索活动名称、主题或会场" clearable @keyup.enter="load" /><el-button type="primary" @click="load">搜索活动</el-button></div>
+    <div class="filter-bar surface-card"><el-input v-model="keyword" placeholder="搜索活动名称、主题或会场" clearable @keyup.enter="search" /><el-button type="primary" @click="search">搜索活动</el-button></div>
     <div v-if="loading" class="state">正在加载活动…</div><el-alert v-else-if="error" :title="error" type="error" :closable="false" show-icon /><el-empty v-else-if="activities.length === 0" description="没有找到符合条件的活动" /><div v-else class="activity-grid"><ActivityCard v-for="activity in activities" :key="activity.id" :activity="activity" /></div>
+    <el-pagination v-if="total > pageSize" :current-page="page" :page-size="pageSize" :total="total" layout="prev, pager, next" @update:current-page="page = $event; load()" />
   </section>
 </template>
 <style scoped>

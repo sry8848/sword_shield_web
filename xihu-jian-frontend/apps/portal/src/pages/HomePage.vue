@@ -8,7 +8,7 @@ const loading = ref(false)
 const error = ref('')
 async function load() {
   loading.value = true; error.value = ''
-  try { activities.value = (await api.activities.list({ page: 1, pageSize: 3 })).records }
+  try { activities.value = (await api.activities.list({ page: 1, pageSize: 3 })).items }
   catch (err) { error.value = err instanceof Error ? err.message : '活动加载失败' }
   finally { loading.value = false }
 }

@@ -1,6 +1,6 @@
 import type { ActivityStatus, RegistrationAvailability } from '@xhlj/shared'
 export function activityStatusLabel(status: ActivityStatus): string {
-  const labels: Record<ActivityStatus, string> = { DRAFT: '草稿', PUBLISHED: '已发布', CANCELLED: '已取消' }
+  const labels: Record<ActivityStatus, string> = { DRAFT: '草稿', PUBLISHED: '已发布', UNPUBLISHED: '已下线', FINISHED: '已结束' }
   return labels[status]
 }
 export function registrationStatusLabel(status: RegistrationAvailability): string {

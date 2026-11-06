@@ -1,25 +1,50 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ElMessage } from 'element-plus'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { DataBoard, Calendar, Tickets, Checked, TrendCharts } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 const route = useRoute(); const router = useRouter(); const auth = useAuthStore()
 const activeMenu = computed(() => route.path)
-function logout() { auth.logout(); router.push('/login') }
+const loggingOut = ref(false)
+
+/** 按路由元数据判断后台菜单入口是否可见。 */
+function canVisit(path: string) {
+  const permission = router.resolve(path).meta.permission
+  return permission ? auth.can(permission) : false
+}
+
+// 会话失效后离开受保护页面，避免继续展示上一会话的数据。
+watch(() => auth.isAuthenticated, (authenticated) => {
+  if (!authenticated && !loggingOut.value) {
+    router.replace({ name: 'AdminLogin', query: { redirect: route.fullPath } })
+  }
+})
+
+/** 退出服务端会话，成功后返回登录入口或门户首页。 */
+async function logout() {
+  loggingOut.value = true
+  try {
+    await auth.logout()
+    await router.push('/login')
+  }
+  catch (error) { ElMessage.error(error instanceof Error ? error.message : '退出登录失败') }
+  finally { loggingOut.value = false }
+}
 </script>
 <template>
   <div class="admin-shell"><aside class="sidebar">
     <RouterLink class="brand" to="/"><span class="brand-mark">西</span><span><strong>西湖论剑</strong><small>运营管理平台</small></span></RouterLink>
     <div class="menu-caption">工作空间</div>
     <el-menu :default-active="activeMenu" router class="side-menu">
-      <el-menu-item index="/"><el-icon><DataBoard /></el-icon><span>运营概览</span></el-menu-item>
-      <el-menu-item index="/activities"><el-icon><Calendar /></el-icon><span>活动管理</span></el-menu-item>
-      <el-menu-item index="/registrations"><el-icon><Tickets /></el-icon><span>报名管理</span></el-menu-item>
-      <el-menu-item index="/checkin"><el-icon><Checked /></el-icon><span>现场核验</span></el-menu-item>
-      <el-menu-item index="/statistics"><el-icon><TrendCharts /></el-icon><span>基础统计</span></el-menu-item>
+      <el-menu-item v-if="canVisit('/')" index="/"><el-icon><DataBoard /></el-icon><span>运营概览</span></el-menu-item>
+      <el-menu-item v-if="canVisit('/activities')" index="/activities"><el-icon><Calendar /></el-icon><span>活动管理</span></el-menu-item>
+      <el-menu-item v-if="canVisit('/registrations')" index="/registrations"><el-icon><Tickets /></el-icon><span>报名管理</span></el-menu-item>
+      <el-menu-item v-if="canVisit('/checkin')" index="/checkin"><el-icon><Checked /></el-icon><span>现场核验</span></el-menu-item>
+      <el-menu-item v-if="canVisit('/statistics')" index="/statistics"><el-icon><TrendCharts /></el-icon><span>基础统计</span></el-menu-item>
     </el-menu>
     <div class="sidebar-bottom">MVP · 管理端骨架</div>
-  </aside><div class="main-area"><header class="topbar"><div class="breadcrumb">{{ route.meta.title || '运营管理' }}</div><div class="top-actions"><span class="env-tag">本地演示</span><span class="operator">{{ auth.user?.displayName || '运营人员' }}</span><el-button text @click="logout">退出</el-button></div></header><main class="content-area"><RouterView /></main></div></div>
+  </aside><div class="main-area"><header class="topbar"><div class="breadcrumb">{{ route.meta.title || '运营管理' }}</div><div class="top-actions"><span class="env-tag">本地演示</span><span class="operator">{{ auth.user?.displayName || '运营人员' }}</span><el-button text :loading="loggingOut" @click="logout">退出</el-button></div></header><main class="content-area"><RouterView /></main></div></div>
 </template>
 <style scoped>
 .admin-shell { min-height: 100vh; display: flex; background: #f4f6fa; }

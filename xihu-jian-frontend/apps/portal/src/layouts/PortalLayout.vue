@@ -1,12 +1,31 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ElMessage } from 'element-plus'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const active = computed(() => route.path.startsWith('/activities') ? '/activities' : route.path)
-function logout() { auth.logout(); router.push('/') }
+const loggingOut = ref(false)
+
+// 会话失效后离开受保护页面，避免继续展示上一会话的数据。
+watch(() => auth.isAuthenticated, (authenticated) => {
+  if (!authenticated && !loggingOut.value && route.meta.requiresAuth) {
+    router.replace({ name: 'Login', query: { redirect: route.fullPath } })
+  }
+})
+
+/** 退出服务端会话，成功后返回登录入口或门户首页。 */
+async function logout() {
+  loggingOut.value = true
+  try {
+    await auth.logout()
+    await router.push('/')
+  }
+  catch (error) { ElMessage.error(error instanceof Error ? error.message : '退出登录失败') }
+  finally { loggingOut.value = false }
+}
 </script>
 
 <template>
@@ -19,7 +38,7 @@ function logout() { auth.logout(); router.push('/') }
         <a href="/#about">了解大会</a><a href="/#activities">大会活动</a>
       </nav>
       <div class="header-actions">
-        <template v-if="auth.isAuthenticated"><RouterLink class="user-link" to="/me/registrations">{{ auth.user?.displayName || '个人中心' }}</RouterLink><el-button text @click="logout">退出</el-button></template>
+        <template v-if="auth.isAuthenticated"><RouterLink class="user-link" to="/me/registrations">{{ auth.user?.displayName || '个人中心' }}</RouterLink><el-button text :loading="loggingOut" @click="logout">退出</el-button></template>
         <RouterLink v-else to="/login"><el-button type="primary" round>登录 / 注册</el-button></RouterLink>
       </div>
     </div></header>

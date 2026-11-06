@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { Activity } from '@xhlj/shared'
 import { formatDateTime } from '@xhlj/shared'
+import { registrationStatusLabel } from '../utils/activity'
 defineProps<{ activity: Activity }>()
 </script>
 <template>
   <RouterLink class="activity-card surface-card" :to="`/activities/${activity.id}`">
-    <div class="card-top"><span class="eyebrow">大会活动</span><el-tag :type="activity.registrationStatus === 'OPEN' ? 'success' : 'info'" effect="light">{{ activity.registrationStatus === 'OPEN' ? '报名开放中' : activity.registrationStatus === 'FULL' ? '名额已满' : '暂未开放' }}</el-tag></div>
+    <div class="card-top"><span class="eyebrow">大会活动</span><el-tag :type="activity.registrationStatus === 'OPEN' ? 'success' : 'info'" effect="light">{{ registrationStatusLabel(activity.registrationStatus) }}</el-tag></div>
     <h3>{{ activity.title }}</h3><p class="summary">{{ activity.summary }}</p>
-    <div class="meta"><span>{{ formatDateTime(activity.startAt) }}</span><span>{{ activity.venue }}</span></div>
+    <div class="meta"><span>{{ formatDateTime(activity.startTime) }}</span><span>{{ activity.venue?.name ?? '会场待定' }}</span></div>
     <div class="card-bottom"><span>已报名 {{ activity.registeredCount }} / {{ activity.capacity }}</span><span class="detail-link">查看详情 →</span></div>
   </RouterLink>
 </template>

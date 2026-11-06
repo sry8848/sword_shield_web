@@ -1,8 +1,9 @@
+import { ElMessage } from 'element-plus'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 declare module 'vue-router' {
-  interface RouteMeta { title?: string; requiresAuth?: boolean; roles?: string[] }
+  interface RouteMeta { title?: string; requiresAuth?: boolean }
 }
 
 export const router = createRouter({
@@ -22,8 +23,12 @@ export const router = createRouter({
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
-  await auth.hydrate()
+  try {
+    await auth.hydrate()
+  }
+  catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '会话恢复失败')
+  }
   if (to.meta.requiresAuth && !auth.isAuthenticated) return { name: 'Login', query: { redirect: to.fullPath } }
-  if (to.meta.roles?.length && !to.meta.roles.includes(auth.user?.role ?? '')) return { name: 'Home' }
   return true
 })

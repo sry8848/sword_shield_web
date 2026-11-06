@@ -1,24 +1,31 @@
-export interface ApiEnvelope<T> {
+interface ApiResponse {
   code: string
   message: string
+  traceId: string
+  timestamp: string
+}
+
+export interface ApiEnvelope<T> extends ApiResponse {
   data: T
-  traceId?: string
+}
+
+export interface ApiErrorResponse extends ApiResponse {
+  details?: Record<string, unknown>
 }
 
 export interface PageQuery {
   page?: number
   pageSize?: number
-  keyword?: string
+}
+
+export interface PageInfo {
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
 }
 
 export interface PageResult<T> {
-  records: T[]
-  total: number
-  page: number
-  pageSize: number
-}
-
-export interface LoginRequest {
-  username: string
-  password: string
+  items: T[]
+  pageInfo: PageInfo
 }

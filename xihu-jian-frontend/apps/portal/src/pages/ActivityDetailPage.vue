@@ -1,22 +1,32 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { formatDateTime, type Activity } from '@xhlj/shared'
+import { formatDateTime, type ActivityDetail } from '@xhlj/shared'
 import { api } from '../api/client'
 import { useAuthStore } from '../stores/auth'
+import { registrationStatusLabel } from '../utils/activity'
 const route = useRoute(); const router = useRouter(); const auth = useAuthStore()
-const activity = ref<Activity | null>(null); const loading = ref(false); const submitting = ref(false)
+const activity = ref<ActivityDetail | null>(null); const loading = ref(false); const submitting = ref(false)
+const form = reactive({ attendeeName: '', phone: '' })
+
+/** 加载当前路由对应的场次详情。 */
 async function load() {
   loading.value = true
   try { activity.value = await api.activities.detail(String(route.params.activityId)) }
   catch (error) { ElMessage.error(error instanceof Error ? error.message : '活动加载失败') }
   finally { loading.value = false }
 }
+/** 提交当前场次的报名资料，成功后跳转到我的报名。 */
 async function register() {
+  if (submitting.value) return
   if (!auth.isAuthenticated) { router.push({ name: 'Login', query: { redirect: route.fullPath } }); return }
+  // 姓名和手机号由参会人填写，登录账号未必是手机号。
+  const attendeeName = form.attendeeName.trim()
+  const phone = form.phone.trim()
+  if (!attendeeName || !phone) { ElMessage.warning('请输入参会人姓名和手机号'); return }
   submitting.value = true
-  try { await api.activities.register(String(route.params.activityId)); ElMessage.success('报名成功，可在“我的报名”中查看凭证'); router.push('/me/registrations') }
+  try { await api.activities.register(String(route.params.activityId), { attendeeName, phone }); ElMessage.success('报名成功，可在“我的报名”中查看凭证'); router.push('/me/registrations') }
   catch (error) { ElMessage.error(error instanceof Error ? error.message : '报名失败') }
   finally { submitting.value = false }
 }
@@ -25,9 +35,12 @@ onMounted(load)
 <template>
   <section class="page-container detail-page"><div v-if="loading" class="state">正在加载活动详情…</div><el-empty v-else-if="!activity" description="活动不存在或暂不可访问" /><template v-else>
     <RouterLink class="back-link" to="/activities">← 返回全部场次</RouterLink>
-    <article class="detail-card surface-card"><div class="detail-main"><el-tag :type="activity.registrationStatus === 'OPEN' ? 'success' : 'info'">{{ activity.registrationStatus === 'OPEN' ? '报名开放中' : activity.registrationStatus === 'FULL' ? '名额已满' : '暂不可报名' }}</el-tag><h1>{{ activity.title }}</h1><p class="summary">{{ activity.summary }}</p>
-      <div class="facts"><div><span>活动时间</span><strong>{{ formatDateTime(activity.startAt) }}</strong></div><div><span>活动地点</span><strong>{{ activity.venue }}</strong></div><div><span>主讲嘉宾</span><strong>{{ activity.speaker || '大会嘉宾' }}</strong></div><div><span>报名情况</span><strong>{{ activity.registeredCount }} / {{ activity.capacity }}</strong></div></div>
-    </div><aside class="register-panel"><span class="panel-caption">REGISTRATION</span><h3>参与本场活动</h3><p>提交报名后，可在个人中心查看报名状态和入场凭证。</p><el-button type="primary" size="large" :loading="submitting" :disabled="activity.registrationStatus !== 'OPEN'" @click="register">{{ activity.registrationStatus === 'OPEN' ? '立即报名' : '暂不可报名' }}</el-button><RouterLink to="/me/registrations" class="my-link">查看我的报名</RouterLink></aside></article>
+    <article class="detail-card surface-card"><div class="detail-main"><el-tag :type="activity.registrationStatus === 'OPEN' ? 'success' : 'info'">{{ registrationStatusLabel(activity.registrationStatus) }}</el-tag><h1>{{ activity.title }}</h1><p class="summary">{{ activity.summary }}</p>
+      <div class="facts"><div><span>活动时间</span><strong>{{ formatDateTime(activity.startTime) }}</strong></div><div><span>活动地点</span><strong>{{ activity.venue?.name ?? activity.address ?? '会场待定' }}</strong></div><div><span>主讲嘉宾</span><strong>{{ activity.speakers?.map(speaker => speaker.name).join('、') || '大会嘉宾' }}</strong></div><div><span>报名情况</span><strong>{{ activity.registeredCount ?? '—' }} / {{ activity.capacity ?? '不限额' }}</strong></div></div>
+    </div><aside class="register-panel"><span class="panel-caption">REGISTRATION</span><h3>参与本场活动</h3><p>提交报名后，可在个人中心查看报名状态和入场凭证。</p><el-form v-if="auth.isAuthenticated && activity.registrationStatus === 'OPEN'" label-position="top" @submit.prevent="register">
+      <el-form-item label="参会人姓名" required><el-input v-model="form.attendeeName" maxlength="50" /></el-form-item>
+      <el-form-item label="手机号" required><el-input v-model="form.phone" type="tel" autocomplete="tel" /></el-form-item>
+    </el-form><el-button type="primary" size="large" :loading="submitting" :disabled="activity.registrationStatus !== 'OPEN'" @click="register">{{ activity.registrationStatus === 'OPEN' ? '立即报名' : '暂不可报名' }}</el-button><RouterLink to="/me/registrations" class="my-link">查看我的报名</RouterLink></aside></article>
   </template></section>
 </template>
 <style scoped>
