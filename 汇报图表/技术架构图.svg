@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="918" viewBox="0 0 1360 918" role="img" aria-labelledby="title">
+<title id="title">剑盾大会平台技术架构图</title>
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+<g font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif">
+<text x="680.0" y="56.519999999999996" fill="#17283C" font-size="32" font-weight="700" text-anchor="middle">剑盾大会平台技术架构图</text>
+<rect x="484" y="95" width="392" height="58" fill="#F4F6FA" stroke="#8192A7" rx="10" stroke-width="1.3"/>
+<text x="680.0" y="118.5" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">浏览器</text>
+<text x="680.0" y="141.5" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">游客 · 注册用户 · 管理员</text>
+<rect x="453" y="196" width="454" height="76" fill="#EDF4FC" stroke="#5C83AE" rx="10" stroke-width="1.3"/>
+<text x="680.0" y="228.5" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">大会门户与管理后台</text>
+<text x="680.0" y="251.5" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">Vue 3 · TypeScript · Element Plus · Axios</text>
+<rect x="453" y="323" width="454" height="76" fill="#EDF4FC" stroke="#5C83AE" rx="10" stroke-width="1.3"/>
+<text x="680.0" y="355.5" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">API 网关   :8080</text>
+<text x="680.0" y="378.5" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">Spring Cloud Gateway · 公开路径放行 / Bearer JWT 校验</text>
+<rect x="95" y="323" width="264" height="76" fill="#F4F6FA" stroke="#8294A9" rx="10" stroke-width="1.3"/>
+<text x="227.0" y="355.5" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">Nacos   :8848</text>
+<text x="227.0" y="378.5" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">服务注册与实例发现</text>
+<rect x="983" y="323" width="262" height="76" fill="#F4F6FA" stroke="#8294A9" rx="10" stroke-width="1.3"/>
+<text x="1114.0" y="355.5" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">集中日志</text>
+<text x="1114.0" y="378.5" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">Logstash → Elasticsearch → Kibana</text>
+<rect x="65" y="448" width="1190" height="169" fill="#F4F8FC" stroke="#A6B9CE" rx="10" stroke-width="1.3"/>
+<text x="87" y="476.26" fill="#2B5787" font-size="16" font-weight="700" text-anchor="start">业务微服务  ·  Java 17 / Spring Boot 3.2</text>
+<rect x="87" y="518" width="174" height="78" fill="#FFFFFF" stroke="#7B97B6" rx="10" stroke-width="1.3"/>
+<text x="174.0" y="543.0" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">用户服务</text>
+<text x="174.0" y="563.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">User · :8101</text>
+<text x="174.0" y="583.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">注册登录、签到积分</text>
+<rect x="282" y="518" width="174" height="78" fill="#FFFFFF" stroke="#7B97B6" rx="10" stroke-width="1.3"/>
+<text x="369.0" y="543.0" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">活动服务</text>
+<text x="369.0" y="563.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">Activity · :8102</text>
+<text x="369.0" y="583.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">活动查询、报名统计</text>
+<rect x="477" y="518" width="174" height="78" fill="#FFFFFF" stroke="#7B97B6" rx="10" stroke-width="1.3"/>
+<text x="564.0" y="543.0" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">内容服务</text>
+<text x="564.0" y="563.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">Content · :8103</text>
+<text x="564.0" y="583.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">文章、展商、成果与资料</text>
+<rect x="672" y="518" width="174" height="78" fill="#FFFFFF" stroke="#7B97B6" rx="10" stroke-width="1.3"/>
+<text x="759.0" y="543.0" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">互动服务</text>
+<text x="759.0" y="563.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">Interaction · :8104</text>
+<text x="759.0" y="583.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">评论、点赞、分享</text>
+<rect x="867" y="518" width="174" height="78" fill="#FFFFFF" stroke="#7B97B6" rx="10" stroke-width="1.3"/>
+<text x="954.0" y="543.0" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">管理服务</text>
+<text x="954.0" y="563.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">Admin · :8106</text>
+<text x="954.0" y="583.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">管理员登录、活动管理</text>
+<rect x="1062" y="518" width="174" height="78" fill="#FFFFFF" stroke="#7B97B6" rx="10" stroke-width="1.3"/>
+<text x="1149.0" y="543.0" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">文件服务</text>
+<text x="1149.0" y="563.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">File · :8105</text>
+<text x="1149.0" y="583.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">上传、签发下载链接</text>
+<rect x="506" y="712" width="348" height="79" fill="#EAF6F4" stroke="#4B8A85" rx="10" stroke-width="1.3"/>
+<text x="680.0" y="746.0" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">MySQL 8.0   :3306</text>
+<text x="680.0" y="769.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">共享数据库 sword_shield · 文件元数据</text>
+<rect x="1018" y="712" width="262" height="79" fill="#EAF6F4" stroke="#4B8A85" rx="10" stroke-width="1.3"/>
+<text x="1149.0" y="746.0" fill="#17283C" font-size="19" font-weight="700" text-anchor="middle">MinIO   :9000</text>
+<text x="1149.0" y="769.0" fill="#45596E" font-size="14" font-weight="400" text-anchor="middle">assets 桶 · 文件本体</text>
+<polyline points="680,153 680,196" fill="none" stroke="#2B5787" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="680,196 676.5,187.0 683.5,187.0" fill="#2B5787"/>
+<polyline points="680,272 680,323" fill="none" stroke="#2B5787" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="680,323 676.5,314.0 683.5,314.0" fill="#2B5787"/>
+<polyline points="680,399 680,493 174,493 174,518" fill="none" stroke="#2B5787" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="174,518 170.5,509.0 177.5,509.0" fill="#2B5787"/>
+<polyline points="174,596 174,650 680,650 680,712" fill="none" stroke="#156A66" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="680,712 676.5,703.0 683.5,703.0" fill="#156A66"/>
+<polyline points="680,399 680,493 369,493 369,518" fill="none" stroke="#2B5787" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="369,518 365.5,509.0 372.5,509.0" fill="#2B5787"/>
+<polyline points="369,596 369,650 680,650 680,712" fill="none" stroke="#156A66" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="680,712 676.5,703.0 683.5,703.0" fill="#156A66"/>
+<polyline points="680,399 680,493 564,493 564,518" fill="none" stroke="#2B5787" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="564,518 560.5,509.0 567.5,509.0" fill="#2B5787"/>
+<polyline points="564,596 564,650 680,650 680,712" fill="none" stroke="#156A66" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="680,712 676.5,703.0 683.5,703.0" fill="#156A66"/>
+<polyline points="680,399 680,493 759,493 759,518" fill="none" stroke="#2B5787" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="759,518 755.5,509.0 762.5,509.0" fill="#2B5787"/>
+<polyline points="759,596 759,650 680,650 680,712" fill="none" stroke="#156A66" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="680,712 676.5,703.0 683.5,703.0" fill="#156A66"/>
+<polyline points="680,399 680,493 954,493 954,518" fill="none" stroke="#2B5787" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="954,518 950.5,509.0 957.5,509.0" fill="#2B5787"/>
+<polyline points="954,596 954,650 680,650 680,712" fill="none" stroke="#156A66" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="680,712 676.5,703.0 683.5,703.0" fill="#156A66"/>
+<polyline points="680,399 680,493 1149,493 1149,518" fill="none" stroke="#2B5787" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="1149,518 1145.5,509.0 1152.5,509.0" fill="#2B5787"/>
+<polyline points="1149,596 1149,650 680,650 680,712" fill="none" stroke="#156A66" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="680,712 676.5,703.0 683.5,703.0" fill="#156A66"/>
+<polyline points="453,361 359,361" fill="none" stroke="#61778E" stroke-width="1.65" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polygon points="359,361 368.0,357.5 368.0,364.5" fill="#61778E"/>
+<polyline points="223,448 223,399" fill="none" stroke="#61778E" stroke-width="1.65" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polygon points="223,399 226.5,408.0 219.5,408.0" fill="#61778E"/>
+<polyline points="1114,448 1114,399" fill="none" stroke="#61778E" stroke-width="1.65" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polygon points="1114,399 1117.5,408.0 1110.5,408.0" fill="#61778E"/>
+<polyline points="907,361 983,361" fill="none" stroke="#61778E" stroke-width="1.65" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polygon points="983,361 974.0,364.5 974.0,357.5" fill="#61778E"/>
+<polyline points="1181,596 1181,712" fill="none" stroke="#156A66" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="1181,712 1177.5,703.0 1184.5,703.0" fill="#156A66"/>
+<polyline points="876,124 1310,124 1310,751 1280,751" fill="none" stroke="#156A66" stroke-width="1.65" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polygon points="1280,751 1289.0,747.5 1289.0,754.5" fill="#156A66"/>
+<text x="770.0" y="176.04" fill="#2B5787" font-size="14" font-weight="400" text-anchor="middle">访问 Web 界面</text>
+<text x="810.0" y="301.54" fill="#2B5787" font-size="14" font-weight="400" text-anchor="middle">HTTP /api · 本地经 Vite 代理</text>
+<text x="818.0" y="429.04" fill="#2B5787" font-size="14" font-weight="400" text-anchor="middle">按 /api/{service} 路由 · lb://</text>
+<text x="406.0" y="350.04" fill="#61778E" font-size="14" font-weight="400" text-anchor="middle">查找实例</text>
+<text x="283.0" y="427.04" fill="#61778E" font-size="14" font-weight="400" text-anchor="middle">服务注册</text>
+<text x="1184.0" y="427.04" fill="#61778E" font-size="14" font-weight="400" text-anchor="middle">异步日志 · TCP</text>
+<text x="753.5" y="686.04" fill="#156A66" font-size="14" font-weight="400" text-anchor="middle">JPA / JDBC</text>
+<text x="1231.0" y="678.04" fill="#156A66" font-size="14" font-weight="400" text-anchor="middle">上传对象</text>
+<text x="1076.5" y="110.54" fill="#156A66" font-size="14" font-weight="400" text-anchor="middle">凭预签名链接直接下载</text>
+<path d="M65 817H1295" stroke="#C6D2DD"/>
+<text x="65" y="848.9" fill="#45596E" font-size="15" font-weight="400" text-anchor="start">管理服务通过 JPA 直接维护共享活动表。网关和业务服务均配置 Logback 异步输出日志。</text>
+<text x="65" y="878.9" fill="#45596E" font-size="15" font-weight="400" text-anchor="start">本地基础设施由 Docker Compose 提供。Redis 有容器定义，当前业务源码未找到调用。</text>
+</g>
+</svg>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="958" viewBox="0 0 1000 958">
+<title>游客用例图</title>
+<desc>参与者游客与8个用例的关联关系。</desc>
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+<text x="500" y="38" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="28" font-weight="bold" fill="#222222">游客用例图</text>
+<rect x="280" y="75" width="660" height="848" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text x="610" y="110" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22" font-weight="normal" fill="#222222">西湖论剑活动平台</text>
+<line x1="190" y1="483.0" x2="455" y2="162" stroke="#66717D" stroke-width="1.5"/>
+<ellipse cx="655" cy="162" rx="200" ry="32" fill="#EAF2F8" stroke="#4F81BD" stroke-width="1.6"/>
+<text x="655" y="170" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="normal" fill="#222222">浏览大会与活动信息</text>
+<line x1="190" y1="483.0" x2="455" y2="258" stroke="#66717D" stroke-width="1.5"/>
+<ellipse cx="655" cy="258" rx="200" ry="32" fill="#EAF2F8" stroke="#4F81BD" stroke-width="1.6"/>
+<text x="655" y="266" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="normal" fill="#222222">浏览大会资讯</text>
+<line x1="190" y1="483.0" x2="455" y2="354" stroke="#66717D" stroke-width="1.5"/>
+<ellipse cx="655" cy="354" rx="200" ry="32" fill="#EAF2F8" stroke="#4F81BD" stroke-width="1.6"/>
+<text x="655" y="362" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="normal" fill="#222222">查看展商与大会成果</text>
+<line x1="190" y1="483.0" x2="455" y2="450" stroke="#66717D" stroke-width="1.5"/>
+<ellipse cx="655" cy="450" rx="200" ry="32" fill="#EAF2F8" stroke="#4F81BD" stroke-width="1.6"/>
+<text x="655" y="458" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="normal" fill="#222222">进入直播或回放</text>
+<line x1="190" y1="483.0" x2="455" y2="546" stroke="#66717D" stroke-width="1.5"/>
+<ellipse cx="655" cy="546" rx="200" ry="32" fill="#EAF2F8" stroke="#4F81BD" stroke-width="1.6"/>
+<text x="655" y="554" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="normal" fill="#222222">浏览图片与视频</text>
+<line x1="190" y1="483.0" x2="455" y2="642" stroke="#66717D" stroke-width="1.5"/>
+<ellipse cx="655" cy="642" rx="200" ry="32" fill="#EAF2F8" stroke="#4F81BD" stroke-width="1.6"/>
+<text x="655" y="650" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="normal" fill="#222222">获取资料下载链接</text>
+<line x1="190" y1="483.0" x2="455" y2="738" stroke="#66717D" stroke-width="1.5"/>
+<ellipse cx="655" cy="738" rx="200" ry="32" fill="#EAF2F8" stroke="#4F81BD" stroke-width="1.6"/>
+<text x="655" y="746" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="normal" fill="#222222">注册账号</text>
+<line x1="190" y1="483.0" x2="455" y2="834" stroke="#66717D" stroke-width="1.5"/>
+<ellipse cx="655" cy="834" rx="200" ry="32" fill="#EAF2F8" stroke="#4F81BD" stroke-width="1.6"/>
+<text x="655" y="842" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="normal" fill="#222222">用户登录</text>
+<g stroke="#548235" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="150" cy="445.0" r="18" fill="#FFFFFF"/>
+<path d="M150 463.0 V517.0 M110 483.0 H190 M150 517.0 L116 554.0 M150 517.0 L184 554.0"/>
+</g>
+<text x="150" y="591.0" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="normal" fill="#222222">游客</text>
+</svg>

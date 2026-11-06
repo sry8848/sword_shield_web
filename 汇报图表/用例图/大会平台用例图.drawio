@@ -1,0 +1,204 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="usecase-1" name="游客用例图">
+    <mxGraphModel grid="0" page="1" pageWidth="1000" pageHeight="958">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="游客用例图" style="text;html=0;align=center;verticalAlign=middle;fontSize=28;fontFamily=Microsoft YaHei;fontColor=#222222;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="0" y="8" width="1000" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="boundary" value="西湖论剑活动平台" style="rounded=0;html=0;fillColor=#FFFFFF;strokeColor=#555555;strokeWidth=1.5;verticalAlign=top;spacingTop=14;fontSize=22;fontFamily=Microsoft YaHei;fontColor=#222222;" vertex="1" parent="1">
+          <mxGeometry x="280" y="75" width="660" height="848" as="geometry" />
+        </mxCell>
+        <mxCell id="actor" value="游客" style="shape=umlActor;html=0;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;align=center;fillColor=#FFFFFF;strokeColor=#548235;strokeWidth=2;fontSize=24;fontFamily=Microsoft YaHei;fontColor=#222222;" vertex="1" parent="1">
+          <mxGeometry x="110" y="427.0" width="80" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="case-1" value="浏览大会与活动信息" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="55" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-1" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-2" value="浏览大会资讯" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="151" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-2" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-3" value="查看展商与大会成果" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="247" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-3" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-4" value="进入直播或回放" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="343" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-4" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-5" value="浏览图片与视频" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="439" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-5" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-6" value="获取资料下载链接" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="535" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-6" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-7" value="注册账号" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="631" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-7" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-8" value="用户登录" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="727" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-8" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="usecase-2" name="注册用户用例图">
+    <mxGraphModel grid="0" page="1" pageWidth="1000" pageHeight="958">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="注册用户用例图" style="text;html=0;align=center;verticalAlign=middle;fontSize=28;fontFamily=Microsoft YaHei;fontColor=#222222;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="0" y="8" width="1000" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="boundary" value="西湖论剑活动平台" style="rounded=0;html=0;fillColor=#FFFFFF;strokeColor=#555555;strokeWidth=1.5;verticalAlign=top;spacingTop=14;fontSize=22;fontFamily=Microsoft YaHei;fontColor=#222222;" vertex="1" parent="1">
+          <mxGeometry x="280" y="75" width="660" height="848" as="geometry" />
+        </mxCell>
+        <mxCell id="actor" value="注册用户" style="shape=umlActor;html=0;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;align=center;fillColor=#FFFFFF;strokeColor=#548235;strokeWidth=2;fontSize=24;fontFamily=Microsoft YaHei;fontColor=#222222;" vertex="1" parent="1">
+          <mxGeometry x="110" y="427.0" width="80" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="case-1" value="浏览大会公开内容" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="55" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-1" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-2" value="报名活动" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="151" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-2" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-3" value="订阅活动" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="247" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-3" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-4" value="查看个人报名记录" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="343" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-4" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-5" value="维护个人资料" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="439" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-5" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-6" value="发表评论" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="535" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-6" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-7" value="点赞内容或评论" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="631" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-7" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-8" value="分享活动或资讯" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="727" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-8" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="usecase-3" name="管理员用例图">
+    <mxGraphModel grid="0" page="1" pageWidth="1000" pageHeight="1054">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="管理员用例图" style="text;html=0;align=center;verticalAlign=middle;fontSize=28;fontFamily=Microsoft YaHei;fontColor=#222222;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="0" y="8" width="1000" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="boundary" value="西湖论剑活动平台" style="rounded=0;html=0;fillColor=#FFFFFF;strokeColor=#555555;strokeWidth=1.5;verticalAlign=top;spacingTop=14;fontSize=22;fontFamily=Microsoft YaHei;fontColor=#222222;" vertex="1" parent="1">
+          <mxGeometry x="280" y="75" width="660" height="944" as="geometry" />
+        </mxCell>
+        <mxCell id="actor" value="管理员" style="shape=umlActor;html=0;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;align=center;fillColor=#FFFFFF;strokeColor=#548235;strokeWidth=2;fontSize=24;fontFamily=Microsoft YaHei;fontColor=#222222;" vertex="1" parent="1">
+          <mxGeometry x="110" y="475.0" width="80" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="case-1" value="管理员登录" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="55" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-1" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-2" value="创建活动" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="151" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-2" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-3" value="修改活动信息" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="247" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-3" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-4" value="发布或下线活动" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="343" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-4" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-5" value="删除活动" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="439" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-5" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-6" value="发布大会资讯" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="535" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-6" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-7" value="发布图片或视频" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="631" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-7" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-8" value="预览已发布媒体" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="727" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-8" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="case-9" value="查看活动统计" style="ellipse;html=0;whiteSpace=wrap;fillColor=#EAF2F8;strokeColor=#4F81BD;strokeWidth=1.6;fontColor=#222222;fontSize=24;fontFamily=Microsoft YaHei;" vertex="1" parent="boundary">
+          <mxGeometry x="175" y="823" width="400" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="association-9" value="" style="endArrow=none;startArrow=none;html=0;strokeColor=#66717D;strokeWidth=1.5;exitX=1;exitY=0.4375;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" parent="1" source="actor" target="case-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

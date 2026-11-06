@@ -1,0 +1,7 @@
+:root { font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif; color: #1f2d3d; background: #f4f6fa; --admin-primary: #155eef; --admin-border: #e8edf4; --admin-muted: #7a8798; }
+* { box-sizing: border-box; } body { margin: 0; min-width: 320px; } a { color: inherit; text-decoration: none; }
+.admin-page { padding: 24px; } .page-title { margin: 0 0 6px; font-size: 22px; color: #1f2d3d; } .page-description { color: #7a8798; font-size: 13px; margin: 0 0 22px; }
+.metric-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 20px; }
+.metric-card { padding: 20px; border: 1px solid var(--admin-border); border-radius: 10px; background: white; }
+.metric-label { color: #7a8798; font-size: 13px; } .metric-value { font-size: 30px; font-weight: 700; color: #1f2d3d; margin-top: 10px; }
+@media (max-width:800px) { .admin-page { padding: 16px; } .metric-grid { grid-template-columns: 1fr; } }

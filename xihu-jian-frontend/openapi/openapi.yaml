@@ -1,0 +1,4110 @@
+openapi: 3.1.0
+info:
+  title: 西湖论剑·大会门户 MVP API
+  version: 0.1.0-draft
+  description: MVP 1.0 第一版接口契约草案。范围：大会门户、普通报名、现场核验、基础运营、基础 RBAC、报名与到场统计。本文件先用于 Apifox 导入和需求评审；所有标注为待确认的业务决策均不得视为已验收需求。
+servers:
+- url: http://localhost:8080/api/v1
+  description: 本地开发环境占位地址，实际后端端口及网关前缀待确认
+tags:
+- name: 大会门户
+  description: 游客可访问的大会基础信息、场次、嘉宾和会场信息
+- name: 账号认证
+  description: 参会用户注册、登录、令牌刷新和当前用户信息
+- name: 普通报名
+  description: 参会用户提交报名、查询本人报名和获取凭证
+- name: 活动管理
+  description: 运营人员创建、编辑、发布和下线场次
+- name: 报名管理
+  description: 运营人员查询场次报名记录
+- name: 现场核验
+  description: 现场工作人员扫码或手动输入凭证并登记到场
+- name: 数据统计
+  description: 报名人数、到场人数和基础场次统计
+- name: 后台与权限
+  description: 后台账号、内置角色、权限字典及角色分配
+paths:
+  /auth/register:
+    post:
+      summary: 用户注册
+      operationId: registerUser
+      tags:
+      - 账号认证
+      responses:
+        '201':
+          description: 注册成功并建立登录会话
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AuthSession'
+              example:
+                code: SUCCESS
+                message: 操作成功
+                data:
+                  accessToken: eyJ...access
+                  refreshToken: eyJ...refresh
+                  tokenType: Bearer
+                  expiresIn: 7200
+                  user:
+                    id: user-001
+                    account: '13800000000'
+                    displayName: 李明
+                    phone: 138****0000
+                    email: null
+                    avatarUrl: null
+                traceId: trace-example-001
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '409':
+          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_CONFLICT
+                message: 业务状态冲突，例如重复报名、活动已满或重复核验
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '422':
+          description: 参数格式正确，但不满足业务规则
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_RULE_VIOLATION
+                message: 参数格式正确，但不满足业务规则
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              account: '13800000000'
+              password: Password123
+              displayName: 李明
+      security: []
+  /auth/login:
+    post:
+      summary: 用户登录
+      operationId: loginUser
+      tags:
+      - 账号认证
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AuthSession'
+              example:
+                code: SUCCESS
+                message: 操作成功
+                data:
+                  accessToken: eyJ...access
+                  refreshToken: eyJ...refresh
+                  tokenType: Bearer
+                  expiresIn: 7200
+                  user:
+                    id: user-001
+                    account: '13800000000'
+                    displayName: 李明
+                    phone: 138****0000
+                    email: null
+                    avatarUrl: null
+                traceId: trace-example-001
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '422':
+          description: 参数格式正确，但不满足业务规则
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_RULE_VIOLATION
+                message: 参数格式正确，但不满足业务规则
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              account: '13800000000'
+              password: Password123
+      security: []
+  /auth/refresh:
+    post:
+      summary: 刷新访问令牌
+      operationId: refreshAccessToken
+      tags:
+      - 账号认证
+      responses:
+        '200':
+          description: 令牌刷新成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AuthSession'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+            example:
+              refreshToken: eyJ...refresh
+      security: []
+  /auth/logout:
+    post:
+      summary: 退出登录
+      operationId: logoutUser
+      tags:
+      - 账号认证
+      responses:
+        '200':
+          description: 退出登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/LogoutData'
+              example:
+                code: SUCCESS
+                message: 操作成功
+                data:
+                  loggedOut: true
+                traceId: trace-example-001
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+            example:
+              refreshToken: eyJ...refresh
+      security:
+      - BearerAuth: []
+  /auth/me:
+    get:
+      summary: 获取当前用户信息
+      operationId: getCurrentUser
+      tags:
+      - 账号认证
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      security:
+      - BearerAuth: []
+  /public/home:
+    get:
+      summary: 获取门户首页数据
+      operationId: getPortalHome
+      tags:
+      - 大会门户
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/HomeData'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      description: 首页聚合接口。首期仅返回大会基础信息和精选场次；通知模块暂不纳入本接口。
+      security: []
+  /public/conference:
+    get:
+      summary: 获取大会基础信息
+      operationId: getConferenceInfo
+      tags:
+      - 大会门户
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ConferenceInfo'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      security: []
+  /public/events:
+    get:
+      summary: 分页查询已发布场次
+      operationId: listPublicEvents
+      tags:
+      - 大会门户
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventPageData'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      description: 仅返回前台可见的已发布场次。默认按开始时间升序。
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: 页码，从 1 开始
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: 每页数量
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: keyword
+        in: query
+        required: false
+        description: 按场次名称搜索
+        schema:
+          type: string
+      - name: date
+        in: query
+        required: false
+        description: 按活动日期筛选，使用大会当地日期
+        schema:
+          type: string
+          format: date
+      - name: venueId
+        in: query
+        required: false
+        description: 按会场筛选
+        schema:
+          type: string
+      security: []
+  /public/events/{eventId}:
+    get:
+      summary: 获取场次详情
+      operationId: getPublicEvent
+      tags:
+      - 大会门户
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventDetail'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: eventId
+        in: path
+        required: true
+        description: 场次 ID
+        schema:
+          type: string
+      security: []
+  /public/speakers:
+    get:
+      summary: 分页查询嘉宾
+      operationId: listPublicSpeakers
+      tags:
+      - 大会门户
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SpeakerPageData'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: 页码
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: 每页数量
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: keyword
+        in: query
+        required: false
+        description: 嘉宾姓名或机构关键词
+        schema:
+          type: string
+      - name: eventId
+        in: query
+        required: false
+        description: 筛选参与指定场次的嘉宾
+        schema:
+          type: string
+      security: []
+  /public/speakers/{speakerId}:
+    get:
+      summary: 获取嘉宾详情
+      operationId: getPublicSpeaker
+      tags:
+      - 大会门户
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SpeakerDetail'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: speakerId
+        in: path
+        required: true
+        description: 嘉宾 ID
+        schema:
+          type: string
+      security: []
+  /public/venues:
+    get:
+      summary: 查询会场列表
+      operationId: listPublicVenues
+      tags:
+      - 大会门户
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/VenuePageData'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: 页码
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: 每页数量
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      security: []
+  /public/venues/{venueId}:
+    get:
+      summary: 获取会场指南
+      operationId: getPublicVenue
+      tags:
+      - 大会门户
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/VenueDetail'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: venueId
+        in: path
+        required: true
+        description: 会场 ID
+        schema:
+          type: string
+      security: []
+  /events/{eventId}/registrations:
+    post:
+      summary: 提交场次报名
+      operationId: createRegistration
+      tags:
+      - 普通报名
+      responses:
+        '201':
+          description: 报名成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/RegistrationDetail'
+              example:
+                code: SUCCESS
+                message: 操作成功
+                data:
+                  id: registration-001
+                  eventId: event-1001
+                  eventTitle: 人工智能与网络安全论坛
+                  status: REGISTERED
+                  registeredAt: '2026-11-06T14:00:00+08:00'
+                  credentialStatus: VALID
+                  attendeeName: 李明
+                  phone: '13800000000'
+                  organization: 某科技有限公司
+                  position: 研发工程师
+                  remark: null
+                  credential:
+                    credentialNo: XH202611060001
+                    qrCodeContent: signed-opaque-credential-payload
+                    status: VALID
+                    validFrom: null
+                    validUntil: null
+                traceId: trace-example-001
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '409':
+          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_CONFLICT
+                message: 业务状态冲突，例如重复报名、活动已满或重复核验
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '422':
+          description: 参数格式正确，但不满足业务规则
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_RULE_VIOLATION
+                message: 参数格式正确，但不满足业务规则
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      description: 仅允许已登录用户报名。一个用户对同一场次默认只能成功报名一次；名额和重复报名规则待确认。
+      parameters:
+      - name: eventId
+        in: path
+        required: true
+        description: 场次 ID
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationCreateRequest'
+            example:
+              attendeeName: 李明
+              phone: '13800000000'
+              organization: 某科技有限公司
+              position: 研发工程师
+              remark: ''
+      security:
+      - BearerAuth: []
+  /me/registrations:
+    get:
+      summary: 查询我的报名列表
+      operationId: listMyRegistrations
+      tags:
+      - 普通报名
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/RegistrationPageData'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: 页码
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: 每页数量
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: status
+        in: query
+        required: false
+        description: 报名状态筛选
+        schema:
+          type: string
+          enum:
+          - REGISTERED
+          - CHECKED_IN
+          - CANCELLED
+      security:
+      - BearerAuth: []
+  /me/registrations/{registrationId}:
+    get:
+      summary: 查询我的报名详情
+      operationId: getMyRegistration
+      tags:
+      - 普通报名
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/RegistrationDetail'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: registrationId
+        in: path
+        required: true
+        description: 报名记录 ID
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+  /me/registrations/{registrationId}/credential:
+    get:
+      summary: 获取报名凭证
+      operationId: getMyRegistrationCredential
+      tags:
+      - 普通报名
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/CredentialData'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      description: 仅报名本人可以获取凭证。二维码载荷应为不可预测或签名的短载荷，不应直接编码手机号等个人信息。
+      parameters:
+      - name: registrationId
+        in: path
+        required: true
+        description: 报名记录 ID
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+  /admin/me:
+    get:
+      summary: 获取当前后台账号及权限
+      operationId: getAdminProfile
+      tags:
+      - 后台与权限
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AdminProfile'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      security:
+      - BearerAuth: []
+  /admin/events:
+    get:
+      summary: 后台分页查询场次
+      operationId: listAdminEvents
+      tags:
+      - 活动管理
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventPageData'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: 页码
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: 每页数量
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: keyword
+        in: query
+        required: false
+        description: 场次名称关键词
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: 场次状态筛选
+        schema:
+          type: string
+          enum:
+          - DRAFT
+          - PUBLISHED
+          - UNPUBLISHED
+          - FINISHED
+      security:
+      - BearerAuth: []
+    post:
+      summary: 创建场次
+      operationId: createAdminEvent
+      tags:
+      - 活动管理
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventDetail'
+              example:
+                code: SUCCESS
+                message: 操作成功
+                data:
+                  id: event-1002
+                  title: 人工智能与网络安全论坛
+                  summary: 论坛简介
+                  coverUrl: null
+                  startTime: '2027-05-20T09:00:00+08:00'
+                  endTime: '2027-05-20T12:00:00+08:00'
+                  venue: null
+                  speakers: []
+                  status: DRAFT
+                  registrationStatus: NOT_OPEN
+                  capacity: 300
+                  registeredCount: 0
+                  description: 活动详细介绍
+                  registrationStartAt: '2027-04-01T09:00:00+08:00'
+                  registrationEndAt: '2027-05-19T18:00:00+08:00'
+                  address: 杭州
+                  organizer: 大会组委会
+                  tags:
+                  - 人工智能
+                  - 网络安全
+                traceId: trace-example-001
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '409':
+          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_CONFLICT
+                message: 业务状态冲突，例如重复报名、活动已满或重复核验
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '422':
+          description: 参数格式正确，但不满足业务规则
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_RULE_VIOLATION
+                message: 参数格式正确，但不满足业务规则
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreateRequest'
+            example:
+              title: 人工智能与网络安全论坛
+              summary: 论坛简介
+              description: 活动详细介绍
+              startTime: '2027-05-20T09:00:00+08:00'
+              endTime: '2027-05-20T12:00:00+08:00'
+              registrationStartAt: '2027-04-01T09:00:00+08:00'
+              registrationEndAt: '2027-05-19T18:00:00+08:00'
+              capacity: 300
+              venueId: venue-001
+              speakerIds:
+              - speaker-001
+              tags:
+              - 人工智能
+              - 网络安全
+      security:
+      - BearerAuth: []
+  /admin/events/{eventId}:
+    get:
+      summary: 查询后台场次详情
+      operationId: getAdminEvent
+      tags:
+      - 活动管理
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventDetail'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: eventId
+        in: path
+        required: true
+        description: 场次 ID
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+    patch:
+      summary: 修改场次
+      operationId: updateAdminEvent
+      tags:
+      - 活动管理
+      responses:
+        '200':
+          description: 修改成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventDetail'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '409':
+          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_CONFLICT
+                message: 业务状态冲突，例如重复报名、活动已满或重复核验
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '422':
+          description: 参数格式正确，但不满足业务规则
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_RULE_VIOLATION
+                message: 参数格式正确，但不满足业务规则
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      description: 仅提交需要修改的字段。已存在报名记录的场次，修改时间、会场或名额时应由后端校验影响。
+      parameters:
+      - name: eventId
+        in: path
+        required: true
+        description: 场次 ID
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdateRequest'
+            example:
+              title: 人工智能与网络安全论坛（更新）
+      security:
+      - BearerAuth: []
+  /admin/events/{eventId}/publish:
+    post:
+      summary: 发布场次
+      operationId: publishAdminEvent
+      tags:
+      - 活动管理
+      responses:
+        '200':
+          description: 发布成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventDetail'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '409':
+          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_CONFLICT
+                message: 业务状态冲突，例如重复报名、活动已满或重复核验
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '422':
+          description: 参数格式正确，但不满足业务规则
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_RULE_VIOLATION
+                message: 参数格式正确，但不满足业务规则
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: eventId
+        in: path
+        required: true
+        description: 场次 ID
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+  /admin/events/{eventId}/unpublish:
+    post:
+      summary: 下线场次
+      operationId: unpublishAdminEvent
+      tags:
+      - 活动管理
+      responses:
+        '200':
+          description: 下线成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventDetail'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '409':
+          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_CONFLICT
+                message: 业务状态冲突，例如重复报名、活动已满或重复核验
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '422':
+          description: 参数格式正确，但不满足业务规则
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_RULE_VIOLATION
+                message: 参数格式正确，但不满足业务规则
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      description: 下线前应检查已有报名及现场执行影响；本接口不等同于删除历史报名。
+      parameters:
+      - name: eventId
+        in: path
+        required: true
+        description: 场次 ID
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+  /admin/registrations:
+    get:
+      summary: 后台分页查询报名记录
+      operationId: listAdminRegistrations
+      tags:
+      - 报名管理
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/RegistrationPageData'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: 页码
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: 每页数量
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: eventId
+        in: query
+        required: false
+        description: 按场次筛选
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: 报名状态
+        schema:
+          type: string
+          enum:
+          - REGISTERED
+          - CHECKED_IN
+          - CANCELLED
+      - name: keyword
+        in: query
+        required: false
+        description: 按姓名、手机号或凭证编号搜索
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+  /admin/registrations/{registrationId}:
+    get:
+      summary: 后台查询报名详情
+      operationId: getAdminRegistration
+      tags:
+      - 报名管理
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/RegistrationDetail'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: registrationId
+        in: path
+        required: true
+        description: 报名记录 ID
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+  /admin/check-ins:
+    post:
+      summary: 现场核验并登记到场
+      operationId: createCheckIn
+      tags:
+      - 现场核验
+      responses:
+        '201':
+          description: 核验成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/CheckInRecord'
+              example:
+                code: SUCCESS
+                message: 操作成功
+                data:
+                  id: checkin-001
+                  eventId: event-1001
+                  eventTitle: 人工智能与网络安全论坛
+                  registrationId: registration-001
+                  credentialNo: XH202611060001
+                  attendeeName: 李明
+                  organization: 某科技有限公司
+                  checkedInAt: '2026-11-06T14:00:00+08:00'
+                  operatorId: staff-001
+                  operatorName: 现场核验员
+                  inputMode: QR_SCAN
+                traceId: trace-example-001
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '409':
+          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_CONFLICT
+                message: 业务状态冲突，例如重复报名、活动已满或重复核验
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '422':
+          description: 参数格式正确，但不满足业务规则
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_RULE_VIOLATION
+                message: 参数格式正确，但不满足业务规则
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      description: 本接口按当前草案采用“一次请求完成凭证校验并写入核验记录”的原子操作。重复核验返回 409 / ALREADY_CHECKED_IN；是否需要先预览再确认待业务确认。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckInCreateRequest'
+            example:
+              eventId: event-1001
+              credentialCode: signed-opaque-credential-payload
+              inputMode: QR_SCAN
+      security:
+      - BearerAuth: []
+    get:
+      summary: 查询现场核验记录
+      operationId: listAdminCheckIns
+      tags:
+      - 现场核验
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/CheckInPageData'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: 页码
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: 每页数量
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: eventId
+        in: query
+        required: false
+        description: 场次 ID
+        schema:
+          type: string
+      - name: startTime
+        in: query
+        required: false
+        description: 核验开始时间
+        schema:
+          type: string
+          format: date-time
+      - name: endTime
+        in: query
+        required: false
+        description: 核验结束时间
+        schema:
+          type: string
+          format: date-time
+      security:
+      - BearerAuth: []
+  /admin/statistics/overview:
+    get:
+      summary: 查询报名与到场概览
+      operationId: getOverviewStatistics
+      tags:
+      - 数据统计
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/OverviewStatistics'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: startDate
+        in: query
+        required: false
+        description: 统计开始日期
+        schema:
+          type: string
+          format: date
+      - name: endDate
+        in: query
+        required: false
+        description: 统计结束日期
+        schema:
+          type: string
+          format: date
+      security:
+      - BearerAuth: []
+  /admin/statistics/events:
+    get:
+      summary: 分页查询场次统计
+      operationId: listEventStatistics
+      tags:
+      - 数据统计
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventStatisticsPageData'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: 页码
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: 每页数量
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: startDate
+        in: query
+        required: false
+        description: 统计开始日期
+        schema:
+          type: string
+          format: date
+      - name: endDate
+        in: query
+        required: false
+        description: 统计结束日期
+        schema:
+          type: string
+          format: date
+      - name: keyword
+        in: query
+        required: false
+        description: 场次名称关键词
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+  /admin/statistics/events/{eventId}:
+    get:
+      summary: 查询单场统计
+      operationId: getEventStatistics
+      tags:
+      - 数据统计
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/EventStatistics'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: eventId
+        in: path
+        required: true
+        description: 场次 ID
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+  /admin/users:
+    get:
+      summary: 查询后台账号列表
+      operationId: listAdminUsers
+      tags:
+      - 后台与权限
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/StaffUserPageData'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        description: 页码
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: 每页数量
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: keyword
+        in: query
+        required: false
+        description: 账号或姓名关键词
+        schema:
+          type: string
+      - name: roleCode
+        in: query
+        required: false
+        description: 角色编码
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: 账号状态
+        schema:
+          type: string
+          enum:
+          - ENABLED
+          - DISABLED
+      security:
+      - BearerAuth: []
+  /admin/users/{userId}:
+    get:
+      summary: 查询后台账号详情
+      operationId: getAdminUser
+      tags:
+      - 后台与权限
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/StaffUserDetail'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        description: 后台账号对应的用户 ID
+        schema:
+          type: string
+      security:
+      - BearerAuth: []
+  /admin/users/{userId}/roles:
+    put:
+      summary: 替换后台账号角色
+      operationId: replaceAdminUserRoles
+      tags:
+      - 后台与权限
+      responses:
+        '200':
+          description: 角色分配成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/StaffUserDetail'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INVALID_ARGUMENT
+                message: 请求参数格式错误或缺少必要参数
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '404':
+          description: 目标资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: RESOURCE_NOT_FOUND
+                message: 目标资源不存在
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '409':
+          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: BUSINESS_CONFLICT
+                message: 业务状态冲突，例如重复报名、活动已满或重复核验
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      description: PUT 表示将该账号的角色集合整体替换为请求中的 roleCodes；空数组表示撤销全部角色。只有具备用户角色管理权限的账号可操作。
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        description: 后台账号对应的用户 ID
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignRolesRequest'
+            example:
+              roleCodes:
+              - EVENT_OPERATOR
+              - CHECKIN_STAFF
+      security:
+      - BearerAuth: []
+  /admin/roles:
+    get:
+      summary: 查询系统内置角色
+      operationId: listAdminRoles
+      tags:
+      - 后台与权限
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/RoleListData'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      security:
+      - BearerAuth: []
+  /admin/permissions:
+    get:
+      summary: 查询系统权限字典
+      operationId: listAdminPermissions
+      tags:
+      - 后台与权限
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PermissionListData'
+        '401':
+          description: 未登录、令牌无效或令牌过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: UNAUTHENTICATED
+                message: 未登录、令牌无效或令牌过期
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          description: 已登录，但没有执行该操作的权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: 已登录，但没有执行该操作的权限
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+              example:
+                code: INTERNAL_ERROR
+                message: 服务器内部错误
+                details: {}
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+      security:
+      - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 访问令牌。令牌类型、刷新方式及存储策略仍需确认。
+  schemas:
+    ApiResponseBase:
+      type: object
+      required:
+      - code
+      - message
+      - traceId
+      - timestamp
+      properties:
+        code:
+          type: string
+          example: SUCCESS
+        message:
+          type: string
+          example: 操作成功
+        traceId:
+          type: string
+          description: 请求追踪标识
+        timestamp:
+          type: string
+          format: date-time
+    ApiErrorResponse:
+      type: object
+      required:
+      - code
+      - message
+      - traceId
+      - timestamp
+      properties:
+        code:
+          type: string
+          example: ALREADY_REGISTERED
+        message:
+          type: string
+          example: 你已报名该活动
+        details:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: 可选的错误上下文，不应包含敏感信息
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    PageInfo:
+      type: object
+      required:
+      - page
+      - pageSize
+      - total
+      - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          example: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          example: 10
+        total:
+          type: integer
+          minimum: 0
+          example: 32
+        totalPages:
+          type: integer
+          minimum: 0
+          example: 4
+    VenueBrief:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+          example: venue-001
+        name:
+          type: string
+          example: 杭州国际博览中心
+        address:
+          type:
+          - string
+          - 'null'
+          example: 杭州市萧山区钱江世纪城
+    SpeakerBrief:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+          example: speaker-001
+        name:
+          type: string
+          example: 张教授
+        title:
+          type:
+          - string
+          - 'null'
+          example: 教授
+        organization:
+          type:
+          - string
+          - 'null'
+          example: 某高校
+    ConferenceInfo:
+      type: object
+      required:
+      - name
+      - startTime
+      - endTime
+      properties:
+        name:
+          type: string
+          example: 西湖论剑·数字安全大会
+        theme:
+          type:
+          - string
+          - 'null'
+          example: 数智安全，共创未来
+        introduction:
+          type:
+          - string
+          - 'null'
+          example: 大会介绍内容
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        location:
+          type:
+          - string
+          - 'null'
+          example: 杭州
+        targetAudience:
+          type:
+          - string
+          - 'null'
+          example: 网络安全从业者、企业及高校代表
+        logoUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+        officialWebsite:
+          type:
+          - string
+          - 'null'
+          format: uri
+    EventSummary:
+      type: object
+      required:
+      - id
+      - title
+      - startTime
+      - endTime
+      - status
+      - registrationStatus
+      properties:
+        id:
+          type: string
+          example: event-1001
+        title:
+          type: string
+          example: 人工智能与网络安全论坛
+        summary:
+          type:
+          - string
+          - 'null'
+          example: 论坛简介
+        coverUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        venue:
+          oneOf:
+          - $ref: '#/components/schemas/VenueBrief'
+          - type: 'null'
+        speakers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakerBrief'
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - PUBLISHED
+          - UNPUBLISHED
+          - FINISHED
+          example: PUBLISHED
+        registrationStatus:
+          type: string
+          enum:
+          - NOT_OPEN
+          - OPEN
+          - CLOSED
+          - FULL
+          example: OPEN
+        capacity:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+          example: 300
+        registeredCount:
+          type: integer
+          minimum: 0
+          example: 128
+    EventDetail:
+      allOf:
+      - $ref: '#/components/schemas/EventSummary'
+      - type: object
+        properties:
+          description:
+            type:
+            - string
+            - 'null'
+            example: 活动详细介绍
+          registrationStartAt:
+            type:
+            - string
+            - 'null'
+            format: date-time
+          registrationEndAt:
+            type:
+            - string
+            - 'null'
+            format: date-time
+          address:
+            type:
+            - string
+            - 'null'
+            example: 杭州市萧山区某某路
+          organizer:
+            type:
+            - string
+            - 'null'
+          tags:
+            type: array
+            items:
+              type: string
+    EventPageData:
+      type: object
+      required:
+      - items
+      - pageInfo
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventSummary'
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+    SpeakerSummary:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+          example: speaker-001
+        name:
+          type: string
+          example: 张教授
+        title:
+          type:
+          - string
+          - 'null'
+          example: 教授
+        organization:
+          type:
+          - string
+          - 'null'
+          example: 某高校
+        avatarUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+    SpeakerDetail:
+      allOf:
+      - $ref: '#/components/schemas/SpeakerSummary'
+      - type: object
+        properties:
+          bio:
+            type:
+            - string
+            - 'null'
+          eventIds:
+            type: array
+            items:
+              type: string
+          eventTitles:
+            type: array
+            items:
+              type: string
+    SpeakerPageData:
+      type: object
+      required:
+      - items
+      - pageInfo
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakerSummary'
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+    VenueSummary:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+          example: venue-001
+        name:
+          type: string
+          example: 主会场
+        address:
+          type:
+          - string
+          - 'null'
+        description:
+          type:
+          - string
+          - 'null'
+    VenueDetail:
+      allOf:
+      - $ref: '#/components/schemas/VenueSummary'
+      - type: object
+        properties:
+          mapUrl:
+            type:
+            - string
+            - 'null'
+            format: uri
+          guideText:
+            type:
+            - string
+            - 'null'
+          imageUrls:
+            type: array
+            items:
+              type: string
+              format: uri
+    VenuePageData:
+      type: object
+      required:
+      - items
+      - pageInfo
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/VenueSummary'
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+    HomeData:
+      type: object
+      required:
+      - conference
+      - featuredEvents
+      properties:
+        conference:
+          $ref: '#/components/schemas/ConferenceInfo'
+        featuredEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventSummary'
+    UserProfile:
+      type: object
+      required:
+      - id
+      - account
+      - displayName
+      properties:
+        id:
+          type: string
+          example: user-001
+        account:
+          type: string
+          example: '13800000000'
+        displayName:
+          type: string
+          example: 参会用户
+        phone:
+          type:
+          - string
+          - 'null'
+          example: 138****0000
+        email:
+          type:
+          - string
+          - 'null'
+        avatarUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+    AuthSession:
+      type: object
+      required:
+      - accessToken
+      - tokenType
+      - expiresIn
+      - user
+      properties:
+        accessToken:
+          type: string
+          description: 访问令牌
+        refreshToken:
+          type:
+          - string
+          - 'null'
+          description: 刷新令牌；是否通过安全 Cookie 下发待确认
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          description: 访问令牌有效秒数
+          example: 7200
+        user:
+          $ref: '#/components/schemas/UserProfile'
+    RegisterRequest:
+      type: object
+      required:
+      - account
+      - password
+      - displayName
+      properties:
+        account:
+          type: string
+          minLength: 3
+          maxLength: 64
+          description: 账号；支持何种账号形式待确认
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 64
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 40
+    LoginRequest:
+      type: object
+      required:
+      - account
+      - password
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+          format: password
+    RefreshRequest:
+      type: object
+      required:
+      - refreshToken
+      properties:
+        refreshToken:
+          type: string
+    LogoutData:
+      type: object
+      required:
+      - loggedOut
+      properties:
+        loggedOut:
+          type: boolean
+          example: true
+    RegistrationCreateRequest:
+      type: object
+      required:
+      - attendeeName
+      - phone
+      properties:
+        attendeeName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: 李明
+        phone:
+          type: string
+          example: '13800000000'
+        organization:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+          example: 某科技有限公司
+        position:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+          example: 研发工程师
+        remark:
+          type:
+          - string
+          - 'null'
+          maxLength: 500
+    Credential:
+      type: object
+      required:
+      - credentialNo
+      - qrCodeContent
+      - status
+      properties:
+        credentialNo:
+          type: string
+          example: XH202611060001
+        qrCodeContent:
+          type: string
+          description: 前端用于生成二维码的凭证载荷；不应包含明文个人敏感信息
+        status:
+          type: string
+          enum:
+          - VALID
+          - CHECKED_IN
+          - INVALID
+        validFrom:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        validUntil:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    RegistrationSummary:
+      type: object
+      required:
+      - id
+      - eventId
+      - eventTitle
+      - status
+      - registeredAt
+      properties:
+        id:
+          type: string
+          example: registration-001
+        eventId:
+          type: string
+        eventTitle:
+          type: string
+        status:
+          type: string
+          enum:
+          - REGISTERED
+          - CHECKED_IN
+          - CANCELLED
+        registeredAt:
+          type: string
+          format: date-time
+        credentialStatus:
+          type: string
+          enum:
+          - VALID
+          - CHECKED_IN
+          - INVALID
+    RegistrationDetail:
+      allOf:
+      - $ref: '#/components/schemas/RegistrationSummary'
+      - type: object
+        properties:
+          attendeeName:
+            type: string
+          phone:
+            type: string
+            description: 仅本人或有权限的运营人员可见
+          organization:
+            type:
+            - string
+            - 'null'
+          position:
+            type:
+            - string
+            - 'null'
+          remark:
+            type:
+            - string
+            - 'null'
+          credential:
+            $ref: '#/components/schemas/Credential'
+    RegistrationPageData:
+      type: object
+      required:
+      - items
+      - pageInfo
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegistrationSummary'
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+    CredentialData:
+      type: object
+      required:
+      - registrationId
+      - eventId
+      - credential
+      properties:
+        registrationId:
+          type: string
+        eventId:
+          type: string
+        credential:
+          $ref: '#/components/schemas/Credential'
+    EventCreateRequest:
+      type: object
+      required:
+      - title
+      - startTime
+      - endTime
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        summary:
+          type:
+          - string
+          - 'null'
+          maxLength: 300
+        description:
+          type:
+          - string
+          - 'null'
+        coverUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        registrationStartAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        registrationEndAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        capacity:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+          description: null 表示不限额；是否启用名额限制待确认
+        venueId:
+          type:
+          - string
+          - 'null'
+        venueName:
+          type:
+          - string
+          - 'null'
+          description: 如暂不使用独立会场数据，可直接填写名称
+        address:
+          type:
+          - string
+          - 'null'
+        speakerIds:
+          type: array
+          items:
+            type: string
+        organizer:
+          type:
+          - string
+          - 'null'
+        tags:
+          type: array
+          items:
+            type: string
+    EventUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        summary:
+          type:
+          - string
+          - 'null'
+          maxLength: 300
+        description:
+          type:
+          - string
+          - 'null'
+        coverUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        registrationStartAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        registrationEndAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        capacity:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+        venueId:
+          type:
+          - string
+          - 'null'
+        venueName:
+          type:
+          - string
+          - 'null'
+        address:
+          type:
+          - string
+          - 'null'
+        speakerIds:
+          type: array
+          items:
+            type: string
+        organizer:
+          type:
+          - string
+          - 'null'
+        tags:
+          type: array
+          items:
+            type: string
+    AdminProfile:
+      type: object
+      required:
+      - user
+      - roles
+      - permissions
+      properties:
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        roles:
+          type: array
+          items:
+            type: string
+        permissions:
+          type: array
+          items:
+            type: string
+    CheckInCreateRequest:
+      type: object
+      required:
+      - eventId
+      - credentialCode
+      - inputMode
+      properties:
+        eventId:
+          type: string
+        credentialCode:
+          type: string
+          description: 二维码载荷或人工输入的凭证编号
+        inputMode:
+          type: string
+          enum:
+          - QR_SCAN
+          - MANUAL_INPUT
+    CheckInRecord:
+      type: object
+      required:
+      - id
+      - eventId
+      - registrationId
+      - credentialNo
+      - checkedInAt
+      - operatorId
+      properties:
+        id:
+          type: string
+        eventId:
+          type: string
+        eventTitle:
+          type: string
+        registrationId:
+          type: string
+        credentialNo:
+          type: string
+        attendeeName:
+          type: string
+        organization:
+          type:
+          - string
+          - 'null'
+        checkedInAt:
+          type: string
+          format: date-time
+        operatorId:
+          type: string
+        operatorName:
+          type:
+          - string
+          - 'null'
+        inputMode:
+          type: string
+          enum:
+          - QR_SCAN
+          - MANUAL_INPUT
+    CheckInPageData:
+      type: object
+      required:
+      - items
+      - pageInfo
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckInRecord'
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+    StaffUserSummary:
+      type: object
+      required:
+      - id
+      - account
+      - displayName
+      - status
+      - roleCodes
+      properties:
+        id:
+          type: string
+        account:
+          type: string
+        displayName:
+          type: string
+        phone:
+          type:
+          - string
+          - 'null'
+          description: 建议脱敏返回
+        status:
+          type: string
+          enum:
+          - ENABLED
+          - DISABLED
+        roleCodes:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+    StaffUserDetail:
+      allOf:
+      - $ref: '#/components/schemas/StaffUserSummary'
+      - type: object
+        properties:
+          roleNames:
+            type: array
+            items:
+              type: string
+          updatedAt:
+            type:
+            - string
+            - 'null'
+            format: date-time
+    StaffUserPageData:
+      type: object
+      required:
+      - items
+      - pageInfo
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffUserSummary'
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+    AssignRolesRequest:
+      type: object
+      required:
+      - roleCodes
+      properties:
+        roleCodes:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+            - SUPER_ADMIN
+            - EVENT_OPERATOR
+            - CHECKIN_STAFF
+            - DATA_OPERATOR
+    RoleSummary:
+      type: object
+      required:
+      - code
+      - name
+      - permissionCodes
+      properties:
+        code:
+          type: string
+          enum:
+          - SUPER_ADMIN
+          - EVENT_OPERATOR
+          - CHECKIN_STAFF
+          - DATA_OPERATOR
+        name:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+        permissionCodes:
+          type: array
+          items:
+            type: string
+    RoleListData:
+      type: object
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleSummary'
+    PermissionSummary:
+      type: object
+      required:
+      - code
+      - name
+      - module
+      properties:
+        code:
+          type: string
+          example: event:publish
+        name:
+          type: string
+          example: 发布活动
+        module:
+          type: string
+          example: 活动管理
+        description:
+          type:
+          - string
+          - 'null'
+    PermissionListData:
+      type: object
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionSummary'
+    OverviewStatistics:
+      type: object
+      required:
+      - eventCount
+      - registrationCount
+      - checkedInCount
+      - checkInRate
+      properties:
+        eventCount:
+          type: integer
+          minimum: 0
+        registrationCount:
+          type: integer
+          minimum: 0
+        checkedInCount:
+          type: integer
+          minimum: 0
+        checkInRate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: checkedInCount / registrationCount；分母为 0 时返回 0
+        startDate:
+          type:
+          - string
+          - 'null'
+          format: date
+        endDate:
+          type:
+          - string
+          - 'null'
+          format: date
+        generatedAt:
+          type: string
+          format: date-time
+    EventStatistics:
+      type: object
+      required:
+      - eventId
+      - eventTitle
+      - registrationCount
+      - checkedInCount
+      - checkInRate
+      properties:
+        eventId:
+          type: string
+        eventTitle:
+          type: string
+        capacity:
+          type:
+          - integer
+          - 'null'
+        registrationCount:
+          type: integer
+          minimum: 0
+        checkedInCount:
+          type: integer
+          minimum: 0
+        checkInRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        generatedAt:
+          type: string
+          format: date-time
+    EventStatisticsPageData:
+      type: object
+      required:
+      - items
+      - pageInfo
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventStatistics'
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'

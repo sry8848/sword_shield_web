@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#123a45"/><stop offset="1" stop-color="#258777"/></linearGradient></defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <g fill="none" stroke="#a2edcf" stroke-width="5" opacity=".7"><path d="M610 260a55 55 0 0 1 5-110 85 85 0 0 1 165 10 50 50 0 0 1 0 100z"/><path d="M700 260v70M620 330h160M620 330v45M780 330v45"/><rect x="595" y="375" width="50" height="40" rx="6"/><rect x="755" y="375" width="50" height="40" rx="6"/></g>
+  <g fill="#fff" font-family="Microsoft YaHei, sans-serif"><text x="70" y="135" font-size="24" letter-spacing="5">专题交流</text><text x="70" y="230" font-size="52" font-weight="700">云原生与零信任</text><text x="74" y="288" font-size="23" opacity=".8">持续验证 · 最小权限</text><text x="74" y="465" font-size="18" opacity=".7">CLOUD NATIVE SECURITY</text></g>
+</svg>

@@ -1,0 +1,23 @@
+{
+  "project": "xihu-jian-frontend",
+  "file_count": 78,
+  "apps": [
+    "apps/portal",
+    "apps/admin"
+  ],
+  "shared_package": "packages/shared",
+  "documentation": "docs/",
+  "api_contract": "openapi/openapi.yaml",
+  "verification": {
+    "json_files": "validated",
+    "openapi_yaml": "parsed successfully as OpenAPI 3.1 YAML",
+    "dependency_install": "not run: package registry network lookup unavailable in this environment",
+    "typescript_syntax": "25 TypeScript files and 14 Vue script blocks transpiled without syntax diagnostics",
+    "full_build_and_typecheck": "not run: npm registry unavailable, dependencies could not be installed"
+  },
+  "known_limitations": [
+    "Mock state is isolated between the two Vite applications.",
+    "OpenAPI is a proposed MVP contract and must be reconciled with the actual backend.",
+    "No pnpm lockfile is included; generate it with pnpm install and commit it."
+  ]
+}

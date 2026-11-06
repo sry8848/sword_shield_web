@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="1690" viewBox="0 0 1060 1690">
+<title>用户报名活动流程</title>
+<rect width="100%" height="100%" fill="white"/>
+<text x="530.0" y="30.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="26" fill="#222222">用户报名活动流程</text>
+<rect x="25" y="70" width="305" height="1600" fill="white" stroke="#444444"/>
+<rect x="25" y="70" width="305" height="44" fill="#F2F2F2" stroke="#444444"/>
+<text x="177.5" y="92.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="23" fill="#222222">用户</text>
+<rect x="330" y="70" width="705" height="1600" fill="white" stroke="#444444"/>
+<rect x="330" y="70" width="705" height="44" fill="#F2F2F2" stroke="#444444"/>
+<text x="682.5" y="92.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="23" fill="#222222">系统</text>
+<polyline points="177,171 177,212" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="177,212 181.0,202.0 173.0,202.0" fill="#444444"/>
+<polyline points="177,278 177,289 550,289 550,300" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,300 554.0,290.0 546.0,290.0" fill="#444444"/>
+<polyline points="420,350 302,350" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="302,350 312.0,354.0 312.0,346.0" fill="#444444"/>
+<polyline points="177,382 177,434" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="177,434 181.0,424.0 173.0,424.0" fill="#444444"/>
+<polyline points="550,400 550,443" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,443 554.0,433.0 546.0,433.0" fill="#444444"/>
+<polyline points="550,517 550,555" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,555 554.0,545.0 546.0,545.0" fill="#444444"/>
+<polyline points="680,605 770,605" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="770,605 760.0,601.0 760.0,609.0" fill="#444444"/>
+<polyline points="550,655 550,690" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,690 554.0,680.0 546.0,680.0" fill="#444444"/>
+<polyline points="685,745 770,745" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="770,745 760.0,741.0 760.0,749.0" fill="#444444"/>
+<polyline points="550,800 550,830" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,830 554.0,820.0 546.0,820.0" fill="#444444"/>
+<polyline points="685,885 770,885" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="770,885 760.0,881.0 760.0,889.0" fill="#444444"/>
+<polyline points="550,940 550,970" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,970 554.0,960.0 546.0,960.0" fill="#444444"/>
+<polyline points="685,1025 770,1025" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="770,1025 760.0,1021.0 760.0,1029.0" fill="#444444"/>
+<polyline points="550,1080 550,1110" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,1110 554.0,1100.0 546.0,1100.0" fill="#444444"/>
+<polyline points="685,1165 770,1165" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="770,1165 760.0,1161.0 760.0,1169.0" fill="#444444"/>
+<polyline points="550,1220 550,1261" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,1261 554.0,1251.0 546.0,1251.0" fill="#444444"/>
+<polyline points="550,1359 550,1410" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,1410 554.0,1400.0 546.0,1400.0" fill="#444444"/>
+<polyline points="680,1460 770,1460" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="770,1460 760.0,1456.0 760.0,1464.0" fill="#444444"/>
+<polyline points="420,1460 360,1460 360,1570 302,1570" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="302,1570 312.0,1574.0 312.0,1566.0" fill="#444444"/>
+<polyline points="177,1602 177,1619" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="177,1619 181.0,1609.0 173.0,1609.0" fill="#444444"/>
+<polyline points="980,605.0 1015,605.0 1015,1640 970,1640" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="970,1640 980.0,1644.0 980.0,1636.0" fill="#444444"/>
+<polyline points="980,745.0 1015,745.0 1015,1640 970,1640" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="970,1640 980.0,1644.0 980.0,1636.0" fill="#444444"/>
+<polyline points="980,885.0 1015,885.0 1015,1640 970,1640" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="970,1640 980.0,1644.0 980.0,1636.0" fill="#444444"/>
+<polyline points="980,1025.0 1015,1025.0 1015,1640 970,1640" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="970,1640 980.0,1644.0 980.0,1636.0" fill="#444444"/>
+<polyline points="980,1165.0 1015,1165.0 1015,1640 970,1640" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="970,1640 980.0,1644.0 980.0,1636.0" fill="#444444"/>
+<polyline points="980,1460.0 1015,1460.0 1015,1640 970,1640" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="970,1640 980.0,1644.0 980.0,1636.0" fill="#444444"/>
+<rect x="97.0" y="129.0" width="160" height="42" rx="21.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="177.0" y="150.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">开始</text>
+<rect x="52.0" y="212.0" width="250" height="66" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="177.0" y="230.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">浏览活动详情</text>
+<text x="177.0" y="259.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">点击“报名活动”</text>
+<polygon points="550.0,300.0 680.0,350.0 550.0,400.0 420.0,350.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="350.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">用户是否已登录？</text>
+<rect x="52.0" y="318.0" width="250" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="177.0" y="335.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提示先登录</text>
+<text x="177.0" y="364.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">跳转至登录页面</text>
+<rect x="82.0" y="434.0" width="190" height="42" rx="21.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="177.0" y="455.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">本次报名结束</text>
+<rect x="420.0" y="443.0" width="260" height="74" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="465.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提交活动编号</text>
+<text x="550.0" y="494.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">及报名来源渠道</text>
+<polygon points="550.0,555.0 680.0,605.0 550.0,655.0 420.0,605.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="605.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">活动是否存在？</text>
+<rect x="770.0" y="573.0" width="210" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="605.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提示活动不存在</text>
+<polygon points="550.0,690.0 685.0,745.0 550.0,800.0 415.0,745.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="730.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">报名是否</text>
+<text x="550.0" y="759.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">已经截止？</text>
+<rect x="770.0" y="713.0" width="210" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="730.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提示报名已截止</text>
+<text x="875.0" y="759.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">无法报名</text>
+<polygon points="550.0,830.0 685.0,885.0 550.0,940.0 415.0,885.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="870.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">报名是否</text>
+<text x="550.0" y="899.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">尚未开放？</text>
+<rect x="770.0" y="853.0" width="210" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="870.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提示报名尚未开放</text>
+<text x="875.0" y="899.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">暂时无法报名</text>
+<polygon points="550.0,970.0 685.0,1025.0 550.0,1080.0 415.0,1025.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="1010.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">该用户是否</text>
+<text x="550.0" y="1039.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">已经报过名？</text>
+<rect x="770.0" y="993.0" width="210" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="1025.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提示无需重复报名</text>
+<polygon points="550.0,1110.0 685.0,1165.0 550.0,1220.0 415.0,1165.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="1150.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">已设上限且</text>
+<text x="550.0" y="1179.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">报名人数已满？</text>
+<rect x="770.0" y="1133.0" width="210" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="1165.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提示报名人数已满</text>
+<rect x="420.0" y="1261.0" width="260" height="98" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="1281.02" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">保存用户、活动</text>
+<text x="550.0" y="1310.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">来源渠道及报名时间</text>
+<text x="550.0" y="1338.98" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">形成报名记录</text>
+<polygon points="550.0,1410.0 680.0,1460.0 550.0,1510.0 420.0,1460.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="1445.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">报名请求</text>
+<text x="550.0" y="1474.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">是否成功？</text>
+<rect x="770.0" y="1428.0" width="210" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="1460.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">显示报名失败</text>
+<rect x="52.0" y="1538.0" width="250" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="177.0" y="1570.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">显示“报名成功”</text>
+<rect x="82.0" y="1619.0" width="190" height="42" rx="21.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="177.0" y="1640.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">报名完成</text>
+<rect x="780.0" y="1619.0" width="190" height="42" rx="21.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="1640.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">本次报名结束</text>
+<rect x="345.5" y="336" width="29" height="28" fill="white"/>
+<text x="360" y="350.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">否</text>
+<rect x="555.5" y="407" width="29" height="28" fill="white"/>
+<text x="570" y="421.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">是</text>
+<rect x="709.5" y="591" width="29" height="28" fill="white"/>
+<text x="724" y="605.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">否</text>
+<rect x="555.5" y="660" width="29" height="28" fill="white"/>
+<text x="570" y="674.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">是</text>
+<rect x="709.5" y="731" width="29" height="28" fill="white"/>
+<text x="724" y="745.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">是</text>
+<rect x="555.5" y="801" width="29" height="28" fill="white"/>
+<text x="570" y="815.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">否</text>
+<rect x="709.5" y="871" width="29" height="28" fill="white"/>
+<text x="724" y="885.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">是</text>
+<rect x="555.5" y="941" width="29" height="28" fill="white"/>
+<text x="570" y="955.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">否</text>
+<rect x="709.5" y="1011" width="29" height="28" fill="white"/>
+<text x="724" y="1025.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">是</text>
+<rect x="555.5" y="1081" width="29" height="28" fill="white"/>
+<text x="570" y="1095.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">否</text>
+<rect x="709.5" y="1151" width="29" height="28" fill="white"/>
+<text x="724" y="1165.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">是</text>
+<rect x="555.5" y="1227" width="29" height="28" fill="white"/>
+<text x="570" y="1241.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">否</text>
+<rect x="709.5" y="1446" width="29" height="28" fill="white"/>
+<text x="724" y="1460.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">否</text>
+<rect x="371.5" y="1446" width="29" height="28" fill="white"/>
+<text x="386" y="1460.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">是</text>
+</svg>

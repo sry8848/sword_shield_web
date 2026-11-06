@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#252353"/><stop offset="1" stop-color="#7352a1"/></linearGradient></defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <g fill="none" stroke="#c8b6fa" stroke-width="3" opacity=".5"><path d="m680 100 110 60v130l-110 60-110-60V160zM680 100v250M570 160l220 130M790 160 570 290"/><circle cx="680" cy="100" r="15"/><circle cx="790" cy="160" r="15"/><circle cx="570" cy="290" r="15"/><circle cx="680" cy="350" r="15"/></g>
+  <g fill="#fff" font-family="Microsoft YaHei, sans-serif"><text x="70" y="135" font-size="24" letter-spacing="5">技术工作坊</text><text x="70" y="230" font-size="52" font-weight="700">AI 应用安全</text><text x="74" y="288" font-size="23" opacity=".8">明确边界 · 安全协作</text><text x="74" y="465" font-size="18" opacity=".7">AI APPLICATION SECURITY</text></g>
+</svg>

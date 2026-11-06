@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="1120" viewBox="0 0 1060 1120">
+<title>资料下载链接获取流程</title>
+<rect width="100%" height="100%" fill="white"/>
+<text x="530.0" y="30.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="26" fill="#222222">资料下载链接获取流程</text>
+<rect x="25" y="70" width="305" height="1030" fill="white" stroke="#444444"/>
+<rect x="25" y="70" width="305" height="44" fill="#F2F2F2" stroke="#444444"/>
+<text x="177.5" y="92.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="23" fill="#222222">用户</text>
+<rect x="330" y="70" width="705" height="1030" fill="white" stroke="#444444"/>
+<rect x="330" y="70" width="705" height="44" fill="#F2F2F2" stroke="#444444"/>
+<text x="682.5" y="92.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="23" fill="#222222">系统</text>
+<polyline points="177,171 177,213" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="177,213 181.0,203.0 173.0,203.0" fill="#444444"/>
+<polyline points="302,245 420,245" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="420,245 410.0,241.0 410.0,249.0" fill="#444444"/>
+<polyline points="550,284 550,318 177,318 177,353" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="177,353 181.0,343.0 173.0,343.0" fill="#444444"/>
+<polyline points="302,390 420,390" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="420,390 410.0,386.0 410.0,394.0" fill="#444444"/>
+<polyline points="550,432 550,475" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,475 554.0,465.0 546.0,465.0" fill="#444444"/>
+<polyline points="550,585 550,638" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,638 554.0,628.0 546.0,628.0" fill="#444444"/>
+<polyline points="685,530 770,530" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="770,530 760.0,526.0 760.0,534.0" fill="#444444"/>
+<polyline points="550,712 550,755" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,755 554.0,745.0 546.0,745.0" fill="#444444"/>
+<polyline points="550,865 550,918" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,918 554.0,908.0 546.0,908.0" fill="#444444"/>
+<polyline points="685,810 770,810" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="770,810 760.0,806.0 760.0,814.0" fill="#444444"/>
+<polyline points="550,982 550,1039" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="550,1039 554.0,1029.0 546.0,1029.0" fill="#444444"/>
+<polyline points="980,530 1015,530 1015,1060 980,1060" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="980,1060 990.0,1064.0 990.0,1056.0" fill="#444444"/>
+<polyline points="980,810 1015,810 1015,1060 980,1060" fill="none" stroke="#444444" stroke-width="1.5"/>
+<polygon points="980,1060 990.0,1064.0 990.0,1056.0" fill="#444444"/>
+<rect x="97.0" y="129.0" width="160" height="42" rx="21.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="177.0" y="150.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">开始</text>
+<rect x="52.0" y="213.0" width="250" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="177.0" y="245.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">打开资料下载页面</text>
+<rect x="420.0" y="206.0" width="260" height="78" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="230.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">按列表展示资料</text>
+<text x="550.0" y="259.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">及主讲人等信息</text>
+<rect x="52.0" y="353.0" width="250" height="74" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="177.0" y="375.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">选择资料</text>
+<text x="177.0" y="404.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">点击“复制下载链接”</text>
+<rect x="420.0" y="348.0" width="260" height="84" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="375.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">生成临时下载地址</text>
+<text x="550.0" y="404.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">设置访问有效期</text>
+<polygon points="550.0,475.0 685.0,530.0 550.0,585.0 415.0,530.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="515.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">地址请求</text>
+<text x="550.0" y="544.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">是否发生异常？</text>
+<rect x="420.0" y="638.0" width="260" height="74" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="660.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">将下载地址</text>
+<text x="550.0" y="689.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">写入用户剪贴板</text>
+<polygon points="550.0,755.0 685.0,810.0 550.0,865.0 415.0,810.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="795.51" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">复制操作</text>
+<text x="550.0" y="824.49" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">是否发生异常？</text>
+<rect x="420.0" y="918.0" width="260" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="950.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提示“下载链接已复制”</text>
+<rect x="440.0" y="1039.0" width="220" height="42" rx="21.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="550.0" y="1060.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">链接获取完成</text>
+<rect x="770.0" y="498.0" width="210" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="530.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提示获取链接失败</text>
+<rect x="770.0" y="778.0" width="210" height="64" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="810.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">提示获取链接失败</text>
+<rect x="770.0" y="1039.0" width="210" height="42" rx="21.0" fill="white" stroke="#444444" stroke-width="1.5"/>
+<text x="875.0" y="1060.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="21" fill="#222222">本次操作结束</text>
+<rect x="555.5" y="597" width="29" height="28" fill="white"/>
+<text x="570" y="611.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">否</text>
+<rect x="709.5" y="516" width="29" height="28" fill="white"/>
+<text x="724" y="530.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">是</text>
+<rect x="555.5" y="878" width="29" height="28" fill="white"/>
+<text x="570" y="892.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">否</text>
+<rect x="709.5" y="796" width="29" height="28" fill="white"/>
+<text x="724" y="810.0" text-anchor="middle" dominant-baseline="central" font-family="Microsoft YaHei, sans-serif" font-size="18" fill="#222222">是</text>
+</svg>

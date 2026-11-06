@@ -17,7 +17,6 @@ services:
       - "3306:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
-      - ./db/sword_shield.sql:/docker-entrypoint-initdb.d/sword_shield.sql:ro
     restart: always
 
   nacos:

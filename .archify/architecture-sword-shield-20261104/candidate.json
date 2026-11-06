@@ -1,0 +1,341 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "剑盾大会平台技术架构图",
+    "locale": "zh-CN",
+    "output": ".archify/architecture-sword-shield-20261104/sword-shield-architecture.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Penryn/sword_shield_web.git",
+      "revision": "e56333182714ad41eb7d4bb5146cb40cc9b85be2"
+    }
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "浏览器",
+      "sublabel": "游客 · 注册用户 · 管理员",
+      "pos": [
+        418,
+        40
+      ],
+      "size": [
+        220,
+        65
+      ],
+      "sources": [
+        {
+          "path": "sword-shield-web-ui/src/router.ts",
+          "line": 24,
+          "end_line": 50
+        },
+        {
+          "path": "sword-shield-web-ui/src/pages/Materials.vue",
+          "line": 105,
+          "end_line": 110
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "大会门户与管理后台",
+      "sublabel": "Vue 3 · TypeScript · Element Plus",
+      "pos": [
+        406,
+        157
+      ],
+      "size": [
+        244,
+        68
+      ],
+      "sources": [
+        {
+          "path": "sword-shield-web-ui/package.json",
+          "line": 11,
+          "end_line": 21
+        },
+        {
+          "path": "sword-shield-web-ui/vite.config.ts",
+          "line": 4,
+          "end_line": 14
+        },
+        {
+          "path": "sword-shield-web-ui/src/api.ts",
+          "line": 3,
+          "end_line": 15
+        }
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "backend",
+      "label": "API 网关",
+      "sublabel": "Spring Cloud Gateway · :8080",
+      "pos": [
+        406,
+        285
+      ],
+      "size": [
+        244,
+        76
+      ],
+      "sources": [
+        {
+          "path": "sword-shield-gateway/src/main/resources/application.yml",
+          "line": 9,
+          "end_line": 42
+        },
+        {
+          "path": "sword-shield-gateway/src/main/java/com/swordshield/gateway/AuthFilter.java",
+          "line": 20,
+          "end_line": 51
+        },
+        {
+          "path": "sword-shield-gateway/src/main/resources/logback-spring.xml",
+          "line": 31,
+          "end_line": 44
+        }
+      ]
+    },
+    {
+      "id": "services",
+      "type": "backend",
+      "label": "六个业务微服务",
+      "sublabel": "Java 17 · Spring Boot 3.2",
+      "pos": [
+        406,
+        434
+      ],
+      "size": [
+        244,
+        76
+      ],
+      "sources": [
+        {
+          "path": "pom.xml",
+          "line": 8,
+          "end_line": 23
+        },
+        {
+          "path": "sword-shield-gateway/src/main/resources/application.yml",
+          "line": 18,
+          "end_line": 42
+        },
+        {
+          "path": "sword-shield-admin/src/main/java/com/swordshield/admin/service/AdminActivityService.java",
+          "line": 14,
+          "end_line": 47
+        }
+      ]
+    },
+    {
+      "id": "nacos",
+      "type": "cloud",
+      "label": "Nacos",
+      "sublabel": "服务注册与发现 · :8848",
+      "pos": [
+        52,
+        285
+      ],
+      "size": [
+        160,
+        76
+      ],
+      "sources": [
+        {
+          "path": "sword-shield-gateway/src/main/resources/application.yml",
+          "line": 9,
+          "end_line": 15
+        },
+        {
+          "path": "sword-shield-activity/src/main/resources/application.yml",
+          "line": 14,
+          "end_line": 18
+        }
+      ]
+    },
+    {
+      "id": "mysql",
+      "type": "database",
+      "label": "MySQL 8.0",
+      "sublabel": "共享数据库 sword_shield",
+      "pos": [
+        414,
+        590
+      ],
+      "size": [
+        228,
+        68
+      ],
+      "sources": [
+        {
+          "path": "docker-compose.yml",
+          "line": 2,
+          "end_line": 9
+        },
+        {
+          "path": "sword-shield-admin/src/main/resources/application.yml",
+          "line": 6,
+          "end_line": 13
+        },
+        {
+          "path": "sword-shield-file/src/main/resources/application.yml",
+          "line": 10,
+          "end_line": 20
+        }
+      ]
+    },
+    {
+      "id": "minio",
+      "type": "database",
+      "label": "MinIO",
+      "sublabel": "对象存储 · assets · :9000",
+      "pos": [
+        834,
+        434
+      ],
+      "size": [
+        205,
+        76
+      ],
+      "sources": [
+        {
+          "path": "sword-shield-file/src/main/resources/application.yml",
+          "line": 29,
+          "end_line": 33
+        },
+        {
+          "path": "sword-shield-file/src/main/java/com/swordshield/file/service/FileService.java",
+          "line": 24,
+          "end_line": 52
+        }
+      ]
+    },
+    {
+      "id": "logs",
+      "type": "cloud",
+      "label": "集中日志",
+      "sublabel": "Logstash → Elasticsearch → Kibana",
+      "pos": [
+        40,
+        470
+      ],
+      "size": [
+        196,
+        75
+      ],
+      "sources": [
+        {
+          "path": "sword-shield-activity/src/main/resources/logback-spring.xml",
+          "line": 31,
+          "end_line": 44
+        },
+        {
+          "path": "logstash/pipeline/logstash.conf",
+          "line": 1,
+          "end_line": 5
+        },
+        {
+          "path": "logstash/pipeline/logstash.conf",
+          "line": 30,
+          "end_line": 34
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "browser-web",
+      "from": "browser",
+      "to": "web",
+      "label": "访问 Web 界面",
+      "variant": "emphasis"
+    },
+    {
+      "id": "web-gateway",
+      "from": "web",
+      "to": "gateway",
+      "label": "HTTP /api",
+      "variant": "emphasis"
+    },
+    {
+      "id": "gateway-services",
+      "from": "gateway",
+      "to": "services",
+      "label": "按路径负载均衡 · lb://",
+      "variant": "emphasis"
+    },
+    {
+      "id": "gateway-nacos",
+      "from": "gateway",
+      "to": "nacos",
+      "label": "查询服务实例"
+    },
+    {
+      "id": "service-registration",
+      "from": "services",
+      "to": "nacos",
+      "label": "注册服务实例"
+    },
+    {
+      "id": "services-mysql",
+      "from": "services",
+      "to": "mysql",
+      "label": "JPA / JDBC"
+    },
+    {
+      "id": "file-minio",
+      "from": "services",
+      "to": "minio",
+      "label": "文件服务上传对象"
+    },
+    {
+      "id": "browser-minio",
+      "from": "browser",
+      "to": "minio",
+      "label": "凭预签名链接下载"
+    },
+    {
+      "id": "services-logs",
+      "from": "services",
+      "to": "logs",
+      "label": "异步日志 · TCP",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "业务服务与端口",
+      "items": [
+        "User :8101 · 注册、登录、签到积分",
+        "Activity :8102 · 活动查询、报名统计",
+        "Content :8103 · 文章、展商、成果和资料",
+        "Interaction :8104 · 评论、点赞、分享",
+        "File :8105 · 文件上传与预签名下载链接",
+        "Admin :8106 · 管理员登录与活动管理"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "鉴权与数据访问",
+      "items": [
+        "网关按路径放行公开接口，其余接口校验 Bearer JWT。管理服务另外校验管理员身份。",
+        "管理服务复用 ActivityRepository 直接读写共享库中的活动表。",
+        "文件元数据写入 MySQL，文件本体存入 MinIO。"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "本地运行与日志",
+      "items": [
+        "本地开发由 Vite 将 /api 代理至网关 :8080。",
+        "网关与业务服务均配置 Logback 异步发送日志，由 Logstash 写入 Elasticsearch，Kibana 查询展示。",
+        "Redis 在 Compose 中有容器定义，当前业务源码未找到调用。"
+      ]
+    }
+  ]
+}

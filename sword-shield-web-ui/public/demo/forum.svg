@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0f2745"/><stop offset="1" stop-color="#247c91"/></linearGradient></defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <g fill="none" stroke="#68d8d2" stroke-width="2" opacity=".35"><circle cx="750" cy="200" r="160"/><circle cx="750" cy="200" r="120"/><path d="M0 410h960M0 450h960M0 490h960M620 0v540M700 0v540M780 0v540M860 0v540"/></g>
+  <path d="M720 100l85 35v80c0 65-85 100-85 100s-85-35-85-100v-80z" fill="#68d8d2" opacity=".8"/>
+  <path d="m678 202 28 28 57-64" fill="none" stroke="#0f2745" stroke-width="12"/>
+  <g fill="#fff" font-family="Microsoft YaHei, sans-serif"><text x="70" y="135" font-size="24" letter-spacing="5">西湖论剑</text><text x="70" y="230" font-size="52" font-weight="700">数字安全主论坛</text><text x="74" y="288" font-size="23" opacity=".8">连接技术 · 共建可信未来</text><text x="74" y="465" font-size="18" opacity=".7">DIGITAL SECURITY FORUM</text></g>
+</svg>
