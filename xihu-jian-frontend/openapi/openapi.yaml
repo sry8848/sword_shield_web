@@ -33,6 +33,9 @@ paths:
       responses:
         '201':
           description: 注册成功并建立登录会话
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/RefreshTokenCookie'
           content:
             application/json:
               schema:
@@ -49,7 +52,6 @@ paths:
                 message: 操作成功
                 data:
                   accessToken: eyJ...access
-                  refreshToken: eyJ...refresh
                   tokenType: Bearer
                   expiresIn: 7200
                   user:
@@ -73,6 +75,8 @@ paths:
                 details: {}
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          $ref: '#/components/responses/AuthOriginForbidden'
         '409':
           description: 业务状态冲突，例如重复报名、活动已满或重复核验
           content:
@@ -129,6 +133,9 @@ paths:
       responses:
         '200':
           description: 登录成功
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/RefreshTokenCookie'
           content:
             application/json:
               schema:
@@ -145,7 +152,6 @@ paths:
                 message: 操作成功
                 data:
                   accessToken: eyJ...access
-                  refreshToken: eyJ...refresh
                   tokenType: Bearer
                   expiresIn: 7200
                   user:
@@ -170,17 +176,20 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
+          description: 登录凭证无效
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+              examples:
+                UNAUTHENTICATED:
+                  value:
+                    code: UNAUTHENTICATED
+                    message: 账号或密码错误
+                    traceId: trace-example-002
+                    timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          $ref: '#/components/responses/AuthOriginForbidden'
         '422':
           description: 参数格式正确，但不满足业务规则
           content:
@@ -224,6 +233,12 @@ paths:
       responses:
         '200':
           description: 令牌刷新成功
+          headers:
+            Set-Cookie:
+              description: 若签发了新的刷新令牌，通过此头更新 Cookie。
+              schema:
+                type: string
+              example: refreshToken=opaque-refresh-token; Path=/api/v1/auth; Secure; HttpOnly; SameSite=Lax
           content:
             application/json:
               schema:
@@ -235,30 +250,10 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/AuthSession'
-        '400':
-          description: 请求参数格式错误或缺少必要参数
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/RefreshTokenUnauthorized'
+        '403':
+          $ref: '#/components/responses/AuthOriginForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -271,15 +266,8 @@ paths:
                 details: {}
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RefreshRequest'
-            example:
-              refreshToken: eyJ...refresh
-      security: []
+      security:
+      - RefreshTokenCookie: []
   /auth/logout:
     post:
       summary: 退出登录
@@ -288,7 +276,14 @@ paths:
       - 账号认证
       responses:
         '200':
-          description: 退出登录成功
+          description: 当前刷新令牌已失效
+          headers:
+            Set-Cookie:
+              description: 使用原 Cookie 的名称及路径清除刷新令牌。
+              required: true
+              schema:
+                type: string
+              example: refreshToken=; Path=/api/v1/auth; Max-Age=0; Secure; HttpOnly; SameSite=Lax
           content:
             application/json:
               schema:
@@ -308,17 +303,9 @@ paths:
                 traceId: trace-example-001
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/RefreshTokenUnauthorized'
+        '403':
+          $ref: '#/components/responses/AuthOriginForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -331,16 +318,8 @@ paths:
                 details: {}
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RefreshRequest'
-            example:
-              refreshToken: eyJ...refresh
       security:
-      - BearerAuth: []
+      - RefreshTokenCookie: []
   /auth/me:
     get:
       summary: 获取当前用户信息
@@ -362,17 +341,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/UserProfile'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '500':
           description: 服务器内部错误
           content:
@@ -899,17 +868,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '404':
           description: 目标资源不存在
           content:
@@ -923,29 +882,37 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '409':
-          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          description: 已报名该场次或场次名额已满
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: BUSINESS_CONFLICT
-                message: 业务状态冲突，例如重复报名、活动已满或重复核验
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+              examples:
+                ALREADY_REGISTERED:
+                  value:
+                    code: ALREADY_REGISTERED
+                    message: 你已报名该场次
+                    traceId: trace-example-002
+                    timestamp: '2026-11-06T14:00:00+08:00'
+                EVENT_FULL:
+                  value:
+                    code: EVENT_FULL
+                    message: 该场次报名名额已满
+                    traceId: trace-example-002
+                    timestamp: '2026-11-06T14:00:00+08:00'
         '422':
-          description: 参数格式正确，但不满足业务规则
+          description: 场次当前未开放报名
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: BUSINESS_RULE_VIOLATION
-                message: 参数格式正确，但不满足业务规则
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+              examples:
+                REGISTRATION_CLOSED:
+                  value:
+                    code: REGISTRATION_CLOSED
+                    message: 该场次当前未开放报名
+                    traceId: trace-example-002
+                    timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
@@ -1013,17 +980,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '500':
           description: 服务器内部错误
           content:
@@ -1087,17 +1044,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/RegistrationDetail'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -1164,17 +1111,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/CredentialData'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -1242,17 +1179,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/AdminProfile'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -1312,17 +1239,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -1442,17 +1359,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -1545,17 +1452,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventDetail'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -1633,17 +1530,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -1743,17 +1630,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventDetail'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -1844,17 +1721,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventDetail'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -1958,17 +1825,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2056,17 +1913,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/RegistrationDetail'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2162,17 +2009,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2198,29 +2035,37 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '409':
-          description: 业务状态冲突，例如重复报名、活动已满或重复核验
+          description: 凭证已核验
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: BUSINESS_CONFLICT
-                message: 业务状态冲突，例如重复报名、活动已满或重复核验
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+              examples:
+                ALREADY_CHECKED_IN:
+                  value:
+                    code: ALREADY_CHECKED_IN
+                    message: 该凭证已核验
+                    traceId: trace-example-002
+                    timestamp: '2026-11-06T14:00:00+08:00'
         '422':
-          description: 参数格式正确，但不满足业务规则
+          description: 场次尚未开始或其他核验规则未通过
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: BUSINESS_RULE_VIOLATION
-                message: 参数格式正确，但不满足业务规则
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+              examples:
+                EVENT_NOT_STARTED:
+                  value:
+                    code: EVENT_NOT_STARTED
+                    message: 该场次尚未开始
+                    traceId: trace-example-002
+                    timestamp: '2026-11-06T14:00:00+08:00'
+                BUSINESS_RULE_VIOLATION:
+                  value:
+                    code: BUSINESS_RULE_VIOLATION
+                    message: 凭证不满足核验条件
+                    traceId: trace-example-002
+                    timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
@@ -2278,17 +2123,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2386,17 +2221,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2471,17 +2296,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2567,17 +2382,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventStatistics'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2656,17 +2461,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2753,17 +2548,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/StaffUserDetail'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2842,17 +2627,7 @@ paths:
                 traceId: trace-example-002
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -2942,17 +2717,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/RoleListData'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -3000,17 +2765,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/PermissionListData'
         '401':
-          description: 未登录、令牌无效或令牌过期
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-              example:
-                code: UNAUTHENTICATED
-                message: 未登录、令牌无效或令牌过期
-                details: {}
-                traceId: trace-example-002
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
@@ -3043,7 +2798,74 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: 访问令牌。令牌类型、刷新方式及存储策略仍需确认。
+      description: 业务接口使用的访问令牌。
+    RefreshTokenCookie:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+      description: >-
+        浏览器随刷新和退出请求发送的 Cookie。服务端设置 HttpOnly、Secure、Path=/api/v1/auth，省略 Domain，默认使用 SameSite=Lax。
+        跨源认证请求启用凭证模式，服务端仅允许明确授权的来源并校验浏览器请求来源。
+        如需跨站部署，须先确认浏览器兼容性和 CSRF 防护，再启用 SameSite=None。
+  headers:
+    RefreshTokenCookie:
+      description: 建立登录会话时下发刷新令牌。示例使用同站部署的 SameSite=Lax。
+      required: true
+      schema:
+        type: string
+      example: refreshToken=opaque-refresh-token; Path=/api/v1/auth; Secure; HttpOnly; SameSite=Lax
+  responses:
+    AccessTokenUnauthorized:
+      description: 访问令牌缺失、无效或已过期
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+          examples:
+            UNAUTHENTICATED:
+              value:
+                code: UNAUTHENTICATED
+                message: 访问令牌缺失或无效
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+            ACCESS_TOKEN_EXPIRED:
+              value:
+                code: ACCESS_TOKEN_EXPIRED
+                message: 访问令牌已过期
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+    RefreshTokenUnauthorized:
+      description: 刷新令牌缺失、无效或已过期
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+          examples:
+            UNAUTHENTICATED:
+              value:
+                code: UNAUTHENTICATED
+                message: 刷新令牌缺失或无效
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+            REFRESH_TOKEN_EXPIRED:
+              value:
+                code: REFRESH_TOKEN_EXPIRED
+                message: 刷新令牌已过期
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
+    AuthOriginForbidden:
+      description: 浏览器请求来源未获授权
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+          examples:
+            FORBIDDEN:
+              value:
+                code: FORBIDDEN
+                message: 请求来源未获授权
+                traceId: trace-example-002
+                timestamp: '2026-11-06T14:00:00+08:00'
   schemas:
     ApiResponseBase:
       type: object
@@ -3080,11 +2902,9 @@ components:
           type: string
           example: 你已报名该活动
         details:
-          type:
-          - object
-          - 'null'
+          type: object
           additionalProperties: true
-          description: 可选的错误上下文，不应包含敏感信息
+          description: 可选的错误上下文，无内容时省略，且不得包含敏感信息
         traceId:
           type: string
         timestamp:
@@ -3250,6 +3070,7 @@ components:
           example: PUBLISHED
         registrationStatus:
           type: string
+          description: NOT_OPEN 表示尚未开始报名，OPEN 表示开放报名，CLOSED 表示报名已截止，FULL 表示名额已满。
           enum:
           - NOT_OPEN
           - OPEN
@@ -3471,11 +3292,6 @@ components:
         accessToken:
           type: string
           description: 访问令牌
-        refreshToken:
-          type:
-          - string
-          - 'null'
-          description: 刷新令牌；是否通过安全 Cookie 下发待确认
         tokenType:
           type: string
           example: Bearer
@@ -3517,13 +3333,6 @@ components:
         password:
           type: string
           format: password
-    RefreshRequest:
-      type: object
-      required:
-      - refreshToken
-      properties:
-        refreshToken:
-          type: string
     LogoutData:
       type: object
       required:

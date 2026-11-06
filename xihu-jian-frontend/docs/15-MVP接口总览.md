@@ -1,6 +1,6 @@
 # 西湖论剑·大会门户 MVP 1.0 接口总览
 
-> 状态：Draft 0.1.0。本文与 `openapi/openapi.yaml` 配套使用，供前后端评审和 Apifox 导入。当前不依据现有后端代码，所有未确认业务决策见 `03-待确认事项.md`。
+> 状态：Draft 0.1.0。本文与 `openapi/openapi.yaml` 配套使用，供前后端评审和 Apifox 导入。当前不依据现有后端代码，所有未确认业务决策见 [14-待确认事项](14-待确认事项.md)。
 
 ## 1. MVP 范围
 
@@ -61,8 +61,8 @@
 | 大会门户 | GET | `/public/venues/{venueId}` | 会场指南 | 否 |
 | 账号认证 | POST | `/auth/register` | 用户注册 | 否 |
 | 账号认证 | POST | `/auth/login` | 用户登录 | 否 |
-| 账号认证 | POST | `/auth/refresh` | 刷新访问令牌 | 否（刷新令牌） |
-| 账号认证 | POST | `/auth/logout` | 退出登录 | 是 |
+| 账号认证 | POST | `/auth/refresh` | 刷新访问令牌 | Refresh Token Cookie |
+| 账号认证 | POST | `/auth/logout` | 退出登录 | Refresh Token Cookie |
 | 账号认证 | GET | `/auth/me` | 当前用户信息 | 是 |
 | 普通报名 | POST | `/events/{eventId}/registrations` | 提交报名 | 是 |
 | 普通报名 | GET | `/me/registrations` | 我的报名列表 | 是 |
