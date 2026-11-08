@@ -1,0 +1,19 @@
+services:
+  mysql:
+    image: mysql:8.0
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-LOCAL_ONLY_ROOT}
+      MYSQL_DATABASE: xihu_activity
+      MYSQL_USER: xihu
+      MYSQL_PASSWORD: ${DB_PASSWORD:-LOCAL_ONLY_XIHU}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - xihu_mysql:/var/lib/mysql
+volumes:
+  xihu_mysql:

@@ -1,0 +1,22 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: activity-service
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3307/xihu_activity?useUnicode=true&characterEncoding=utf8&connectionTimeZone=UTC}
+    username: ${DB_USER:xihu}
+    password: ${DB_PASSWORD:LOCAL_ONLY_XIHU}
+  flyway:
+    enabled: true
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:DEV_ONLY_CHANGE_THIS_32_BYTE_SECRET_FOR_LOCAL_TESTS}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
