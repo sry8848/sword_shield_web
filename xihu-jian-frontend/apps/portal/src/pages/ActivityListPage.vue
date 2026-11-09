@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { api } from '../api/client'
 import type { Activity } from '@xhlj/shared'
 import ActivityCard from '../components/ActivityCard.vue'
@@ -10,16 +10,32 @@ const total = ref(0)
 const activities = ref<Activity[]>([])
 const loading = ref(false)
 const error = ref('')
-/** 根据关键词加载当前页的公开场次。 */
+// 只有持有当前编号的请求可以更新列表状态。
+let requestVersion = 0
+
+/** 根据当前关键词和页码加载公开场次，并更新列表状态。 */
 async function load() {
-  loading.value = true; error.value = ''
+  // 1. 标记本次请求为最新请求，并进入加载状态。
+  const version = ++requestVersion
+  loading.value = true
+  error.value = ''
+
+  // 2. 读取场次，仅用最新请求的结果更新页面。
   try {
     const result = await api.activities.list({ keyword: keyword.value, page: page.value, pageSize })
+    if (version !== requestVersion)
+      return
     activities.value = result.items
     total.value = result.pageInfo.total
   }
-  catch (err) { error.value = err instanceof Error ? err.message : '活动加载失败' }
-  finally { loading.value = false }
+  catch (err) {
+    if (version === requestVersion)
+      error.value = err instanceof Error ? err.message : '活动加载失败'
+  }
+  finally {
+    if (version === requestVersion)
+      loading.value = false
+  }
 }
 /** 搜索新关键词时从第一页开始。 */
 function search() {
@@ -27,6 +43,10 @@ function search() {
   return load()
 }
 onMounted(load)
+onBeforeUnmount(() => {
+  // 1. 离开页面时，使仍在途中的请求失效。
+  requestVersion++
+})
 </script>
 <template>
   <section class="page-container list-page"><div class="intro"><span class="section-kicker">AGENDA & ATTENDANCE</span><h1>议程与参会</h1><p>浏览大会场次，了解活动时间、地点与报名状态。</p></div>

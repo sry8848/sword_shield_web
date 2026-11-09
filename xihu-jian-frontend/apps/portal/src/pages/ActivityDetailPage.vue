@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { formatDateTime, type ActivityDetail } from '@xhlj/shared'
@@ -10,13 +10,6 @@ const route = useRoute(); const router = useRouter(); const auth = useAuthStore(
 const activity = ref<ActivityDetail | null>(null); const loading = ref(false); const submitting = ref(false)
 const form = reactive({ attendeeName: '', phone: '' })
 
-/** 加载当前路由对应的场次详情。 */
-async function load() {
-  loading.value = true
-  try { activity.value = await api.activities.detail(String(route.params.activityId)) }
-  catch (error) { ElMessage.error(error instanceof Error ? error.message : '活动加载失败') }
-  finally { loading.value = false }
-}
 /** 提交当前场次的报名资料，成功后跳转到我的报名。 */
 async function register() {
   if (submitting.value) return
@@ -30,7 +23,33 @@ async function register() {
   catch (error) { ElMessage.error(error instanceof Error ? error.message : '报名失败') }
   finally { submitting.value = false }
 }
-onMounted(load)
+
+/** 首次进入和场次 ID 变化时加载该场次，并更新详情状态。 */
+watch(() => route.params.activityId, async (activityId, _previousId, onCleanup) => {
+  // 1. 注册清理，在场次 ID 变化或页面卸载时使本次读取失效。
+  let current = true
+  onCleanup(() => { current = false })
+
+  // 2. 清空上一场详情并进入加载状态。
+  // 新场次读取失败时，旧场次的报名入口也必须保持隐藏。
+  activity.value = null
+  loading.value = true
+
+  // 3. 读取目标场次，仅在本次读取仍有效时更新页面。
+  try {
+    const detail = await api.activities.detail(String(activityId))
+    if (current)
+      activity.value = detail
+  }
+  catch (error) {
+    if (current)
+      ElMessage.error(error instanceof Error ? error.message : '活动加载失败')
+  }
+  finally {
+    if (current)
+      loading.value = false
+  }
+}, { immediate: true })
 </script>
 <template>
   <section class="page-container detail-page"><div v-if="loading" class="state">正在加载活动详情…</div><el-empty v-else-if="!activity" description="活动不存在或暂不可访问" /><template v-else>
