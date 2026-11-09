@@ -1,23 +1,22 @@
 package com.swordshield.next.common;
 
 import java.time.Instant;
-import org.slf4j.MDC;
 
 public record ApiEnvelope<T>(String code, String message, T data, String traceId, Instant timestamp) {
 
     /**
-     * 将业务数据包装为成功响应，使用当前请求的 Trace ID。
+     * 将业务数据和接口层提供的请求 Trace ID 包装为成功响应。
      *
      * @param data 业务数据
+     * @param traceId 由接口层从当前请求追踪上下文取得的标识
      * @return 含追踪信息的成功响应
-     * @throws IllegalStateException 当前请求缺少追踪上下文时抛出
+     * @throws IllegalArgumentException Trace ID 为空时抛出
      */
-    public static <T> ApiEnvelope<T> ok(T data) {
-        // 1. 读取由请求追踪框架写入 MDC 的 Trace ID。
-        String traceId = MDC.get("traceId");
+    public static <T> ApiEnvelope<T> ok(T data, String traceId) {
+        // 1. 拒绝缺少 Trace ID 的调用。
         if (traceId == null || traceId.isBlank()) {
-            // 缺少追踪上下文意味着响应无法与请求日志关联，应直接暴露配置问题。
-            throw new IllegalStateException("当前请求追踪上下文缺少 traceId");
+            // 缺少 Trace ID 会使响应无法关联请求日志，直接暴露接口层的调用错误。
+            throw new IllegalArgumentException("traceId must not be blank");
         }
 
         // 2. 返回带追踪信息及生成时间的成功响应。

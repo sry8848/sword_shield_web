@@ -9,11 +9,27 @@ management:
       exposure:
         include: health
   tracing:
+    propagation:
+      type: w3c
     export:
-      # 本阶段只建立本地追踪。Boot 同时停用入站追踪传播，避免接续未受信请求的上下文。
-      enabled: false
+      otlp:
+        enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "test | prod"
+  main:
+    banner-mode: "off"
+
 logging:
   structured:
+    format:
+      console: ecs
+    ecs:
+      service:
+        version: ${APP_VERSION:unknown}
     json:
       rename:
         traceId: trace.id

@@ -7,6 +7,7 @@ import java.net.http.HttpResponse;
 import java.time.Instant;
 
 import com.swordshield.next.common.ApiEnvelope;
+import io.micrometer.tracing.Tracer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,12 +31,13 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "spring.mvc.problemdetails.enabled=true",
-        "logging.structured.format.console=ecs"
+        "APP_VERSION=identity-test"
 })
+@ActiveProfiles("test")
 @Import(IdentityMvcErrorsTest.TestController.class)
 @ExtendWith(OutputCaptureExtension.class)
 class IdentityMvcErrorsTest {
@@ -69,9 +72,9 @@ class IdentityMvcErrorsTest {
         assertThat(Instant.parse(body.path("timestamp").asString())).isBeforeOrEqualTo(Instant.now());
     }
 
-    /** 验证独立运行的 Identity 不接续来自直接客户端的追踪头。 */
+    /** 验证在受控测试环境中接续有效的 W3C 上下文。 */
     @Test
-    void directClientCannotSupplyTraceId() throws Exception {
+    void continuesIncomingW3cTrace() throws Exception {
         // 1. 发送一个带有效 W3C 追踪头的直接请求。
         String suppliedTraceId = "4bf92f3577b34da6a3ce929d0e0e4736";
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + PATH + "?page=1"))
@@ -79,16 +82,18 @@ class IdentityMvcErrorsTest {
                 .build();
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        // 2. 验证服务为本次请求建立独立追踪。
+        // 2. 验证当前 HTTP span 沿用入站 Trace ID。
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(traceId(mapper.readTree(response.body()))).isNotEqualTo(suppliedTraceId);
+        assertThat(traceId(mapper.readTree(response.body()))).isEqualTo(suppliedTraceId);
     }
 
-    /** 验证在请求追踪作用域之外构造响应时会明确失败。 */
+    /** 验证调用方未提供有效 Trace ID 时，成功响应构造失败。 */
     @Test
-    void successEnvelopeRequiresTraceContext() {
-        assertThatIllegalStateException().isThrownBy(() -> ApiEnvelope.ok("value"))
-                .withMessageContaining("traceId");
+    void successEnvelopeRequiresTraceId() {
+        assertThatIllegalArgumentException().isThrownBy(() -> ApiEnvelope.ok("value", null))
+                .withMessage("traceId must not be blank");
+        assertThatIllegalArgumentException().isThrownBy(() -> ApiEnvelope.ok("value", " "))
+                .withMessage("traceId must not be blank");
     }
 
     /** 验证 JSON 字段校验失败时只公开固定的字段说明。 */
@@ -120,12 +125,13 @@ class IdentityMvcErrorsTest {
 
     /** 验证非法 JSON 不暴露输入或解析器细节。 */
     @Test
-    void malformedJsonReturnsSafeProblem() throws Exception {
+    void malformedJsonReturnsSafeProblem(CapturedOutput output) throws Exception {
         var response = request("POST", PATH, "application/json", "{\"displayName\": " + SECRET);
         JsonNode body = problem(response, 400, "INVALID_ARGUMENT", "请求错误");
         assertThat(body.path("detail").asString()).isEqualTo("请求体格式不正确");
         assertThat(body.has("errors")).isFalse();
         assertThat(response.body()).doesNotContain(SECRET, "Jackson");
+        assertThat(output.getAll()).doesNotContain(SECRET);
     }
 
     /** 验证不支持的 HTTP 方法仍返回框架计算的 Allow 头。 */
@@ -156,10 +162,16 @@ class IdentityMvcErrorsTest {
 
         // 2. 取出该请求唯一的堆栈日志，核对 MDC 自动输出的追踪字段。
         var logs = output.getOut().lines()
-                .filter(line -> line.contains(traceId(body)) && line.contains("\"stack_trace\""))
+                .filter(line -> line.contains(traceId(body))
+                        && (line.contains("\"stack_trace\"") || line.contains("Identity MVC 未预期异常")))
                 .map(mapper::readTree)
                 .toList();
         assertThat(logs).hasSize(1);
+        assertThat(logs.get(0).path("log").path("level").asString()).isEqualTo("ERROR");
+        assertThat(logs.get(0).path("service").path("name").asString()).isEqualTo("identity-service");
+        assertThat(logs.get(0).path("service").path("version").asString()).isEqualTo("identity-test");
+        assertThat(logs.get(0).path("trace.id").isString()).isTrue();
+        assertThat(logs.get(0).path("span.id").isString()).isTrue();
         assertThat(logs.get(0).path("trace.id").asString()).isEqualTo(traceId(body));
         assertThat(logs.get(0).path("span.id").asString()).matches("[0-9a-f]{16}");
         assertThat(logs.get(0).has("traceId") || logs.get(0).has("spanId")).isFalse();
@@ -226,16 +238,23 @@ class IdentityMvcErrorsTest {
     @RestController
     static class TestController {
 
+        private final Tracer tracer;
+
+        /** 使用真实 HTTP 请求的追踪上下文构造测试响应。 */
+        TestController(Tracer tracer) {
+            this.tracer = tracer;
+        }
+
         /** 校验 JSON 后返回包含真实 Trace ID 的成功响应。 */
         @PostMapping(path = PATH, consumes = "application/json")
         ApiEnvelope<String> validateBody(@Valid @RequestBody ValidationInput input) {
-            return ApiEnvelope.ok(input.displayName());
+            return ApiEnvelope.ok(input.displayName(), tracer.currentSpan().context().traceId());
         }
 
         /** 校验查询参数的最小值。 */
         @GetMapping(PATH)
         ApiEnvelope<Integer> validateQuery(@RequestParam("page") @Positive int pageNumber) {
-            return ApiEnvelope.ok(pageNumber);
+            return ApiEnvelope.ok(pageNumber, tracer.currentSpan().context().traceId());
         }
 
         /** 触发带诊断消息和原因的未知异常。 */
