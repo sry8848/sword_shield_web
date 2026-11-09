@@ -144,14 +144,15 @@ class IdentityMvcErrorsTest {
                 "UNSUPPORTED_MEDIA_TYPE", "不支持的媒体类型");
     }
 
-    /** 验证 500 响应和唯一的异常日志共享追踪 ID，且均省略原始异常消息。 */
+    /** 验证 500 响应只返回通用说明，且可关联唯一一条保留原始异常的日志。 */
     @Test
     void unexpectedExceptionIsLoggedOnceWithTheResponseTraceId(CapturedOutput output) throws Exception {
-        // 1. 触发具有敏感消息的异常，检查通用 500 响应。
+        // 1. 触发带诊断消息和原因的异常，检查通用 500 响应。
         var response = request("GET", "/test/failure", null, "");
         JsonNode body = problem(response, 500, "INTERNAL_ERROR", "服务器内部错误");
         assertThat(body.path("detail").asString()).isEqualTo("服务器内部错误");
-        assertThat(response.body()).doesNotContain(SECRET, "IllegalStateException");
+        assertThat(response.body()).doesNotContain("模拟业务执行失败", "模拟参数异常",
+                "IllegalStateException", "IllegalArgumentException", "stack_trace", "TestController.failure");
 
         // 2. 取出该请求唯一的堆栈日志，核对 MDC 自动输出的追踪字段。
         var logs = output.getOut().lines()
@@ -162,10 +163,12 @@ class IdentityMvcErrorsTest {
         assertThat(logs.get(0).path("trace.id").asString()).isEqualTo(traceId(body));
         assertThat(logs.get(0).path("span.id").asString()).matches("[0-9a-f]{16}");
         assertThat(logs.get(0).has("traceId") || logs.get(0).has("spanId")).isFalse();
-        assertThat(logs.get(0).path("error").path("stack_trace").asString())
-                .contains("IllegalStateException", "TestController.failure", "Caused by", "IllegalArgumentException")
-                .doesNotContain(SECRET);
-        assertThat(output.getAll()).doesNotContain(SECRET);
+        JsonNode error = logs.get(0).path("error");
+        assertThat(error.path("type").asString()).isEqualTo("java.lang.IllegalStateException");
+        assertThat(error.path("message").asString()).isEqualTo("模拟业务执行失败");
+        assertThat(error.path("stack_trace").asString())
+                .contains("java.lang.IllegalStateException: 模拟业务执行失败", "TestController.failure",
+                        "Caused by: java.lang.IllegalArgumentException: 模拟参数异常");
     }
 
     /** 验证未映射的路径使用统一的 404 错误响应。 */
@@ -235,10 +238,10 @@ class IdentityMvcErrorsTest {
             return ApiEnvelope.ok(pageNumber);
         }
 
-        /** 触发未知异常并模拟异常消息包含敏感信息的情况。 */
+        /** 触发带诊断消息和原因的未知异常。 */
         @GetMapping("/test/failure")
         void failure() {
-            throw new IllegalStateException(SECRET, new IllegalArgumentException(SECRET));
+            throw new IllegalStateException("模拟业务执行失败", new IllegalArgumentException("模拟参数异常"));
         }
     }
 

@@ -4,7 +4,6 @@ package com.swordshield.next.identity;
 import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -79,7 +78,7 @@ class IdentityMvcExceptionHandler extends ResponseEntityExceptionHandler impleme
                 problem.setProperty("errors", errors);
             }
         } else if (status.value() == 500) {
-            LOG.error("Identity MVC 未预期异常", safeStackTrace(exception, new IdentityHashMap<>()));
+            LOG.error("Identity MVC 未预期异常", exception);
         }
 
         // 3. 保留 Allow 等 MVC 响应头，并指定错误响应的媒体类型。
@@ -156,27 +155,6 @@ class IdentityMvcExceptionHandler extends ResponseEntityExceptionHandler impleme
         boolean required = "NotBlank".equals(constraint) || "NotNull".equals(constraint) || "NotEmpty".equals(constraint);
         return Map.of("field", field, "code", required ? "REQUIRED" : "INVALID_VALUE",
                 "detail", required ? "缺少必填值" : "字段值不符合要求");
-    }
-
-    /** 保留异常类型、堆栈帧、原因及 suppressed 链，移除可能含凭证的原始消息。 */
-    private static Throwable safeStackTrace(Throwable original, Map<Throwable, Throwable> copied) {
-        // 1. 复用已复制的节点，保留异常链关系并避免循环引用导致重复遍历。
-        Throwable existing = copied.get(original);
-        if (existing != null) {
-            return existing;
-        }
-
-        // 2. 复制诊断所需的帧和异常链。异常原始消息可能含请求值。
-        Throwable safe = new Throwable(original.getClass().getName());
-        copied.put(original, safe);
-        safe.setStackTrace(original.getStackTrace());
-        if (original.getCause() != null) {
-            safe.initCause(safeStackTrace(original.getCause(), copied));
-        }
-        for (Throwable suppressed : original.getSuppressed()) {
-            safe.addSuppressed(safeStackTrace(suppressed, copied));
-        }
-        return safe;
     }
 
     /** 注册 Spring MVC 序列化前的 Problem Details 拦截器。 */
