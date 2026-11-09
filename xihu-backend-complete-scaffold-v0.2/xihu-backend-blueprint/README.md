@@ -1,6 +1,6 @@
 # 西湖论剑后端架构规范与技术骨架
 
-本目录的 `docs/` 是后端架构、工程与编码约束的唯一维护位置。各主题以本索引指向的规范章节为准，其他说明链接到原章节。骨架及模块说明用于查阅示例和实现状态。
+本目录的 `docs/` 是后端架构、工程与编码约束的唯一维护位置。各主题以本索引指向的规范章节为准，其他说明链接到原章节。骨架用于验证构建与服务启动。
 
 ## 阅读顺序
 
@@ -26,18 +26,30 @@ MVP 缩小首期交付范围，各项工程和安全约束仍适用。对未来�
 
 遇到资料冲突时，暂停受影响的实现，在[待确认事项](docs/11-现有前端OpenAPI契约差异与冻结项.md)记录相关出处、影响和需确认的问题。确认后由对应资料维护其结论。涉及对外接口时按 [API 契约与异常](docs/02-工程与编码规范.md#api-契约与异常)处理。
 
+
 ## 骨架实现状态与本地验证
 
-`backend/` 下有 14 个 Maven 模块。`gateway`、`identity-service`、`activity-service` 含 Spring 技术演示，`common` 含通用响应与示例授权模型。其余 10 个模块保留早期骨架示例，业务状态和验证范围见 [VALIDATION.md](VALIDATION.md)。
+| Maven 模块 | 当前内容 | 默认端口 |
+| --- | --- | --- |
+| `gateway` | Spring Cloud Gateway 启动入口和健康检查 | 8080 |
+| `identity-service` | 身份服务启动入口和健康检查 | 8081 |
+| `activity-service` | 活动服务启动入口和健康检查 | 8082 |
+| `common` | 通用成功响应和错误响应类型 | — |
 
-本地验证需要 JDK 17 和 Maven。运行 Activity 的数据库示例时另需 Docker。
+业务接口、网关转发规则、认证和数据库迁移随实际用例接入。三个服务各有独立启动入口，健康检查用于验证服务存活。历史演示的交付记录见 [VALIDATION.md](VALIDATION.md)。
+
+本地验证需要 JDK 17 或以上版本和 Maven。在 `backend/` 执行：
 
 ```powershell
-cd backend
 mvn -B clean verify
-# 运行数据库示例时执行 docker compose up -d mysql
-# 可分别在 backend 下运行以下三个演示应用
-# mvn -pl identity-service spring-boot:run
-# mvn -pl activity-service spring-boot:run
-# mvn -pl gateway spring-boot:run
 ```
+
+构建完成后可分别运行以下命令，每个进程占用一个终端：
+
+```powershell
+mvn -pl gateway spring-boot:run
+mvn -pl identity-service spring-boot:run
+mvn -pl activity-service spring-boot:run
+```
+
+服务启动后，分别访问 `http://localhost:8080/actuator/health`、`http://localhost:8081/actuator/health` 和 `http://localhost:8082/actuator/health`。

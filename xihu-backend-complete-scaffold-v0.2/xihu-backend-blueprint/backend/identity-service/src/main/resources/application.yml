@@ -3,11 +3,8 @@ server:
 spring:
   application:
     name: identity-service
-app:
-  jwt:
-    secret: ${APP_JWT_SECRET:DEV_ONLY_CHANGE_THIS_32_BYTE_SECRET_FOR_LOCAL_TESTS}
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health

@@ -8,13 +8,14 @@
 | --- | --- | --- |
 | 首期角色与权限配置 | [MVP](../../../docs/mvp.md)建议三类后台角色，[OpenAPI 草案](../../../xihu-jian-frontend/openapi/openapi.yaml)含 `DATA_OPERATOR`。旧 v0.2 的 03、06 展开了角色和范围编辑，接口待确认事项 D13–D16 则保留首期配置范围。 | 首期角色与动作矩阵，是否允许编辑角色和范围，是否需要新增配置接口。 |
 | 核验的场次范围 | MVP 限制核验员只操作授权场次，OpenAPI 草案尚无场次授权配置端点。见[接口待确认事项 D12、D16](../../../xihu-jian-frontend/docs/14-待确认事项.md)。 | 确认范围来源与配置方式，以及报名、统计等操作是否沿用对应范围。核验仍遵守 [安全与授权规范](03-权限数据范围组织租户审批.md)。 |
-| 登录与会话 | 评审稿已注明 Bearer Access Token 与 HttpOnly Cookie 传输 Refresh Token。旧 v0.2 的 01、11 讨论 JWT 验签与会话设计，骨架只演示内存账号登录。 | 根据[接口待确认事项 D01–D03、D15](../../../xihu-jian-frontend/docs/14-待确认事项.md)确认账号入口、令牌时效、轮换、退出与部署来源，明确签名和撤权机制。 |
+| 登录与会话 | 评审稿已注明 Bearer Access Token 与 HttpOnly Cookie 传输 Refresh Token。旧 v0.2 的 01、11 讨论 JWT 验签与会话设计，早期骨架曾演示内存账号登录。 | 根据[接口待确认事项 D01–D03、D15](../../../xihu-jian-frontend/docs/14-待确认事项.md)确认账号入口、令牌时效、轮换、退出与部署来源，明确签名和撤权机制。 |
 | 核验流程与指标口径 | 旧 v0.1 验收和 v0.2 的 11 提及预览与确认，OpenAPI 草案以一次 `POST /admin/check-ins` 完成核验。统计草案仍有口径待确认。 | 核验是否分步、凭证规则、名额与取消、报名及到场指标口径按[接口待确认事项 D05–D07、D10–D11、D17](../../../xihu-jian-frontend/docs/14-待确认事项.md)确认。 |
 | 显式拒绝和多来源授权 | 旧 v0.2 的 03 写有显式 DENY 优先，09 将通用 DENY 表达式推迟到实际需求出现。 | 如需显式拒绝或组织、个人授权，先确认合并优先级、撤权及审计规则。 |
 | 未来领域交界 | 旧 v0.2 的 01 同时提到 Activity 和 Interaction 的场次订阅，将限量预约与支付合并列出。产品评审提出了[职责拆分建议](../../../docs/功能模块清单与微服务划分评审.md)。旧 01 将组织成员列在 Identity，Organization 骨架也包含成员职责。 | 在启用相关能力前，确认场次订阅、限量业务订单及组织成员存储的唯一所有者，以及 Organization 与 Identity 的部署关系。 |
 | 多租户与审批方案 | 旧 v0.2 的 03、10 保留多种租户部署方式和审批实现。 | 业务启用前确认租户部署与账号模型、审批接入范围和版本迁移方案。实现候选见[参考](07-参考开源实现与取舍.md)。 |
-| 工程技术基线 | v0.1 记录了旧版 Spring 兼容基线，当前 v0.2 Maven 版本声明已经调整。项目 [AGENTS.md](../../../AGENTS.md)明确本次课设没有 SQL Server 选型要求，骨架演示用 MySQL。 | 正式开发采用的依赖兼容组合和目标数据库以专项验证及评审结论为准。 |
+| 工程技术基线 | v0.1 记录了旧版 Spring 兼容基线，当前 v0.2 Maven 版本声明已经调整。项目 [AGENTS.md](../../../AGENTS.md)明确本次课设没有 SQL Server 选型要求，早期骨架演示使用 MySQL。 | 正式开发采用的依赖兼容组合和目标数据库以专项验证及评审结论为准。 |
+
 
 ## 骨架与 OpenAPI 的实施差距
 
-当前骨架仅声明演示登录、后台身份查询、公开场次列表、后台场次创建、详情和发布端点。演示登录使用 `username`，OpenAPI 草案使用 `account`。注册、刷新与退出、真实角色分配、普通报名、凭证、核验和统计等尚无完整实现，已有端点的字段及行为也需要契约验证。端点和 DTO 以 [OpenAPI](../../../xihu-jian-frontend/openapi/openapi.yaml)为准，历史验证范围见 [VALIDATION.md](../VALIDATION.md)。
+当前骨架保留 Gateway、Identity 和 Activity 的启动入口与健康检查，以及通用响应类型。账号会话、角色权限、场次、报名、凭证、核验和统计等对外 API 随正式用例实现。端点、DTO 和响应行为以 [OpenAPI](../../../xihu-jian-frontend/openapi/openapi.yaml) 为准。当前启动与构建方式见 [README](../README.md#骨架实现状态与本地验证)，早期演示的验证范围见 [VALIDATION.md](../VALIDATION.md)。
