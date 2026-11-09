@@ -71,7 +71,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -91,7 +91,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Conflict
+                title: 状态冲突
                 status: 409
                 detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
@@ -107,7 +107,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Unprocessable Content
+                title: 无法处理的内容
                 status: 422
                 detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
@@ -123,7 +123,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -187,7 +187,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -203,7 +203,7 @@ paths:
                 UNAUTHENTICATED:
                   value:
                     type: about:blank
-                    title: Unauthorized
+                    title: 未认证
                     status: 401
                     detail: 账号或密码错误
                     code: UNAUTHENTICATED
@@ -221,7 +221,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Unprocessable Content
+                title: 无法处理的内容
                 status: 422
                 detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
@@ -237,7 +237,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -293,7 +293,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -347,7 +347,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -385,7 +385,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -421,7 +421,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -457,7 +457,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -471,7 +471,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -506,7 +506,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -520,7 +520,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -593,7 +593,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -607,7 +607,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -649,7 +649,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -663,7 +663,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -728,7 +728,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -742,7 +742,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -784,7 +784,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -798,7 +798,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -851,7 +851,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -865,7 +865,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -930,7 +930,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -946,7 +946,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -962,7 +962,7 @@ paths:
                 ALREADY_REGISTERED:
                   value:
                     type: about:blank
-                    title: Conflict
+                    title: 状态冲突
                     status: 409
                     detail: 你已报名该场次
                     code: ALREADY_REGISTERED
@@ -971,7 +971,7 @@ paths:
                 EVENT_FULL:
                   value:
                     type: about:blank
-                    title: Conflict
+                    title: 状态冲突
                     status: 409
                     detail: 该场次报名名额已满
                     code: EVENT_FULL
@@ -989,7 +989,7 @@ paths:
                 REGISTRATION_CLOSED:
                   value:
                     type: about:blank
-                    title: Unprocessable Content
+                    title: 无法处理的内容
                     status: 422
                     detail: 该场次当前未开放报名
                     code: REGISTRATION_CLOSED
@@ -1003,7 +1003,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1059,7 +1059,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -1075,7 +1075,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1141,7 +1141,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -1155,7 +1155,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -1169,7 +1169,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1214,7 +1214,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -1228,7 +1228,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -1242,7 +1242,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1288,7 +1288,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -1302,7 +1302,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1338,7 +1338,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -1354,7 +1354,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -1368,7 +1368,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1464,7 +1464,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -1480,7 +1480,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -1494,7 +1494,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Conflict
+                title: 状态冲突
                 status: 409
                 detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
@@ -1510,7 +1510,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Unprocessable Content
+                title: 无法处理的内容
                 status: 422
                 detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
@@ -1524,7 +1524,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1583,7 +1583,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -1597,7 +1597,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -1611,7 +1611,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1653,7 +1653,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -1669,7 +1669,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -1683,7 +1683,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -1697,7 +1697,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Conflict
+                title: 状态冲突
                 status: 409
                 detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
@@ -1713,7 +1713,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Unprocessable Content
+                title: 无法处理的内容
                 status: 422
                 detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
@@ -1727,7 +1727,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1781,7 +1781,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -1795,7 +1795,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -1809,7 +1809,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Conflict
+                title: 状态冲突
                 status: 409
                 detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
@@ -1823,7 +1823,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Unprocessable Content
+                title: 无法处理的内容
                 status: 422
                 detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
@@ -1837,7 +1837,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1882,7 +1882,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -1896,7 +1896,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -1910,7 +1910,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Conflict
+                title: 状态冲突
                 status: 409
                 detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
@@ -1924,7 +1924,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Unprocessable Content
+                title: 无法处理的内容
                 status: 422
                 detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
@@ -1938,7 +1938,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -1982,7 +1982,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -1998,7 +1998,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2012,7 +2012,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2090,7 +2090,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2104,7 +2104,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -2118,7 +2118,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2178,7 +2178,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -2194,7 +2194,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2208,7 +2208,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -2224,7 +2224,7 @@ paths:
                 ALREADY_CHECKED_IN:
                   value:
                     type: about:blank
-                    title: Conflict
+                    title: 状态冲突
                     status: 409
                     detail: 该凭证已核验
                     code: ALREADY_CHECKED_IN
@@ -2242,7 +2242,7 @@ paths:
                 EVENT_NOT_STARTED:
                   value:
                     type: about:blank
-                    title: Unprocessable Content
+                    title: 无法处理的内容
                     status: 422
                     detail: 该场次尚未开始
                     code: EVENT_NOT_STARTED
@@ -2251,7 +2251,7 @@ paths:
                 BUSINESS_RULE_VIOLATION:
                   value:
                     type: about:blank
-                    title: Unprocessable Content
+                    title: 无法处理的内容
                     status: 422
                     detail: 凭证不满足核验条件
                     code: BUSINESS_RULE_VIOLATION
@@ -2265,7 +2265,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2311,7 +2311,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -2327,7 +2327,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2341,7 +2341,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2415,7 +2415,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -2431,7 +2431,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2445,7 +2445,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2496,7 +2496,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -2512,7 +2512,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2526,7 +2526,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2602,7 +2602,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2616,7 +2616,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -2630,7 +2630,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2673,7 +2673,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -2689,7 +2689,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2703,7 +2703,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2780,7 +2780,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2794,7 +2794,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -2808,7 +2808,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2851,7 +2851,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Bad Request
+                title: 请求错误
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
@@ -2867,7 +2867,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2881,7 +2881,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Not Found
+                title: 未找到
                 status: 404
                 detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
@@ -2895,7 +2895,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Conflict
+                title: 状态冲突
                 status: 409
                 detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
@@ -2911,7 +2911,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -2967,7 +2967,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -2981,7 +2981,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -3019,7 +3019,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
@@ -3033,7 +3033,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
               example:
                 type: about:blank
-                title: Internal Server Error
+                title: 服务器内部错误
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
@@ -3074,7 +3074,7 @@ components:
             UNAUTHENTICATED:
               value:
                 type: about:blank
-                title: Unauthorized
+                title: 未认证
                 status: 401
                 detail: 访问令牌缺失或无效
                 code: UNAUTHENTICATED
@@ -3083,7 +3083,7 @@ components:
             ACCESS_TOKEN_EXPIRED:
               value:
                 type: about:blank
-                title: Unauthorized
+                title: 未认证
                 status: 401
                 detail: 访问令牌已过期
                 code: ACCESS_TOKEN_EXPIRED
@@ -3099,7 +3099,7 @@ components:
             UNAUTHENTICATED:
               value:
                 type: about:blank
-                title: Unauthorized
+                title: 未认证
                 status: 401
                 detail: 刷新令牌缺失或无效
                 code: UNAUTHENTICATED
@@ -3108,7 +3108,7 @@ components:
             REFRESH_TOKEN_EXPIRED:
               value:
                 type: about:blank
-                title: Unauthorized
+                title: 未认证
                 status: 401
                 detail: 刷新令牌已过期
                 code: REFRESH_TOKEN_EXPIRED
@@ -3124,7 +3124,7 @@ components:
             FORBIDDEN:
               value:
                 type: about:blank
-                title: Forbidden
+                title: 禁止访问
                 status: 403
                 detail: 请求来源未获授权
                 code: FORBIDDEN
@@ -3144,7 +3144,7 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
           example:
             type: about:blank
-            title: Method Not Allowed
+            title: 不支持的请求方法
             status: 405
             detail: 目标资源不支持该请求方法
             code: METHOD_NOT_ALLOWED
@@ -3158,7 +3158,7 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
           example:
             type: about:blank
-            title: Content Too Large
+            title: 请求内容过大
             status: 413
             detail: 请求体超过允许的大小
             code: PAYLOAD_TOO_LARGE
@@ -3172,7 +3172,7 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
           example:
             type: about:blank
-            title: Unsupported Media Type
+            title: 不支持的媒体类型
             status: 415
             detail: 请求体媒体类型不受支持
             code: UNSUPPORTED_MEDIA_TYPE
@@ -3186,7 +3186,7 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
           example:
             type: about:blank
-            title: Too Many Requests
+            title: 请求过于频繁
             status: 429
             detail: 请求频率超过限制
             code: TOO_MANY_REQUESTS
@@ -3200,7 +3200,7 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
           example:
             type: about:blank
-            title: Bad Gateway
+            title: 网关错误
             status: 502
             detail: 网关收到无效的上游响应
             code: BAD_GATEWAY
@@ -3214,7 +3214,7 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
           example:
             type: about:blank
-            title: Service Unavailable
+            title: 服务不可用
             status: 503
             detail: 服务暂不可用
             code: SERVICE_UNAVAILABLE
@@ -3228,7 +3228,7 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
           example:
             type: about:blank
-            title: Gateway Timeout
+            title: 网关超时
             status: 504
             detail: 网关等待上游响应超时
             code: GATEWAY_TIMEOUT
@@ -3258,6 +3258,9 @@ components:
     ProblemDetail:
       type: object
       description: RFC 9457 错误响应。使用实际的 4xx 或 5xx HTTP 状态。
+      not:
+        required:
+        - details
       required:
       - type
       - title
@@ -3273,7 +3276,7 @@ components:
           const: about:blank
         title:
           type: string
-          description: 对应 HTTP 状态的标准简短说明，可本地化。
+          description: 使用后端工程与编码规范中实际 HTTP 状态对应的固定简体中文标题。各错误响应示例展示该标题。
         status:
           type: integer
           minimum: 400
