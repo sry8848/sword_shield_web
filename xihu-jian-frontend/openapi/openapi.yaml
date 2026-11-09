@@ -66,52 +66,68 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                errors:
+                - field: displayName
+                  code: REQUIRED
+                  detail: 缺少显示名称
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '403':
           $ref: '#/components/responses/AuthOriginForbidden'
         '409':
           description: 业务状态冲突，例如重复报名、活动已满或重复核验
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Conflict
+                status: 409
+                detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
-                message: 业务状态冲突，例如重复报名、活动已满或重复核验
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           description: 参数格式正确，但不满足业务规则
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Unprocessable Content
+                status: 422
+                detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
-                message: 参数格式正确，但不满足业务规则
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       requestBody:
         required: true
@@ -166,53 +182,66 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           description: 登录凭证无效
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               examples:
                 UNAUTHENTICATED:
                   value:
+                    type: about:blank
+                    title: Unauthorized
+                    status: 401
+                    detail: 账号或密码错误
                     code: UNAUTHENTICATED
-                    message: 账号或密码错误
-                    traceId: trace-example-002
+                    traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                     timestamp: '2026-11-06T14:00:00+08:00'
         '403':
           $ref: '#/components/responses/AuthOriginForbidden'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           description: 参数格式正确，但不满足业务规则
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Unprocessable Content
+                status: 422
+                detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
-                message: 参数格式正确，但不满足业务规则
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       requestBody:
         required: true
@@ -254,17 +283,21 @@ paths:
           $ref: '#/components/responses/RefreshTokenUnauthorized'
         '403':
           $ref: '#/components/responses/AuthOriginForbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       security:
       - RefreshTokenCookie: []
@@ -309,14 +342,16 @@ paths:
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       security:
       - RefreshTokenCookie: []
@@ -345,14 +380,16 @@ paths:
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       security:
       - BearerAuth: []
@@ -379,14 +416,16 @@ paths:
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       description: 首页聚合接口。首期仅返回大会基础信息和精选场次；通知模块暂不纳入本接口。
       security: []
@@ -413,26 +452,30 @@ paths:
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       security: []
   /public/events:
@@ -458,26 +501,30 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       description: 仅返回前台可见的已发布场次。默认按开始时间升序。
       parameters:
@@ -541,26 +588,30 @@ paths:
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: eventId
@@ -593,26 +644,30 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: page
@@ -668,26 +723,30 @@ paths:
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: speakerId
@@ -720,26 +779,30 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: page
@@ -783,26 +846,30 @@ paths:
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: venueId
@@ -858,72 +925,89 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '409':
           description: 已报名该场次或场次名额已满
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               examples:
                 ALREADY_REGISTERED:
                   value:
+                    type: about:blank
+                    title: Conflict
+                    status: 409
+                    detail: 你已报名该场次
                     code: ALREADY_REGISTERED
-                    message: 你已报名该场次
-                    traceId: trace-example-002
+                    traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                     timestamp: '2026-11-06T14:00:00+08:00'
                 EVENT_FULL:
                   value:
+                    type: about:blank
+                    title: Conflict
+                    status: 409
+                    detail: 该场次报名名额已满
                     code: EVENT_FULL
-                    message: 该场次报名名额已满
-                    traceId: trace-example-002
+                    traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                     timestamp: '2026-11-06T14:00:00+08:00'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           description: 场次当前未开放报名
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               examples:
                 REGISTRATION_CLOSED:
                   value:
+                    type: about:blank
+                    title: Unprocessable Content
+                    status: 422
+                    detail: 该场次当前未开放报名
                     code: REGISTRATION_CLOSED
-                    message: 该场次当前未开放报名
-                    traceId: trace-example-002
+                    traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                     timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       description: 仅允许已登录用户报名。一个用户对同一场次默认只能成功报名一次；名额和重复报名规则待确认。
       parameters:
@@ -970,28 +1054,32 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: page
@@ -1048,38 +1136,44 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: registrationId
@@ -1115,38 +1209,44 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       description: 仅报名本人可以获取凭证。二维码载荷应为不可预测或签名的短载荷，不应直接编码手机号等个人信息。
       parameters:
@@ -1183,26 +1283,30 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       security:
       - BearerAuth: []
@@ -1229,40 +1333,46 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: page
@@ -1349,64 +1459,76 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '409':
           description: 业务状态冲突，例如重复报名、活动已满或重复核验
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Conflict
+                status: 409
+                detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
-                message: 业务状态冲突，例如重复报名、活动已满或重复核验
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           description: 参数格式正确，但不满足业务规则
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Unprocessable Content
+                status: 422
+                detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
-                message: 参数格式正确，但不满足业务规则
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       requestBody:
         required: true
@@ -1456,38 +1578,44 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: eventId
@@ -1520,76 +1648,90 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '409':
           description: 业务状态冲突，例如重复报名、活动已满或重复核验
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Conflict
+                status: 409
+                detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
-                message: 业务状态冲突，例如重复报名、活动已满或重复核验
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           description: 参数格式正确，但不满足业务规则
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Unprocessable Content
+                status: 422
+                detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
-                message: 参数格式正确，但不满足业务规则
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       description: 仅提交需要修改的字段。已存在报名记录的场次，修改时间、会场或名额时应由后端校验影响。
       parameters:
@@ -1634,62 +1776,72 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '409':
           description: 业务状态冲突，例如重复报名、活动已满或重复核验
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Conflict
+                status: 409
+                detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
-                message: 业务状态冲突，例如重复报名、活动已满或重复核验
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '422':
           description: 参数格式正确，但不满足业务规则
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Unprocessable Content
+                status: 422
+                detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
-                message: 参数格式正确，但不满足业务规则
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: eventId
@@ -1725,62 +1877,72 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '409':
           description: 业务状态冲突，例如重复报名、活动已满或重复核验
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Conflict
+                status: 409
+                detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
-                message: 业务状态冲突，例如重复报名、活动已满或重复核验
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '422':
           description: 参数格式正确，但不满足业务规则
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Unprocessable Content
+                status: 422
+                detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
-                message: 参数格式正确，但不满足业务规则
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       description: 下线前应检查已有报名及现场执行影响；本接口不等同于删除历史报名。
       parameters:
@@ -1815,40 +1977,46 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: page
@@ -1917,38 +2085,44 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: registrationId
@@ -1999,84 +2173,103 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '409':
           description: 凭证已核验
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               examples:
                 ALREADY_CHECKED_IN:
                   value:
+                    type: about:blank
+                    title: Conflict
+                    status: 409
+                    detail: 该凭证已核验
                     code: ALREADY_CHECKED_IN
-                    message: 该凭证已核验
-                    traceId: trace-example-002
+                    traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                     timestamp: '2026-11-06T14:00:00+08:00'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '422':
           description: 场次尚未开始或其他核验规则未通过
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               examples:
                 EVENT_NOT_STARTED:
                   value:
+                    type: about:blank
+                    title: Unprocessable Content
+                    status: 422
+                    detail: 该场次尚未开始
                     code: EVENT_NOT_STARTED
-                    message: 该场次尚未开始
-                    traceId: trace-example-002
+                    traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                     timestamp: '2026-11-06T14:00:00+08:00'
                 BUSINESS_RULE_VIOLATION:
                   value:
+                    type: about:blank
+                    title: Unprocessable Content
+                    status: 422
+                    detail: 凭证不满足核验条件
                     code: BUSINESS_RULE_VIOLATION
-                    message: 凭证不满足核验条件
-                    traceId: trace-example-002
+                    traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                     timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       description: 本接口按当前草案采用“一次请求完成凭证校验并写入核验记录”的原子操作。重复核验返回 409 / ALREADY_CHECKED_IN；是否需要先预览再确认待业务确认。
       requestBody:
@@ -2113,40 +2306,46 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: page
@@ -2211,40 +2410,46 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: startDate
@@ -2286,40 +2491,46 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: page
@@ -2386,38 +2597,44 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: eventId
@@ -2451,40 +2668,46 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: page
@@ -2552,38 +2775,44 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       parameters:
       - name: userId
@@ -2617,64 +2846,76 @@ paths:
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                message: 请求参数格式错误或缺少必要参数
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
           $ref: '#/components/responses/AccessTokenUnauthorized'
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '404':
           description: 目标资源不存在
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: 目标资源不存在
                 code: RESOURCE_NOT_FOUND
-                message: 目标资源不存在
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '409':
           description: 业务状态冲突，例如重复报名、活动已满或重复核验
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Conflict
+                status: 409
+                detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
-                message: 业务状态冲突，例如重复报名、活动已满或重复核验
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       description: PUT 表示将该账号的角色集合整体替换为请求中的 roleCodes；空数组表示撤销全部角色。只有具备用户角色管理权限的账号可操作。
       parameters:
@@ -2721,26 +2962,30 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       security:
       - BearerAuth: []
@@ -2769,26 +3014,30 @@ paths:
         '403':
           description: 已登录，但没有执行该操作的权限
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
                 code: FORBIDDEN
-                message: 已登录，但没有执行该操作的权限
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '500':
           description: 服务器内部错误
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
+                $ref: '#/components/schemas/ProblemDetail'
               example:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                message: 服务器内部错误
-                details: {}
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
       security:
       - BearerAuth: []
@@ -2818,54 +3067,173 @@ components:
     AccessTokenUnauthorized:
       description: 访问令牌缺失、无效或已过期
       content:
-        application/json:
+        application/problem+json:
           schema:
-            $ref: '#/components/schemas/ApiErrorResponse'
+            $ref: '#/components/schemas/ProblemDetail'
           examples:
             UNAUTHENTICATED:
               value:
+                type: about:blank
+                title: Unauthorized
+                status: 401
+                detail: 访问令牌缺失或无效
                 code: UNAUTHENTICATED
-                message: 访问令牌缺失或无效
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
             ACCESS_TOKEN_EXPIRED:
               value:
+                type: about:blank
+                title: Unauthorized
+                status: 401
+                detail: 访问令牌已过期
                 code: ACCESS_TOKEN_EXPIRED
-                message: 访问令牌已过期
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
     RefreshTokenUnauthorized:
       description: 刷新令牌缺失、无效或已过期
       content:
-        application/json:
+        application/problem+json:
           schema:
-            $ref: '#/components/schemas/ApiErrorResponse'
+            $ref: '#/components/schemas/ProblemDetail'
           examples:
             UNAUTHENTICATED:
               value:
+                type: about:blank
+                title: Unauthorized
+                status: 401
+                detail: 刷新令牌缺失或无效
                 code: UNAUTHENTICATED
-                message: 刷新令牌缺失或无效
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
             REFRESH_TOKEN_EXPIRED:
               value:
+                type: about:blank
+                title: Unauthorized
+                status: 401
+                detail: 刷新令牌已过期
                 code: REFRESH_TOKEN_EXPIRED
-                message: 刷新令牌已过期
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
     AuthOriginForbidden:
       description: 浏览器请求来源未获授权
       content:
-        application/json:
+        application/problem+json:
           schema:
-            $ref: '#/components/schemas/ApiErrorResponse'
+            $ref: '#/components/schemas/ProblemDetail'
           examples:
             FORBIDDEN:
               value:
+                type: about:blank
+                title: Forbidden
+                status: 403
+                detail: 请求来源未获授权
                 code: FORBIDDEN
-                message: 请求来源未获授权
-                traceId: trace-example-002
+                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+    MethodNotAllowed:
+      description: 目标资源不支持请求使用的方法。属于路由级错误。
+      headers:
+        Allow:
+          required: true
+          description: 目标资源当前支持的 HTTP 方法
+          schema:
+            type: string
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Method Not Allowed
+            status: 405
+            detail: 目标资源不支持该请求方法
+            code: METHOD_NOT_ALLOWED
+            traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+            timestamp: '2026-11-06T14:00:00+08:00'
+    PayloadTooLarge:
+      description: 请求体超过对应入口或接口配置的大小上限。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Content Too Large
+            status: 413
+            detail: 请求体超过允许的大小
+            code: PAYLOAD_TOO_LARGE
+            traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+            timestamp: '2026-11-06T14:00:00+08:00'
+    UnsupportedMediaType:
+      description: 有请求体的接口不支持请求使用的媒体类型。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Unsupported Media Type
+            status: 415
+            detail: 请求体媒体类型不受支持
+            code: UNSUPPORTED_MEDIA_TYPE
+            traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+            timestamp: '2026-11-06T14:00:00+08:00'
+    TooManyRequests:
+      description: 请求超过接口适用的频率限制。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Too Many Requests
+            status: 429
+            detail: 请求频率超过限制
+            code: TOO_MANY_REQUESTS
+            traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+            timestamp: '2026-11-06T14:00:00+08:00'
+    BadGateway:
+      description: Gateway 收到无效的上游响应。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Bad Gateway
+            status: 502
+            detail: 网关收到无效的上游响应
+            code: BAD_GATEWAY
+            traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+            timestamp: '2026-11-06T14:00:00+08:00'
+    ServiceUnavailable:
+      description: 目标服务暂不可用。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Service Unavailable
+            status: 503
+            detail: 服务暂不可用
+            code: SERVICE_UNAVAILABLE
+            traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+            timestamp: '2026-11-06T14:00:00+08:00'
+    GatewayTimeout:
+      description: Gateway 等待上游响应超时。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: Gateway Timeout
+            status: 504
+            detail: 网关等待上游响应超时
+            code: GATEWAY_TIMEOUT
+            traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+            timestamp: '2026-11-06T14:00:00+08:00'
   schemas:
     ApiResponseBase:
       type: object
@@ -2887,29 +3255,68 @@ components:
         timestamp:
           type: string
           format: date-time
-    ApiErrorResponse:
+    ProblemDetail:
       type: object
+      description: RFC 9457 错误响应。使用实际的 4xx 或 5xx HTTP 状态。
       required:
+      - type
+      - title
+      - status
+      - detail
       - code
-      - message
       - traceId
       - timestamp
       properties:
+        type:
+          type: string
+          format: uri
+          const: about:blank
+        title:
+          type: string
+          description: 对应 HTTP 状态的标准简短说明，可本地化。
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+          description: 必须与实际 HTTP 状态一致。
+        detail:
+          type: string
+          description: 本次错误的安全说明，供人阅读。
+        instance:
+          type: string
+          format: uri-reference
+          description: 可选的错误实例 URI 引用。没有实际错误实例标识时省略，禁止使用请求路径代替。
         code:
           type: string
-          example: ALREADY_REGISTERED
-        message:
-          type: string
-          example: 你已报名该活动
-        details:
-          type: object
-          additionalProperties: true
-          description: 可选的错误上下文，无内容时省略，且不得包含敏感信息
+          description: 全局唯一、稳定的项目错误码，用于业务分支。
         traceId:
           type: string
+          description: 来自真实请求追踪上下文的追踪标识。
         timestamp:
           type: string
           format: date-time
+          description: 服务端生成的 ISO 8601 时间，含时区。
+        errors:
+          type: array
+          description: 可选的字段校验错误列表。
+          items:
+            $ref: '#/components/schemas/FieldValidationError'
+    FieldValidationError:
+      type: object
+      required:
+      - field
+      - code
+      - detail
+      properties:
+        field:
+          type: string
+          description: 未通过校验的请求字段。
+        code:
+          type: string
+          description: 字段校验原因码。
+        detail:
+          type: string
+          description: 字段校验失败的安全说明。
     PageInfo:
       type: object
       required:
