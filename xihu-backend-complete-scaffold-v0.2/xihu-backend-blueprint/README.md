@@ -1,62 +1,43 @@
-# 西湖论剑后端完整领域骨架 V0.2（独立交付，不覆盖旧仓库）
+# 西湖论剑后端架构规范与技术骨架
 
-> 基准：用户确认的完整功能清单、MVP/OpenAPI 副本、2026-11-08 查询到的 `sry8848/sword_shield_web` `dev` 分支旧工程。旧工程是 Java 17 + Spring Boot 3.2.5 + Gateway/Dubbo；它与讨论中的新 API 文档并非相同提交。本包属于设计交付，不会替换仓库。
+本目录的 `docs/` 是后端架构、工程与编码约束的唯一维护位置。各主题以本索引指向的规范章节为准，其他说明链接到原章节。骨架及模块说明用于查阅示例和实现状态。
 
-## 交付成果和真实实现状态
+## 阅读顺序
 
-**14 个 Maven 模块：** `common`, `gateway`, `identity-service`, `activity-service`, `content-service`, `file-service`, `interaction-service`, `incentive-service`, `limited-seat-service`, `payment-service`, `customer-service`, `analytics-service`, `workflow-service`, `organization-service`。
+1. [总体架构与数据所有权](docs/01-总体架构与数据所有权.md)规定领域职责、服务依赖、数据所有权与事务边界。
+2. [工程与编码规范](docs/02-工程与编码规范.md)规定分层、API 契约管理、数据访问、配置、日志、异常与测试。
+3. [认证、授权、租户、组织与审批](docs/03-权限数据范围组织租户审批.md)规定身份与授权职责、数据范围及启用未来能力时的安全要求。
+4. [待确认事项与契约差异](docs/11-现有前端OpenAPI契约差异与冻结项.md)记录尚未达成一致的事项及其来源。开发对应功能前核对相关条目。
+5. [实现参考与历史取舍](docs/07-参考开源实现与取舍.md)收录可选实现和开源参考。采用前按实际业务验证。
 
-- **已有 Spring 技术演示：** `gateway`、`identity-service`、`activity-service`，沿用 V0.1 的结构与示例；能配置启动，但尚未在当前环境完成 Spring Maven 构建/联调。
-- **真实基础库：** `common`，含 API envelope、错误结构与授权纯 Java 模型。新增 `AuthorizationRequest`/`AuthorizationGrant`/`AuthorizedQuerySpec`，修正了通用 SELF 不能直接比较资源 ID 的建模缺陷。
-- **新增未来领域：** 10 个 `jar` 模块，均包含领域值对象、仓储 Port、应用层授权契约和分层目录约束；它们不是空 Maven POM，也不是已经实现的服务，更没有 Spring 启动类。
-- **完整文档：** 原有 00–07 规范加上 08–11（完整领域模块矩阵、通用资源授权运行模型、未来重构明细、API 契约差异）。
-- **自检：** Java 17 语言级纯 Java 领域模块编译；范围判定测试通过。`mvn clean verify`、HTTP/DB 联调未跑通，详见 VALIDATION。
+前三份是架构约束。待确认事项记录决策缺口，实现参考提供候选路径。[v0.1 后端文档](../../xihu-backend-architecture-starter-v0.1/xihu-backend-blueprint/README.md)作为历史资料保存，后续开发只引用这里的现行规范。
 
-## 推荐阅读顺序
+## 资料的权威边界
 
-1. `docs/08-完整领域模块矩阵与依赖.md`：所有业务模块、边界与数据所有者。
-2. `docs/00-决策记录与范围.md` 与 `docs/01-总体架构与数据所有权.md`：架构取舍。
-3. `docs/02-工程与编码规范.md`：团队统一编码规范。
-4. `docs/09-数据权限运行模型.md`：**跨资源（场次、用户、报名等）数据范围**。
-5. `docs/10-多租户组织审批演进与重构明细.md`：真实升级时哪些需要改。
-6. `docs/11-现有前端OpenAPI契约差异与冻结项.md`：与原前端接口规范对齐的必要工作。
-7. 各未来服务的 `MODULE.md`：领域具体扩展责任。
+| 资料 | 负责的问题 |
+| --- | --- |
+| [MVP](../../docs/mvp.md) | 第一阶段业务范围与交付闭环。 |
+| [完整产品功能清单](../../docs/功能模块清单与微服务划分评审.md)及[菜单与页面功能清单](../../docs/菜单与页面功能清单.md) | 产品完整功能规划与页面组织。服务划分的现行约束见阅读顺序第 1 项。 |
+| [OpenAPI](../../xihu-jian-frontend/openapi/openapi.yaml) | 对外 API 的唯一机器可读契约。当前文件处于评审阶段，标为待确认的业务规则随评审收敛。 |
+| 后端架构规范 | 后端的领域边界、工程和编码约束。 |
+| 后端代码 | 上述要求的具体实现。演示实现与已确认规范有差异时，以对应权威资料判断实施缺口。 |
 
-## 依赖与工程使用
+MVP 缩小首期交付范围，各项工程和安全约束仍适用。对未来模块先划清职责，等业务需要再增加代码、运行服务和基础设施。多租户、组织、审批等能力的条件性约束在各自启用时适用。
 
-```text
-backend/pom.xml               # Maven Reactor 14 modules
-backend/common                # 纯通用值对象/响应
-backend/gateway               # 本地静态路由演示
-backend/identity-service      # 演示账号和 JWT（不是正式认证系统）
-backend/activity-service      # MySQL + Flyway + MyBatis 活动示例
-backend/{其余10个}-service     # 可编译领域契约，按需升级为启动应用
-```
+遇到资料冲突时，暂停受影响的实现，在[待确认事项](docs/11-现有前端OpenAPI契约差异与冻结项.md)记录相关出处、影响和需确认的问题。确认后由对应资料维护其结论。涉及对外接口时按 [API 契约与异常](docs/02-工程与编码规范.md#api-契约与异常)处理。
 
-本项目未来目标虽保留分布式架构设计，但**Maven module ≠ 需要现在部署的微服务**。本地 MVP 开发不需要启动十个无业务逻辑的进程。
+## 骨架实现状态与本地验证
 
-### Windows 本地验证
+`backend/` 下有 14 个 Maven 模块。`gateway`、`identity-service`、`activity-service` 含 Spring 技术演示，`common` 含通用响应与示例授权模型。其余 10 个模块保留早期骨架示例，业务状态和验证范围见 [VALIDATION.md](VALIDATION.md)。
 
-前提：JDK 17+、Maven 3.9+；若要启动 activity 服务，再准备 Docker Desktop。
+本地验证需要 JDK 17 和 Maven。运行 Activity 的数据库示例时另需 Docker。
 
 ```powershell
 cd backend
-mvn -B -U clean verify
-# 如需要启动演示 MySQL
-# docker compose up -d mysql
-# 分别执行：mvn -pl identity-service spring-boot:run、mvn -pl activity-service spring-boot:run、mvn -pl gateway spring-boot:run
+mvn -B clean verify
+# 运行数据库示例时执行 docker compose up -d mysql
+# 可分别在 backend 下运行以下三个演示应用
+# mvn -pl identity-service spring-boot:run
+# mvn -pl activity-service spring-boot:run
+# mvn -pl gateway spring-boot:run
 ```
-
-**不要把演示管理员凭证、HS256 共享密钥、内存授权数据用于公网或正式系统。** `mvn clean verify` 成功之后仍要执行服务联调、Flyway、跨租户/资源越权测试。
-
-## 与原 OpenAPI 的关系
-
-原 `openapi.yaml` 是唯一正式 API 契约；本工程仍是**技术骨架**，MVP 所需用户注册、报名、QR、核验、统计并未完整实现，参见 `docs/11-现有前端OpenAPI契约差异与冻结项.md`。不要直接用本包替换现有前后端。
-
-## 非目标
-
-- 不提前实现完整组织树/Flowable/租户管理后台。
-- 不以创建未来服务文件夹冒充业务实现。
-- 不绕开未确认的 SQL Server 赛题条件，当前示例暂按 MySQL。
-- 不把 `tenantId` 字段本身等同于安全的 SaaS 隔离。
-- 不宣称本项目已经完成 Maven 构建验证。

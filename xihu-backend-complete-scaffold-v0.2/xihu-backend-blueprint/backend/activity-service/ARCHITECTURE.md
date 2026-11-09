@@ -1,17 +1,5 @@
-# activity-service — MVP 演示工程到正式工程的落实要求
+# activity-service 骨架记录
 
-旧 V0.1 源码在根 package 直接放 Controller/Service/Mapper，这不是目标工程的标准分层，只保留用于技术演示。
+本目录包含早期 Spring 技术演示。正式分层以 [工程与编码规范](../../docs/02-工程与编码规范.md)为准，领域和依赖边界见 [总体架构](../../docs/01-总体架构与数据所有权.md)。
 
-正式业务实现必须拆分：
-
-```
-interfaces/rest/           HTTP 入口、参数校验、映射
-application/               用例、事务、DTO 编排
-  port/                     上下游契约
- domain/                    实体、业务不变量、状态机、Port
-infrastructure/persistence/ MyBatis Entity/Mapper/Repository adapter
-infrastructure/external/    外部客户端
-configuration/              Security/租户/数据库/日志配置
-```
-
-禁止由于 MVP 演示代码路径简短而继续堆砌根目录类。**本模块不能声称已经实现完整 MVP**。具体功能差异见 `docs/11-现有前端OpenAPI契约差异与冻结项.md`。
+演示覆盖范围见 [骨架与 OpenAPI 的实施差距](../../docs/11-现有前端OpenAPI契约差异与冻结项.md#骨架与-openapi-的实施差距)。

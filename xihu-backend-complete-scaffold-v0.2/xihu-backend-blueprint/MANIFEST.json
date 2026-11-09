@@ -36,17 +36,10 @@
     "organization-service"
   ],
   "docs": [
-    "00-决策记录与范围.md",
     "01-总体架构与数据所有权.md",
     "02-工程与编码规范.md",
     "03-权限数据范围组织租户审批.md",
-    "04-MVP到完整版迁移表.md",
-    "05-验收与缺口.md",
-    "06-权限关系表与接口约定.md",
     "07-参考开源实现与取舍.md",
-    "08-完整领域模块矩阵与依赖.md",
-    "09-数据权限运行模型.md",
-    "10-多租户组织审批演进与重构明细.md",
     "11-现有前端OpenAPI契约差异与冻结项.md"
   ],
   "status": "partial-implementation; Maven build/runtime not verified"

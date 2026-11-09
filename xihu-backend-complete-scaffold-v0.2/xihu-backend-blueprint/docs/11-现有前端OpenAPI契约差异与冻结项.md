@@ -1,44 +1,20 @@
-# 11 前端、MVP OpenAPI 与本工程差异清单
+# 11 待确认事项与契约差异
 
-基准：随会话提供的 `openapi.yaml` 文档副本（125263 bytes）、MVP.md、现有 `dev` 分支旧工程。**本包没有修改原前端，也没有宣称 API 已完全兼容。**
+下表记录整理时发现的未决问题。旧 v0.2 文档编号对应整理前的版本（Git 提交 `0756c0b`）。[资料权威边界](../README.md#资料的权威边界)说明确认后应更新哪份资料。
 
-## 1. 当前 OpenAPI 业务接口覆盖
+## 待确认事项
 
-```
-POST /auth/register             POST /auth/login
-POST /auth/refresh              POST /auth/logout
-GET  /auth/me                   GET  /public/events
-GET  /public/events/{eventId}  POST /events/{eventId}/registrations
-GET  /me/registrations         GET  /me/registrations/{registrationId}
-GET  /me/registrations/{registrationId}/credential
-POST/GET /admin/events         GET/PATCH /admin/events/{eventId}
-POST /admin/events/{eventId}/publish
-POST /admin/events/{eventId}/unpublish
-GET  /admin/registrations      GET /admin/registrations/{registrationId}
-POST/GET /admin/check-ins      GET /admin/statistics/overview
-GET /admin/statistics/events  GET /admin/statistics/events/{eventId}
-```
+| 事项 | 现有资料与差异 | 待确认结论 |
+| --- | --- | --- |
+| 首期角色与权限配置 | [MVP](../../../docs/mvp.md)建议三类后台角色，[OpenAPI 草案](../../../xihu-jian-frontend/openapi/openapi.yaml)含 `DATA_OPERATOR`。旧 v0.2 的 03、06 展开了角色和范围编辑，接口待确认事项 D13–D16 则保留首期配置范围。 | 首期角色与动作矩阵，是否允许编辑角色和范围，是否需要新增配置接口。 |
+| 核验的场次范围 | MVP 限制核验员只操作授权场次，OpenAPI 草案尚无场次授权配置端点。见[接口待确认事项 D12、D16](../../../xihu-jian-frontend/docs/14-待确认事项.md)。 | 确认范围来源与配置方式，以及报名、统计等操作是否沿用对应范围。核验仍遵守 [安全与授权规范](03-权限数据范围组织租户审批.md)。 |
+| 登录与会话 | 评审稿已注明 Bearer Access Token 与 HttpOnly Cookie 传输 Refresh Token。旧 v0.2 的 01、11 讨论 JWT 验签与会话设计，骨架只演示内存账号登录。 | 根据[接口待确认事项 D01–D03、D15](../../../xihu-jian-frontend/docs/14-待确认事项.md)确认账号入口、令牌时效、轮换、退出与部署来源，明确签名和撤权机制。 |
+| 核验流程与指标口径 | 旧 v0.1 验收和 v0.2 的 11 提及预览与确认，OpenAPI 草案以一次 `POST /admin/check-ins` 完成核验。统计草案仍有口径待确认。 | 核验是否分步、凭证规则、名额与取消、报名及到场指标口径按[接口待确认事项 D05–D07、D10–D11、D17](../../../xihu-jian-frontend/docs/14-待确认事项.md)确认。 |
+| 显式拒绝和多来源授权 | 旧 v0.2 的 03 写有显式 DENY 优先，09 将通用 DENY 表达式推迟到实际需求出现。 | 如需显式拒绝或组织、个人授权，先确认合并优先级、撤权及审计规则。 |
+| 未来领域交界 | 旧 v0.2 的 01 同时提到 Activity 和 Interaction 的场次订阅，将限量预约与支付合并列出。产品评审提出了[职责拆分建议](../../../docs/功能模块清单与微服务划分评审.md)。旧 01 将组织成员列在 Identity，Organization 骨架也包含成员职责。 | 在启用相关能力前，确认场次订阅、限量业务订单及组织成员存储的唯一所有者，以及 Organization 与 Identity 的部署关系。 |
+| 多租户与审批方案 | 旧 v0.2 的 03、10 保留多种租户部署方式和审批实现。 | 业务启用前确认租户部署与账号模型、审批接入范围和版本迁移方案。实现候选见[参考](07-参考开源实现与取舍.md)。 |
+| 工程技术基线 | v0.1 记录了旧版 Spring 兼容基线，当前 v0.2 Maven 版本声明已经调整。项目 [AGENTS.md](../../../AGENTS.md)明确本次课设没有 SQL Server 选型要求，骨架演示用 MySQL。 | 正式开发采用的依赖兼容组合和目标数据库以专项验证及评审结论为准。 |
 
-所有路径以 `/api/v1` 为前缀。
+## 骨架与 OpenAPI 的实施差距
 
-## 2. 本骨架中的实现状态（必须按照真实状态报）
-
-- `/api/v1/auth/login`：演示管理员内存账号、JWT；与原 OpenAPI 所要求的真实账号注册/刷新协议**不完整兼容**。
-- `/api/v1/admin/me`：演示用户、角色、权限；未实现数据库动态 RBAC。
-- `/api/v1/public/events`：简化只读已发布活动，响应字段未覆盖正式前台需求。
-- `/api/v1/admin/events`：简化活动草稿创建。
-- `/api/v1/admin/events/{id}/publish`：演示发布动作。
-- 其它 MVP 端点：**未实现**。
-
-## 3. 开发前必须冻结的契约差异
-
-1. MVP 文档 3 个后台角色，现有 OpenAPI/规范含 `DATA_OPERATOR`：统一角色矩阵；角色代码不可永久固定在枚举中。
-2. 登陆请求是普通用户账号还是后台独立账号，以及 refresh 会话结构，需要由身份服务统一。
-3. 核验员被授权的场次：角色共享范围或团队授权，核验接口必须服务端检查，当前 OpenAPI 缺少配置端点。
-4. `resource:action` 稳定授权码与多资源数据范围必须以文档 09 为准；不能以 JWT 中静态长寿命的范围快照作为唯一授权依据。
-5. 注册、报名并发名额、凭证 QR preview/confirm 与统计口径，以已确认的业务决策为准修订 OpenAPI。
-6. SQL Server 在早期赛题中提及，而骨架默认 MySQL：课程硬性验收条件先核实。
-
-## 4. 规则
-
-OpenAPI 仍是前后端的单一机器可读契约；文档改动应先在仓库评审提交，再改 Controller，不能直接用新示范接口替代正式契约。
+当前骨架仅声明演示登录、后台身份查询、公开场次列表、后台场次创建、详情和发布端点。演示登录使用 `username`，OpenAPI 草案使用 `account`。注册、刷新与退出、真实角色分配、普通报名、凭证、核验和统计等尚无完整实现，已有端点的字段及行为也需要契约验证。端点和 DTO 以 [OpenAPI](../../../xihu-jian-frontend/openapi/openapi.yaml)为准，历史验证范围见 [VALIDATION.md](../VALIDATION.md)。

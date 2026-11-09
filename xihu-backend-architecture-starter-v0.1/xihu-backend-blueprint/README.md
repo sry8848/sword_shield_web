@@ -1,5 +1,7 @@
 # 西湖论剑后端架构与工程骨架（独立交付包）
 
+> **历史版本。** 后端架构规范统一维护在 [现行规范入口](../../xihu-backend-complete-scaffold-v0.2/xihu-backend-blueprint/README.md)。本页及本目录文档保留原始交付记录。
+
 > 设计基准：`sry8848/sword_shield_web` 默认 `dev` 分支的旧工程 + 会话中已形成的 MVP、功能划分、前端接口规范及 `openapi.yaml` 文档副本。
 > **本包没有覆盖 GitHub 仓库，也不是已完成 MVP。** 它包含架构决策、开发规范、扩展性设计和最小可联调的多模块示范工程。
 
