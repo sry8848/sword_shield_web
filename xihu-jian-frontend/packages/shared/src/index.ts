@@ -1,5 +1,3 @@
-export { createApi } from './api/createApi'
 export { ApiError, createHttpClient, request } from './http/client'
+export type { HttpClientOptions } from './http/client'
 export { formatDateTime } from './utils/date'
-export type * from './types/api'
-export type * from './types/domain'
