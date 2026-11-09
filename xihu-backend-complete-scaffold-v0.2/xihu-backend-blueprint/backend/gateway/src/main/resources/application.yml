@@ -5,15 +5,17 @@ spring:
     name: gateway
   cloud:
     gateway:
-      routes:
-        - id: identity
-          uri: http://localhost:8081
-          predicates:
-            - Path=/api/v1/auth/**,/api/v1/admin/me
-        - id: activity
-          uri: http://localhost:8082
-          predicates:
-            - Path=/api/v1/public/events,/api/v1/admin/events/**,/api/v1/admin/events
+      server:
+        webflux:
+          routes:
+            - id: identity
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/v1/auth/**,/api/v1/admin/me
+            - id: activity
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/v1/public/events,/api/v1/admin/events/**,/api/v1/admin/events
 management:
   endpoints:
     web:
