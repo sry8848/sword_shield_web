@@ -8,3 +8,13 @@ management:
     web:
       exposure:
         include: health
+  tracing:
+    export:
+      # 本阶段只建立本地追踪。Boot 同时停用入站追踪传播，避免接续未受信请求的上下文。
+      enabled: false
+logging:
+  structured:
+    json:
+      rename:
+        traceId: trace.id
+        spanId: span.id
