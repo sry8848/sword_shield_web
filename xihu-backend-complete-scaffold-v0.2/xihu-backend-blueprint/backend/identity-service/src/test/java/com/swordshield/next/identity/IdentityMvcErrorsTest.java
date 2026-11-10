@@ -146,6 +146,13 @@ class IdentityMvcErrorsTest {
                 .noneMatch(log -> log.path("log").path("level").asString().equals("ERROR"));
     }
 
+    /** 验证同为 409 的业务异常和框架异常使用各自的错误码。 */
+    @Test
+    void conflictCodeDependsOnTheExceptionSource() throws Exception {
+        problem(request("GET", "/test/business/registered", null, ""), 409, "ALREADY_REGISTERED", "状态冲突");
+        problem(request("GET", "/test/status/conflict", null, ""), 409, "BUSINESS_CONFLICT", "状态冲突");
+    }
+
     /** 验证缺少必填 JSON 字段时仍返回安全的必填说明。 */
     @Test
     void invalidBodyHasSafeFieldErrors(CapturedOutput output) throws Exception {
@@ -387,6 +394,12 @@ class IdentityMvcErrorsTest {
         @GetMapping("/test/status/not-acceptable")
         void notAcceptable() {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "模拟框架内部说明");
+        }
+
+        /** 触发由 MVC 提供状态、由全局处理器补充通用错误码的 409。 */
+        @GetMapping("/test/status/conflict")
+        void conflict() {
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
 
         /** 让 MVC 按端点声明的响应媒体类型进行内容协商。 */

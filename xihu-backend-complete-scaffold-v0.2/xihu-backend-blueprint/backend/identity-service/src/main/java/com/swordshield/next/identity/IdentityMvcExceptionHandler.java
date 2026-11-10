@@ -58,7 +58,14 @@ class IdentityMvcExceptionHandler extends ResponseEntityExceptionHandler impleme
     /** 将业务失败映射为对应状态，并使用统一的错误响应格式。 */
     @ExceptionHandler(BusinessException.class)
     ResponseEntity<Object> handleBusiness(BusinessException exception, WebRequest request) {
-        return handleExceptionInternal(exception, null, HttpHeaders.EMPTY, statusOf(exception.getKind()), request);
+        // 1. 根据失败类别选择状态，直接使用异常携带的业务码和说明。
+        HttpStatusCode status = statusOf(exception.getKind());
+        ProblemDetail problem = problem(status, exception.getCode(), titleOf(status), exception.getMessage());
+
+        // 2. 指定响应媒体类型，并由 Spring MVC 创建响应。
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+        return super.handleExceptionInternal(exception, problem, headers, status, request);
     }
 
     /** 返回业务失败类别对应的 HTTP 状态。 */
@@ -67,6 +74,16 @@ class IdentityMvcExceptionHandler extends ResponseEntityExceptionHandler impleme
             case NOT_FOUND -> HttpStatus.NOT_FOUND;
             case CONFLICT -> HttpStatus.CONFLICT;
             case RULE_VIOLATION -> HttpStatus.UNPROCESSABLE_CONTENT;
+        };
+    }
+
+    /** 返回业务异常和框架异常共用的状态标题。 */
+    private static String titleOf(HttpStatusCode status) {
+        return switch (status.value()) {
+            case 404 -> "未找到";
+            case 409 -> "状态冲突";
+            case 422 -> "无法处理的内容";
+            default -> throw new IllegalArgumentException("Unsupported business status: " + status);
         };
     }
 
@@ -86,19 +103,19 @@ class IdentityMvcExceptionHandler extends ResponseEntityExceptionHandler impleme
             return createResponseEntity(null, headers, status, request);
         }
 
-        // 2. 按状态选择公开标题、通用码和说明，并为业务失败保留原有业务码及说明。
+        // 2. 按状态选择框架错误的公开标题、通用码和说明。
         ProblemDetail problem = switch (status.value()) {
             case 400 -> problem(status, "INVALID_ARGUMENT", "请求错误",
                     exception instanceof HttpMessageNotReadableException
                             ? "请求体格式不正确" : "请求参数不合法");
             case 401 -> problem(status, "UNAUTHENTICATED", "未认证", "缺少有效的认证凭证");
             case 403 -> problem(status, "FORBIDDEN", "禁止访问", "无权访问目标资源");
-            case 404 -> problem(status, "RESOURCE_NOT_FOUND", "未找到", "目标资源不存在");
+            case 404 -> problem(status, "RESOURCE_NOT_FOUND", titleOf(status), "目标资源不存在");
             case 405 -> problem(status, "METHOD_NOT_ALLOWED", "不支持的请求方法", "目标资源不支持该请求方法");
-            case 409 -> problem(status, "BUSINESS_CONFLICT", "状态冲突", "当前状态与该操作冲突");
+            case 409 -> problem(status, "BUSINESS_CONFLICT", titleOf(status), "当前状态与该操作冲突");
             case 413 -> problem(status, "PAYLOAD_TOO_LARGE", "请求内容过大", "请求体超过允许的大小");
             case 415 -> problem(status, "UNSUPPORTED_MEDIA_TYPE", "不支持的媒体类型", "请求体媒体类型不受支持");
-            case 422 -> problem(status, "BUSINESS_RULE_VIOLATION", "无法处理的内容", "请求不满足业务规则");
+            case 422 -> problem(status, "BUSINESS_RULE_VIOLATION", titleOf(status), "请求不满足业务规则");
             case 429 -> problem(status, "TOO_MANY_REQUESTS", "请求过于频繁", "请求频率超过限制");
             case 502 -> problem(status, "BAD_GATEWAY", "网关错误", "网关收到无效的上游响应");
             case 503 -> problem(status, "SERVICE_UNAVAILABLE", "服务不可用", "目标服务暂不可用");
@@ -114,10 +131,6 @@ class IdentityMvcExceptionHandler extends ResponseEntityExceptionHandler impleme
         };
         if (problem == null) {
             return super.handleExceptionInternal(exception, body, headers, status, request);
-        }
-        if (exception instanceof BusinessException business) {
-            problem.setProperty("code", business.getCode());
-            problem.setDetail(business.getMessage());
         }
 
         // 3. 为参数校验附加公开的字段错误。
