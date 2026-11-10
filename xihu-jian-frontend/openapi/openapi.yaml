@@ -3276,7 +3276,7 @@ components:
           const: about:blank
         title:
           type: string
-          description: 使用后端工程与编码规范中实际 HTTP 状态对应的固定简体中文标题。各错误响应示例展示该标题。
+          description: 使用后端工程与编码规范中的简体中文标题，已登记状态使用对应的固定标题。
         status:
           type: integer
           minimum: 400
@@ -3284,14 +3284,14 @@ components:
           description: 必须与实际 HTTP 状态一致。
         detail:
           type: string
-          description: 本次错误的安全说明，供人阅读。
+          description: 本次错误面向客户端的公开说明。原始异常和 cause 链保留在服务端。
         instance:
           type: string
           format: uri-reference
           description: 可选的错误实例 URI 引用。没有实际错误实例标识时省略，禁止使用请求路径代替。
         code:
           type: string
-          description: 全局唯一、稳定的项目错误码，用于业务分支。
+          description: 全局唯一、稳定的项目错误码。业务失败使用所属模块定义的业务码，未登记的框架 4xx 可使用 HTTP_ERROR。
         traceId:
           type: string
           description: 来自真实请求追踪上下文的追踪标识。

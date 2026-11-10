@@ -28,12 +28,12 @@ MVP 缩小首期交付范围，各项工程和安全约束仍适用。对未来�
 
 ## 骨架实现状态与本地验证
 
-| Maven 模块           | 当前内容                           | 默认端口 |
-| ------------------ | ------------------------------ | ---- |
-| `gateway`          | Spring Cloud Gateway 启动入口和健康检查 | 8080 |
-| `identity-service` | 身份服务启动入口和健康检查                  | 8081 |
-| `activity-service` | 活动服务启动入口和健康检查                  | 8082 |
-| `common`           | 通用成功响应类型 `ApiEnvelope<T>` | —    |
+| Maven 模块 | 当前内容 | 默认端口 |
+| --- | --- | --- |
+| `gateway` | Spring Cloud Gateway 启动入口、健康检查和请求追踪 | 8080 |
+| `identity-service` | 身份服务启动入口、健康检查、请求追踪和 MVC 全局异常处理 | 8081 |
+| `activity-service` | 活动服务启动入口和健康检查 | 8082 |
+| `common` | 通用成功响应 `ApiEnvelope<T>`、失败类别 `FailureKind` 和业务异常 `BusinessException` | — |
 
 业务接口、网关转发规则、认证和数据库迁移随实际用例接入。三个服务各有独立启动入口，健康检查用于验证服务存活。历史演示的交付记录见 [VALIDATION.md](VALIDATION.md)。
 

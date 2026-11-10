@@ -7,12 +7,17 @@ import java.net.http.HttpResponse;
 import java.time.Instant;
 
 import com.swordshield.next.common.ApiEnvelope;
+import com.swordshield.next.common.BusinessException;
+import com.swordshield.next.common.FailureKind;
 import io.micrometer.tracing.Tracer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -20,12 +25,15 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -96,7 +104,49 @@ class IdentityMvcErrorsTest {
                 .withMessage("traceId must not be blank");
     }
 
-    /** 验证 JSON 字段校验失败时只公开固定的字段说明。 */
+    /** 验证业务异常具有稳定的业务语义和自身的堆栈。 */
+    @Test
+    void businessExceptionRetainsItsKindCodeAndStack() {
+        var exception = new BusinessException(FailureKind.CONFLICT, "ALREADY_REGISTERED", "您已报名该场次");
+
+        assertThat(exception.getKind()).isEqualTo(FailureKind.CONFLICT);
+        assertThat(exception.getCode()).isEqualTo("ALREADY_REGISTERED");
+        assertThat(exception).hasMessage("您已报名该场次").hasNoCause();
+        assertThat(exception.getStackTrace()).isNotEmpty();
+    }
+
+    /** 验证包装业务失败时保留原始异常对象。 */
+    @Test
+    void businessExceptionRetainsOriginalCause() {
+        var cause = new IllegalStateException("模拟唯一约束冲突");
+        var exception = new BusinessException(FailureKind.CONFLICT, "ALREADY_REGISTERED", "您已报名该场次", cause);
+
+        assertThat(exception.getCause()).isSameAs(cause);
+    }
+
+    /** 验证 MVC 根据失败类别选择状态，响应保留各业务码和公开说明。 */
+    @ParameterizedTest
+    @CsvSource({
+            "missing, 404, RESOURCE_NOT_FOUND, 未找到, 场次不存在",
+            "registered, 409, ALREADY_REGISTERED, 状态冲突, 您已报名该场次",
+            "full, 409, EVENT_FULL, 状态冲突, 场次名额已满",
+            "closed, 422, REGISTRATION_CLOSED, 无法处理的内容, 报名已截止"
+    })
+    void businessFailuresUseTheirOwnCodeWithoutAnUnexpectedErrorLog(
+            String scenario, int status, String code, String title, String detail, CapturedOutput output)
+            throws Exception {
+        // 1. 触发指定业务失败并校验完整的响应。
+        var response = request("GET", "/test/business/" + scenario, null, "");
+        JsonNode body = problem(response, status, code, title);
+        assertThat(body.path("detail").asString()).isEqualTo(detail);
+        assertThat(response.body()).doesNotContain("模拟唯一约束冲突");
+
+        // 2. 检查同一请求的日志，确认业务拒绝没有进入未知系统故障分支。
+        assertThat(output.getAll().lines().filter(line -> line.contains(traceId(body))).map(mapper::readTree))
+                .noneMatch(log -> log.path("log").path("level").asString().equals("ERROR"));
+    }
+
+    /** 验证缺少必填 JSON 字段时仍返回安全的必填说明。 */
     @Test
     void invalidBodyHasSafeFieldErrors(CapturedOutput output) throws Exception {
         // 1. 提交缺少必填字段的 JSON。
@@ -114,6 +164,26 @@ class IdentityMvcErrorsTest {
                 .noneMatch(line -> line.contains("\"stack_trace\""));
     }
 
+    /** 验证多个无效字段分别保留校验说明，且响应不包含原始输入。 */
+    @Test
+    void invalidBodyRetainsSpecificMessagesForMultipleFields() throws Exception {
+        // 1. 提交超长姓名和空白城市。
+        String rejectedName = "过".repeat(31);
+        var response = request("POST", PATH, "application/json",
+                "{\"displayName\":\"" + rejectedName + "\",\"city\":\" \"}");
+        JsonNode body = problem(response, 400, "INVALID_ARGUMENT", "请求错误");
+
+        // 2. 分别核对字段错误，不依赖 Bean Validation 的报告顺序。
+        assertThat(body.path("errors")).containsExactlyInAnyOrder(
+                mapper.readTree("""
+                        {"field":"displayName","code":"INVALID_VALUE","detail":"姓名不能超过30个字符"}
+                        """),
+                mapper.readTree("""
+                        {"field":"city","code":"INVALID_VALUE","detail":"城市至少需要2个字符"}
+                        """));
+        assertThat(response.body()).doesNotContain(rejectedName);
+    }
+
     /** 验证 MVC 直接校验查询参数时返回对外参数名。 */
     @Test
     void invalidQueryParameterUsesTheRequestParameterName() throws Exception {
@@ -121,6 +191,7 @@ class IdentityMvcErrorsTest {
         JsonNode body = problem(response, 400, "INVALID_ARGUMENT", "请求错误");
         assertThat(body.path("errors").get(0).path("field").asString()).isEqualTo("page");
         assertThat(body.path("errors").get(0).path("code").asString()).isEqualTo("INVALID_VALUE");
+        assertThat(body.path("errors").get(0).path("detail").asString()).isEqualTo("页码必须大于0");
     }
 
     /** 验证非法 JSON 不暴露输入或解析器细节。 */
@@ -148,6 +219,42 @@ class IdentityMvcErrorsTest {
     void unsupportedMediaTypeReturnsProblem() throws Exception {
         problem(request("POST", PATH, "text/plain", "text"), 415,
                 "UNSUPPORTED_MEDIA_TYPE", "不支持的媒体类型");
+    }
+
+    /** 验证 Spring MVC 解析未登记的状态异常时保留原状态和公共字段。 */
+    @Test
+    void unregisteredFrameworkStatusReturnsProblem() throws Exception {
+        var response = request("GET", "/test/status/not-acceptable", null, "");
+        problem(response, 406, "HTTP_ERROR", "请求失败");
+        assertThat(response.body()).doesNotContain("模拟框架内部说明");
+    }
+
+    /** 验证客户端排除错误 JSON 时，406 保留状态并省略响应体。 */
+    @ParameterizedTest
+    @CsvSource({
+            "/test/json, text/plain",
+            "/test/status/not-acceptable, 'application/problem+json;q=0, */*'"
+    })
+    void unacceptableMediaTypeDoesNotForceJson(String path, String accept) throws Exception {
+        // 1. 发出会得到 406 且不接受错误 JSON 的请求。
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+                .header("Accept", accept)
+                .build();
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // 2. 检查内容协商失败的状态和响应体。
+        assertThat(response.statusCode()).isEqualTo(406);
+        assertThat(response.body()).isEmpty();
+        assertThat(response.headers().firstValue("Content-Type")).isEmpty();
+    }
+
+    /** 验证未登记的框架 5xx 保留状态并隐藏底层说明。 */
+    @Test
+    void unregisteredServerStatusReturnsSafeProblem() throws Exception {
+        var response = request("GET", "/test/status/unknown-server-error", null, "");
+        JsonNode body = problem(response, 507, "INTERNAL_ERROR", "服务器内部错误");
+        assertThat(body.path("detail").asString()).isEqualTo("服务器内部错误");
+        assertThat(response.body()).doesNotContain("模拟框架内部说明");
     }
 
     /** 验证 500 响应只返回通用说明，且可关联唯一一条保留原始异常的日志。 */
@@ -253,7 +360,7 @@ class IdentityMvcErrorsTest {
 
         /** 校验查询参数的最小值。 */
         @GetMapping(PATH)
-        ApiEnvelope<Integer> validateQuery(@RequestParam("page") @Positive int pageNumber) {
+        ApiEnvelope<Integer> validateQuery(@RequestParam("page") @Positive(message = "页码必须大于0") int pageNumber) {
             return ApiEnvelope.ok(pageNumber, tracer.currentSpan().context().traceId());
         }
 
@@ -262,8 +369,41 @@ class IdentityMvcErrorsTest {
         void failure() {
             throw new IllegalStateException("模拟业务执行失败", new IllegalArgumentException("模拟参数异常"));
         }
+
+        /** 按测试场景触发带有独立业务码的异常。 */
+        @GetMapping("/test/business/{scenario}")
+        void businessFailure(@PathVariable("scenario") String scenario) {
+            throw switch (scenario) {
+                case "missing" -> new BusinessException(FailureKind.NOT_FOUND, "RESOURCE_NOT_FOUND", "场次不存在");
+                case "registered" -> new BusinessException(FailureKind.CONFLICT, "ALREADY_REGISTERED", "您已报名该场次",
+                        new IllegalStateException("模拟唯一约束冲突"));
+                case "full" -> new BusinessException(FailureKind.CONFLICT, "EVENT_FULL", "场次名额已满");
+                case "closed" -> new BusinessException(FailureKind.RULE_VIOLATION, "REGISTRATION_CLOSED", "报名已截止");
+                default -> new IllegalArgumentException(scenario);
+            };
+        }
+
+        /** 用 MVC 支持的状态异常触发 406，允许客户端接收错误 JSON。 */
+        @GetMapping("/test/status/not-acceptable")
+        void notAcceptable() {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "模拟框架内部说明");
+        }
+
+        /** 让 MVC 按端点声明的响应媒体类型进行内容协商。 */
+        @GetMapping(path = "/test/json", produces = "application/json")
+        ApiEnvelope<String> json() {
+            return ApiEnvelope.ok("有效", tracer.currentSpan().context().traceId());
+        }
+
+        /** 触发项目状态表未登记的框架 5xx。 */
+        @GetMapping("/test/status/unknown-server-error")
+        void unknownServerStatus() {
+            throw new ResponseStatusException(HttpStatus.INSUFFICIENT_STORAGE, "模拟框架内部说明");
+        }
     }
 
-    /** 为请求体校验提供一个必填字段。 */
-    record ValidationInput(@NotBlank String displayName) {}
+    /** 为请求体提供必填、长度和多字段校验。 */
+    record ValidationInput(
+            @NotBlank(message = "缺少必填值") @Size(max = 30, message = "姓名不能超过30个字符") String displayName,
+            @Size(min = 2, message = "城市至少需要2个字符") String city) {}
 }
