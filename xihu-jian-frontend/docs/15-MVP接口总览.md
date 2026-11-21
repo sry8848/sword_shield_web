@@ -27,14 +27,14 @@
 2. 查看大会信息：`GET /public/conference`。
 3. 浏览场次：`GET /public/events`。
 4. 查看场次详情：`GET /public/events/{eventId}`。
-5. 注册/登录：`POST /auth/register`、`POST /auth/login`。
+5. 参会账号登录使用 `POST /auth/portal/login`，注册留待后续模块。
 6. 提交报名：`POST /events/{eventId}/registrations`。
 7. 查询本人报名：`GET /me/registrations`、`GET /me/registrations/{registrationId}`。
 8. 获取二维码凭证：`GET /me/registrations/{registrationId}/credential`。
 
 ### 2.2 运营人员
 
-1. 登录后读取后台身份与权限：`GET /admin/me`。
+1. 通过 `POST /auth/admin/login` 登录，并通过 `GET /auth/admin/me` 查询当前账号及角色。
 2. 创建并维护场次：`POST /admin/events`、`PATCH /admin/events/{eventId}`。
 3. 发布/下线场次：`POST /admin/events/{eventId}/publish`、`POST /admin/events/{eventId}/unpublish`。
 4. 查看报名：`GET /admin/registrations`、`GET /admin/registrations/{registrationId}`。
@@ -59,16 +59,16 @@
 | 大会门户 | GET | `/public/speakers/{speakerId}` | 嘉宾详情 | 否 |
 | 大会门户 | GET | `/public/venues` | 会场列表 | 否 |
 | 大会门户 | GET | `/public/venues/{venueId}` | 会场指南 | 否 |
-| 账号认证 | POST | `/auth/register` | 用户注册 | 否 |
-| 账号认证 | POST | `/auth/login` | 用户登录 | 否 |
-| 账号认证 | POST | `/auth/refresh` | 刷新访问令牌 | Refresh Token Cookie |
-| 账号认证 | POST | `/auth/logout` | 退出登录 | Refresh Token Cookie |
-| 账号认证 | GET | `/auth/me` | 当前用户信息 | 是 |
+| 账号认证 | POST | `/auth/register` | 用户注册（后续草案） | 否 |
+| 账号认证 | POST | `/auth/portal/login`、`/auth/admin/login` | 分别建立前后台会话 | 否 |
+| 账号认证 | POST | `/auth/portal/refresh`、`/auth/admin/refresh` | 刷新各自的访问令牌 | 各自的 Refresh Cookie |
+| 账号认证 | POST | `/auth/portal/logout`、`/auth/admin/logout` | 退出当前应用的会话 | 各自的 Refresh Cookie |
+| 账号认证 | GET | `/auth/portal/me`、`/auth/admin/me` | 当前身份 | 各自的 Access Token |
+| 账号认证 | GET | `/auth/jwks` | 获取验签公钥 | 否 |
 | 普通报名 | POST | `/events/{eventId}/registrations` | 提交报名 | 是 |
 | 普通报名 | GET | `/me/registrations` | 我的报名列表 | 是 |
 | 普通报名 | GET | `/me/registrations/{registrationId}` | 我的报名详情 | 是 |
 | 普通报名 | GET | `/me/registrations/{registrationId}/credential` | 获取报名凭证 | 是 |
-| 活动管理 | GET | `/admin/me` | 当前后台账号和权限 | 是 |
 | 活动管理 | GET | `/admin/events` | 后台场次列表 | 是 |
 | 活动管理 | POST | `/admin/events` | 创建场次 | 是 |
 | 活动管理 | GET | `/admin/events/{eventId}` | 后台场次详情 | 是 |
@@ -88,7 +88,7 @@
 | 后台与权限 | GET | `/admin/roles` | 内置角色列表 | 是 |
 | 后台与权限 | GET | `/admin/permissions` | 权限字典 | 是 |
 
-> 共 36 个操作定义。这里的“认证=是”表示需要访问令牌；是否具备具体操作权限还需服务端按权限码校验。
+> 这里的“认证=是”表示需要访问令牌；是否具备具体操作权限还需服务端按权限码校验。
 
 ## 4. 页面与接口映射
 
@@ -99,9 +99,9 @@
 | P03 场次详情与普通报名 | `/public/events/{eventId}`、`POST /events/{eventId}/registrations` |
 | P05 讲者嘉宾 | `/public/speakers`、`/public/speakers/{speakerId}` |
 | P06 会场指南 | `/public/venues`、`/public/venues/{venueId}` |
-| P21 登录/注册 | `/auth/register`、`/auth/login`、`/auth/refresh`、`/auth/logout` |
+| P21 登录 | `/auth/portal/login`、`/auth/portal/refresh`、`/auth/portal/logout` |
 | M02 我的报名/凭证 | `/me/registrations`、`/me/registrations/{registrationId}`、`/credential` |
-| B01 后台入口 | `/auth/login`、`/admin/me` |
+| B01 后台入口 | `/auth/admin/login`、`/auth/admin/me` |
 | B03 活动管理 | `/admin/events` 及发布/下线动作 |
 | B04 报名管理 | `/admin/registrations` |
 | B05 现场核验 | `/admin/check-ins` |
@@ -121,7 +121,7 @@
 ## 6. 推荐开发顺序
 
 1. 公共数据：大会基础信息、场次列表/详情、嘉宾、会场。
-2. 认证：注册、登录、当前用户、令牌刷新。
+2. 认证：两端登录、当前身份、令牌刷新和退出。
 3. 普通报名：提交报名、本人报名列表/详情、凭证。
 4. 运营管理：后台场次 CRUD、发布/下线、报名列表。
 5. 现场核验：核验写入、核验记录。

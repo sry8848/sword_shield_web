@@ -10,7 +10,7 @@ tags:
 - name: 大会门户
   description: 游客可访问的大会基础信息、场次、嘉宾和会场信息
 - name: 账号认证
-  description: 参会用户注册、登录、令牌刷新和当前用户信息
+  description: 前后台登录、会话刷新、退出和当前身份查询
 - name: 普通报名
   description: 参会用户提交报名、查询本人报名和获取凭证
 - name: 活动管理
@@ -35,7 +35,7 @@ paths:
           description: 注册成功并建立登录会话
           headers:
             Set-Cookie:
-              $ref: '#/components/headers/RefreshTokenCookie'
+              $ref: '#/components/headers/PortalRefreshCookie'
           content:
             application/json:
               schema:
@@ -53,14 +53,10 @@ paths:
                 data:
                   accessToken: eyJ...access
                   tokenType: Bearer
-                  expiresIn: 7200
+                  expiresIn: 600
                   user:
                     id: user-001
-                    account: '13800000000'
-                    displayName: 李明
-                    phone: 138****0000
-                    email: null
-                    avatarUrl: null
+                    maskedPhone: 138****0000
                 traceId: trace-example-001
                 timestamp: '2026-11-06T14:00:00+08:00'
         '400':
@@ -79,7 +75,7 @@ paths:
                 - field: displayName
                   code: REQUIRED
                   detail: 缺少显示名称
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
         '403':
           $ref: '#/components/responses/AuthOriginForbidden'
@@ -95,7 +91,7 @@ paths:
                 status: 409
                 detail: 业务状态冲突，例如重复报名、活动已满或重复核验
                 code: BUSINESS_CONFLICT
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
@@ -111,7 +107,7 @@ paths:
                 status: 422
                 detail: 参数格式正确，但不满足业务规则
                 code: BUSINESS_RULE_VIOLATION
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
         '429':
           $ref: '#/components/responses/TooManyRequests'
@@ -127,7 +123,7 @@ paths:
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
       requestBody:
         required: true
@@ -140,18 +136,19 @@ paths:
               password: Password123
               displayName: 李明
       security: []
-  /auth/login:
+      description: 后续注册模块的接口草案，本期认证契约暂不交付。
+      x-status: draft
+  /auth/portal/login:
     post:
-      summary: 用户登录
-      operationId: loginUser
+      summary: 前台登录
+      operationId: loginPortal
       tags:
       - 账号认证
+      description: 使用手机号和密码建立当前应用的独立会话，校验浏览器请求来源。
+      security: []
       responses:
         '200':
-          description: 登录成功
-          headers:
-            Set-Cookie:
-              $ref: '#/components/headers/RefreshTokenCookie'
+          description: 登录成功。
           content:
             application/json:
               schema:
@@ -163,22 +160,9 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/AuthSession'
-              example:
-                code: SUCCESS
-                message: 操作成功
-                data:
-                  accessToken: eyJ...access
-                  tokenType: Bearer
-                  expiresIn: 7200
-                  user:
-                    id: user-001
-                    account: '13800000000'
-                    displayName: 李明
-                    phone: 138****0000
-                    email: null
-                    avatarUrl: null
-                traceId: trace-example-001
-                timestamp: '2026-11-06T14:00:00+08:00'
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/PortalRefreshCookie'
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
@@ -191,10 +175,10 @@ paths:
                 status: 400
                 detail: 请求参数格式错误或缺少必要参数
                 code: INVALID_ARGUMENT
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          description: 登录凭证无效
+          description: 手机号不存在、密码错误或账号禁用，统一返回登录凭证无效。
           content:
             application/problem+json:
               schema:
@@ -207,26 +191,12 @@ paths:
                     status: 401
                     detail: 账号或密码错误
                     code: UNAUTHENTICATED
-                    traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                    traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                     timestamp: '2026-11-06T14:00:00+08:00'
         '403':
           $ref: '#/components/responses/AuthOriginForbidden'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
-        '422':
-          description: 参数格式正确，但不满足业务规则
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 无法处理的内容
-                status: 422
-                detail: 参数格式正确，但不满足业务规则
-                code: BUSINESS_RULE_VIOLATION
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
@@ -241,7 +211,7 @@ paths:
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
       requestBody:
         required: true
@@ -250,24 +220,21 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginRequest'
             example:
-              account: '13800000000'
+              phone: '13800000000'
               password: Password123
-      security: []
-  /auth/refresh:
+  /auth/portal/refresh:
     post:
-      summary: 刷新访问令牌
-      operationId: refreshAccessToken
+      summary: 刷新前台会话
+      operationId: refreshPortal
       tags:
       - 账号认证
+      description: 每个 Refresh Token 仅轮换一次。账号和会话仍有效时，自首次成功轮换提交起 3 秒内（含 3 秒）重复提交同一旧令牌返回 409。重复请求不签发令牌、不修改 Cookie、不撤销会话、不延长窗口，前端等待同一会话的刷新结果。超过窗口则判定为重放并撤销所属会话。每次成功刷新都更新
+        Cookie。空闲有效期为 7 天，绝对有效期为 30 天。
+      security:
+      - PortalRefreshCookie: []
       responses:
         '200':
-          description: 令牌刷新成功
-          headers:
-            Set-Cookie:
-              description: 若签发了新的刷新令牌，通过此头更新 Cookie。
-              schema:
-                type: string
-              example: refreshToken=opaque-refresh-token; Path=/api/v1/auth; Secure; HttpOnly; SameSite=Lax
+          description: 轮换成功。
           content:
             application/json:
               schema:
@@ -279,10 +246,15 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/AuthSession'
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/PortalRefreshCookie'
         '401':
-          $ref: '#/components/responses/RefreshTokenUnauthorized'
+          $ref: '#/components/responses/SessionRefreshUnauthorized'
         '403':
           $ref: '#/components/responses/AuthOriginForbidden'
+        '409':
+          $ref: '#/components/responses/RefreshConcurrent'
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
@@ -297,26 +269,20 @@ paths:
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
-      security:
-      - RefreshTokenCookie: []
-  /auth/logout:
+  /auth/portal/logout:
     post:
-      summary: 退出登录
-      operationId: logoutUser
+      summary: 前台退出
+      operationId: logoutPortal
       tags:
       - 账号认证
+      description: 只撤销当前前台会话并清除 Cookie。Refresh Token 随即失效，旧 Access Token 保留剩余有效期，至多 600 秒。
+      security:
+      - PortalRefreshCookie: []
       responses:
         '200':
-          description: 当前刷新令牌已失效
-          headers:
-            Set-Cookie:
-              description: 使用原 Cookie 的名称及路径清除刷新令牌。
-              required: true
-              schema:
-                type: string
-              example: refreshToken=; Path=/api/v1/auth; Max-Age=0; Secure; HttpOnly; SameSite=Lax
+          description: 当前应用的会话已退出。
           content:
             application/json:
               schema:
@@ -328,13 +294,13 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/LogoutData'
-              example:
-                code: SUCCESS
-                message: 操作成功
-                data:
-                  loggedOut: true
-                traceId: trace-example-001
-                timestamp: '2026-11-06T14:00:00+08:00'
+          headers:
+            Set-Cookie:
+              description: 清除当前应用的刷新 Cookie。
+              required: true
+              schema:
+                type: string
+              example: portal_refresh_token=; Path=/api/v1/auth/portal; Max-Age=0; Secure; HttpOnly; SameSite=Lax
         '401':
           $ref: '#/components/responses/RefreshTokenUnauthorized'
         '403':
@@ -351,19 +317,20 @@ paths:
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
-      security:
-      - RefreshTokenCookie: []
-  /auth/me:
+  /auth/portal/me:
     get:
-      summary: 获取当前用户信息
-      operationId: getCurrentUser
+      summary: 获取当前前台身份
+      operationId: getPortalIdentity
       tags:
       - 账号认证
+      description: 返回当前用户身份。
+      security:
+      - PortalBearerAuth: []
       responses:
         '200':
-          description: 获取成功
+          description: 获取成功。
           content:
             application/json:
               schema:
@@ -389,10 +356,267 @@ paths:
                 status: 500
                 detail: 服务器内部错误
                 code: INTERNAL_ERROR
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
+  /auth/admin/login:
+    post:
+      summary: 后台登录
+      operationId: loginAdmin
+      tags:
+      - 账号认证
+      description: 使用手机号和密码建立当前应用的独立会话，校验浏览器请求来源。后台登录要求有效的 SUPER_ADMIN 角色。
+      security: []
+      responses:
+        '200':
+          description: 登录成功。
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AuthSession'
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/AdminRefreshCookie'
+        '400':
+          description: 请求参数格式错误或缺少必要参数
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: 请求错误
+                status: 400
+                detail: 请求参数格式错误或缺少必要参数
+                code: INVALID_ARGUMENT
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '401':
+          description: 手机号不存在、密码错误或账号禁用，统一返回登录凭证无效。
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              examples:
+                UNAUTHENTICATED:
+                  value:
+                    type: about:blank
+                    title: 未认证
+                    status: 401
+                    detail: 账号或密码错误
+                    code: UNAUTHENTICATED
+                    traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                    timestamp: '2026-11-06T14:00:00+08:00'
+        '403':
+          $ref: '#/components/responses/AdminAuthOriginOrAccessForbidden'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: 服务器内部错误
+                status: 500
+                detail: 服务器内部错误
+                code: INTERNAL_ERROR
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              phone: '13800000000'
+              password: Password123
+  /auth/admin/refresh:
+    post:
+      summary: 刷新后台会话
+      operationId: refreshAdmin
+      tags:
+      - 账号认证
+      description: 每个 Refresh Token 仅轮换一次。账号和会话仍有效时，自首次成功轮换提交起 3 秒内（含 3 秒）重复提交同一旧令牌返回 409。重复请求不签发令牌、不修改 Cookie、不撤销会话、不延长窗口，前端等待同一会话的刷新结果。超过窗口则判定为重放并撤销所属会话。每次成功刷新都更新
+        Cookie。空闲有效期为 7 天，绝对有效期为 30 天。
       security:
-      - BearerAuth: []
+      - AdminRefreshCookie: []
+      responses:
+        '200':
+          description: 轮换成功。
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AuthSession'
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/AdminRefreshCookie'
+        '401':
+          $ref: '#/components/responses/SessionRefreshUnauthorized'
+        '403':
+          $ref: '#/components/responses/AdminAuthOriginOrAccessForbidden'
+        '409':
+          $ref: '#/components/responses/RefreshConcurrent'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: 服务器内部错误
+                status: 500
+                detail: 服务器内部错误
+                code: INTERNAL_ERROR
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
+  /auth/admin/logout:
+    post:
+      summary: 后台退出
+      operationId: logoutAdmin
+      tags:
+      - 账号认证
+      description: 确认当前会话的 Refresh Token 已失效且旧 Access Token 会被后续受保护请求拒绝后，才返回 200 并清除 Cookie。无法确认撤销时返回 503，保留 Cookie 供重试。
+      security:
+      - AdminRefreshCookie: []
+      responses:
+        '200':
+          description: 当前应用的会话已退出。
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/LogoutData'
+          headers:
+            Set-Cookie:
+              description: 清除当前应用的刷新 Cookie。
+              required: true
+              schema:
+                type: string
+              example: admin_refresh_token=; Path=/api/v1/auth/admin; Max-Age=0; Secure; HttpOnly; SameSite=Lax
+        '401':
+          $ref: '#/components/responses/RefreshTokenUnauthorized'
+        '403':
+          $ref: '#/components/responses/AuthOriginForbidden'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: 服务器内部错误
+                status: 500
+                detail: 服务器内部错误
+                code: INTERNAL_ERROR
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
+  /auth/admin/me:
+    get:
+      summary: 获取当前后台身份
+      operationId: getAdminIdentity
+      tags:
+      - 账号认证
+      description: 返回当前用户及后台角色。
+      security:
+      - AdminBearerAuth: []
+      responses:
+        '200':
+          description: 获取成功。
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AdminProfile'
+        '401':
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+        '403':
+          $ref: '#/components/responses/AdminAccessRevoked'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: 服务器内部错误
+                status: 500
+                detail: 服务器内部错误
+                code: INTERNAL_ERROR
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
+  /auth/jwks:
+    get:
+      summary: 获取 JWT 验签公钥
+      operationId: getAuthJwks
+      tags:
+      - 账号认证
+      description: 发布资源服务可用的 JWT 验签公钥。
+      security: []
+      responses:
+        '200':
+          description: 公钥集合。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthJwks'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: about:blank
+                title: 服务器内部错误
+                status: 500
+                detail: 服务器内部错误
+                code: INTERNAL_ERROR
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
   /public/home:
     get:
       summary: 获取门户首页数据
@@ -1030,7 +1254,7 @@ paths:
               position: 研发工程师
               remark: ''
       security:
-      - BearerAuth: []
+      - PortalBearerAuth: []
   /me/registrations:
     get:
       summary: 查询我的报名列表
@@ -1110,7 +1334,7 @@ paths:
           - CHECKED_IN
           - CANCELLED
       security:
-      - BearerAuth: []
+      - PortalBearerAuth: []
   /me/registrations/{registrationId}:
     get:
       summary: 查询我的报名详情
@@ -1183,7 +1407,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
+      - PortalBearerAuth: []
   /me/registrations/{registrationId}/credential:
     get:
       summary: 获取报名凭证
@@ -1257,59 +1481,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
-  /admin/me:
-    get:
-      summary: 获取当前后台账号及权限
-      operationId: getAdminProfile
-      tags:
-      - 后台与权限
-      responses:
-        '200':
-          description: 获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                - $ref: '#/components/schemas/ApiResponseBase'
-                - type: object
-                  required:
-                  - data
-                  properties:
-                    data:
-                      $ref: '#/components/schemas/AdminProfile'
-        '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
-        '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
-        '500':
-          description: 服务器内部错误
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 服务器内部错误
-                status: 500
-                detail: 服务器内部错误
-                code: INTERNAL_ERROR
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
-      security:
-      - BearerAuth: []
+      - PortalBearerAuth: []
   /admin/events:
     get:
       summary: 后台分页查询场次
@@ -1345,21 +1517,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -1374,6 +1534,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: page
         in: query
@@ -1410,7 +1572,7 @@ paths:
           - UNPUBLISHED
           - FINISHED
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
     post:
       summary: 创建场次
       operationId: createAdminEvent
@@ -1471,21 +1633,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '409':
           description: 业务状态冲突，例如重复报名、活动已满或重复核验
           content:
@@ -1530,6 +1680,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       requestBody:
         required: true
         content:
@@ -1552,7 +1704,7 @@ paths:
               - 人工智能
               - 网络安全
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/events/{eventId}:
     get:
       summary: 查询后台场次详情
@@ -1574,21 +1726,9 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventDetail'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
           description: 目标资源不存在
           content:
@@ -1617,6 +1757,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: eventId
         in: path
@@ -1625,7 +1767,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
     patch:
       summary: 修改场次
       operationId: updateAdminEvent
@@ -1660,21 +1802,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
           description: 目标资源不存在
           content:
@@ -1733,6 +1863,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       description: 仅提交需要修改的字段。已存在报名记录的场次，修改时间、会场或名额时应由后端校验影响。
       parameters:
       - name: eventId
@@ -1750,7 +1882,7 @@ paths:
             example:
               title: 人工智能与网络安全论坛（更新）
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/events/{eventId}/publish:
     post:
       summary: 发布场次
@@ -1772,21 +1904,9 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventDetail'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
           description: 目标资源不存在
           content:
@@ -1843,6 +1963,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: eventId
         in: path
@@ -1851,7 +1973,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/events/{eventId}/unpublish:
     post:
       summary: 下线场次
@@ -1873,21 +1995,9 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventDetail'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
           description: 目标资源不存在
           content:
@@ -1944,6 +2054,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       description: 下线前应检查已有报名及现场执行影响；本接口不等同于删除历史报名。
       parameters:
       - name: eventId
@@ -1953,7 +2065,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/registrations:
     get:
       summary: 后台分页查询报名记录
@@ -1989,21 +2101,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -2018,6 +2118,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: page
         in: query
@@ -2059,7 +2161,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/registrations/{registrationId}:
     get:
       summary: 后台查询报名详情
@@ -2081,21 +2183,9 @@ paths:
                     data:
                       $ref: '#/components/schemas/RegistrationDetail'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
           description: 目标资源不存在
           content:
@@ -2124,6 +2214,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: registrationId
         in: path
@@ -2132,7 +2224,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/check-ins:
     post:
       summary: 现场核验并登记到场
@@ -2185,21 +2277,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
           description: 目标资源不存在
           content:
@@ -2271,6 +2351,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       description: 本接口按当前草案采用“一次请求完成凭证校验并写入核验记录”的原子操作。重复核验返回 409 / ALREADY_CHECKED_IN；是否需要先预览再确认待业务确认。
       requestBody:
         required: true
@@ -2283,7 +2365,7 @@ paths:
               credentialCode: signed-opaque-credential-payload
               inputMode: QR_SCAN
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
     get:
       summary: 查询现场核验记录
       operationId: listAdminCheckIns
@@ -2318,21 +2400,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -2347,6 +2417,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: page
         in: query
@@ -2386,7 +2458,7 @@ paths:
           type: string
           format: date-time
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/statistics/overview:
     get:
       summary: 查询报名与到场概览
@@ -2422,21 +2494,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -2451,6 +2511,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: startDate
         in: query
@@ -2467,7 +2529,7 @@ paths:
           type: string
           format: date
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/statistics/events:
     get:
       summary: 分页查询场次统计
@@ -2503,21 +2565,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -2532,6 +2582,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: page
         in: query
@@ -2571,7 +2623,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/statistics/events/{eventId}:
     get:
       summary: 查询单场统计
@@ -2593,21 +2645,9 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventStatistics'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
           description: 目标资源不存在
           content:
@@ -2636,6 +2676,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: eventId
         in: path
@@ -2644,7 +2686,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/users:
     get:
       summary: 查询后台账号列表
@@ -2680,21 +2722,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -2709,6 +2739,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: page
         in: query
@@ -2749,7 +2781,7 @@ paths:
           - ENABLED
           - DISABLED
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/users/{userId}:
     get:
       summary: 查询后台账号详情
@@ -2771,21 +2803,9 @@ paths:
                     data:
                       $ref: '#/components/schemas/StaffUserDetail'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
           description: 目标资源不存在
           content:
@@ -2814,6 +2834,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       parameters:
       - name: userId
         in: path
@@ -2822,7 +2844,7 @@ paths:
         schema:
           type: string
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/users/{userId}/roles:
     put:
       summary: 替换后台账号角色
@@ -2858,21 +2880,9 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
           description: 目标资源不存在
           content:
@@ -2917,6 +2927,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       description: PUT 表示将该账号的角色集合整体替换为请求中的 roleCodes；空数组表示撤销全部角色。只有具备用户角色管理权限的账号可操作。
       parameters:
       - name: userId
@@ -2936,7 +2948,7 @@ paths:
               - EVENT_OPERATOR
               - CHECKIN_STAFF
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/roles:
     get:
       summary: 查询系统内置角色
@@ -2958,21 +2970,9 @@ paths:
                     data:
                       $ref: '#/components/schemas/RoleListData'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -2987,8 +2987,10 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
   /admin/permissions:
     get:
       summary: 查询系统权限字典
@@ -3010,21 +3012,9 @@ paths:
                     data:
                       $ref: '#/components/schemas/PermissionListData'
         '401':
-          $ref: '#/components/responses/AccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
         '403':
-          description: 已登录，但没有执行该操作的权限
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 禁止访问
-                status: 403
-                detail: 已登录，但没有执行该操作的权限
-                code: FORBIDDEN
-                traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
-                timestamp: '2026-11-06T14:00:00+08:00'
+          $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -3039,31 +3029,206 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
       security:
-      - BearerAuth: []
+      - AdminBearerAuth: []
 components:
   securitySchemes:
-    BearerAuth:
+    PortalBearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: 业务接口使用的访问令牌。
-    RefreshTokenCookie:
+      description: 只接受签发给前台的访问令牌，校验对应 audience。
+    PortalRefreshCookie:
       type: apiKey
       in: cookie
-      name: refreshToken
-      description: >-
-        浏览器随刷新和退出请求发送的 Cookie。服务端设置 HttpOnly、Secure、Path=/api/v1/auth，省略 Domain，默认使用 SameSite=Lax。
-        跨源认证请求启用凭证模式，服务端仅允许明确授权的来源并校验浏览器请求来源。
-        如需跨站部署，须先确认浏览器兼容性和 CSRF 防护，再启用 SameSite=None。
+      name: portal_refresh_token
+      description: 用于前台刷新与退出。HttpOnly，生产使用 Secure，默认 SameSite=Lax，省略 Domain，Path=/api/v1/auth/portal。
+    AdminBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 只接受签发给后台的访问令牌，校验对应 audience。
+    AdminRefreshCookie:
+      type: apiKey
+      in: cookie
+      name: admin_refresh_token
+      description: 用于后台刷新与退出。HttpOnly，生产使用 Secure，默认 SameSite=Lax，省略 Domain，Path=/api/v1/auth/admin。
   headers:
-    RefreshTokenCookie:
-      description: 建立登录会话时下发刷新令牌。示例使用同站部署的 SameSite=Lax。
+    PortalRefreshCookie:
+      description: 下发当前应用的刷新 Cookie。
       required: true
       schema:
         type: string
-      example: refreshToken=opaque-refresh-token; Path=/api/v1/auth; Secure; HttpOnly; SameSite=Lax
+      example: portal_refresh_token=opaque-refresh-token; Path=/api/v1/auth/portal; Secure; HttpOnly; SameSite=Lax
+    AdminRefreshCookie:
+      description: 下发当前应用的刷新 Cookie。
+      required: true
+      schema:
+        type: string
+      example: admin_refresh_token=opaque-refresh-token; Path=/api/v1/auth/admin; Secure; HttpOnly; SameSite=Lax
   responses:
+    AdminAccessTokenUnauthorized:
+      description: 后台访问令牌缺失、无效、已过期或版本已失效。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          examples:
+            UNAUTHENTICATED:
+              value:
+                type: about:blank
+                title: 未认证
+                status: 401
+                detail: 访问令牌缺失或无效
+                code: UNAUTHENTICATED
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+            ACCESS_TOKEN_EXPIRED:
+              value:
+                type: about:blank
+                title: 未认证
+                status: 401
+                detail: 访问令牌已过期
+                code: ACCESS_TOKEN_EXPIRED
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+            ACCESS_TOKEN_STALE:
+              value:
+                type: about:blank
+                title: 未认证
+                status: 401
+                detail: 后台访问令牌版本已过期，请刷新。
+                code: ACCESS_TOKEN_STALE
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+    SessionRefreshUnauthorized:
+      description: 刷新令牌缺失、无效、过期或被判定为重放。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          examples:
+            UNAUTHENTICATED:
+              value:
+                type: about:blank
+                title: 未认证
+                status: 401
+                detail: 刷新令牌缺失或无效
+                code: UNAUTHENTICATED
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+            REFRESH_TOKEN_EXPIRED:
+              value:
+                type: about:blank
+                title: 未认证
+                status: 401
+                detail: 刷新令牌已过期
+                code: REFRESH_TOKEN_EXPIRED
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+            REFRESH_TOKEN_REPLAYED:
+              value:
+                type: about:blank
+                title: 未认证
+                status: 401
+                detail: 已用刷新令牌被重放，所属会话已撤销，请重新登录。
+                code: REFRESH_TOKEN_REPLAYED
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+    RefreshConcurrent:
+      description: 刷新令牌刚被轮换，请等待同一会话的刷新结果。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: 状态冲突
+            status: 409
+            detail: 刷新令牌刚被轮换，请等待同一会话的刷新结果。
+            code: REFRESH_ALREADY_ROTATED
+            traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+            timestamp: '2026-11-06T14:00:00+08:00'
+    AuthStateUnavailable:
+      description: 暂时无法确认后台在线认证状态。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: 服务不可用
+            status: 503
+            detail: 暂时无法确认后台在线认证状态。
+            code: AUTH_STATE_UNAVAILABLE
+            traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+            timestamp: '2026-11-06T14:00:00+08:00'
+    AdminAuthOriginOrAccessForbidden:
+      description: 浏览器请求来源未获授权，或账号没有有效的后台角色。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          examples:
+            FORBIDDEN:
+              value:
+                type: about:blank
+                title: 禁止访问
+                status: 403
+                detail: 请求来源未获授权
+                code: FORBIDDEN
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+            ADMIN_ACCESS_REVOKED:
+              value:
+                type: about:blank
+                title: 禁止访问
+                status: 403
+                detail: 账号没有有效的后台访问资格。
+                code: ADMIN_ACCESS_REVOKED
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+    AdminBusinessForbidden:
+      description: 当前操作权限不足，或账号已失去后台访问资格。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          examples:
+            FORBIDDEN:
+              value:
+                type: about:blank
+                title: 禁止访问
+                status: 403
+                detail: 已登录，但没有执行该操作的权限
+                code: FORBIDDEN
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+            ADMIN_ACCESS_REVOKED:
+              value:
+                type: about:blank
+                title: 禁止访问
+                status: 403
+                detail: 账号没有有效的后台访问资格。
+                code: ADMIN_ACCESS_REVOKED
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                timestamp: '2026-11-06T14:00:00+08:00'
+    AdminAccessRevoked:
+      description: 账号没有有效的后台访问资格。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          example:
+            type: about:blank
+            title: 禁止访问
+            status: 403
+            detail: 账号没有有效的后台访问资格。
+            code: ADMIN_ACCESS_REVOKED
+            traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+            timestamp: '2026-11-06T14:00:00+08:00'
     AccessTokenUnauthorized:
       description: 访问令牌缺失、无效或已过期
       content:
@@ -3665,32 +3830,15 @@ components:
       type: object
       required:
       - id
-      - account
-      - displayName
+      - maskedPhone
       properties:
         id:
           type: string
           example: user-001
-        account:
+        maskedPhone:
           type: string
-          example: '13800000000'
-        displayName:
-          type: string
-          example: 参会用户
-        phone:
-          type:
-          - string
-          - 'null'
+          description: 脱敏后的当前用户手机号。
           example: 138****0000
-        email:
-          type:
-          - string
-          - 'null'
-        avatarUrl:
-          type:
-          - string
-          - 'null'
-          format: uri
     AuthSession:
       type: object
       required:
@@ -3707,8 +3855,8 @@ components:
           example: Bearer
         expiresIn:
           type: integer
-          description: 访问令牌有效秒数
-          example: 7200
+          const: 600
+          description: 访问令牌有效秒数。
         user:
           $ref: '#/components/schemas/UserProfile'
     RegisterRequest:
@@ -3732,17 +3880,52 @@ components:
           type: string
           minLength: 1
           maxLength: 40
+    AuthJwks:
+      type: object
+      required:
+      - keys
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            required:
+            - kty
+            - kid
+            - n
+            - e
+            additionalProperties: false
+            properties:
+              kty:
+                type: string
+                const: RSA
+              kid:
+                type: string
+              n:
+                type: string
+              e:
+                type: string
+              alg:
+                type: string
+                const: RS256
+              use:
+                type: string
+                const: sig
     LoginRequest:
       type: object
       required:
-      - account
+      - phone
       - password
       properties:
-        account:
+        phone:
           type: string
+          pattern: ^1[3-9][0-9]{9}$
+          description: 中国大陆 11 位手机号。
         password:
           type: string
           format: password
+          minLength: 1
+          writeOnly: true
     LogoutData:
       type: object
       required:
@@ -4034,7 +4217,6 @@ components:
       required:
       - user
       - roles
-      - permissions
       properties:
         user:
           $ref: '#/components/schemas/UserProfile'
@@ -4042,10 +4224,8 @@ components:
           type: array
           items:
             type: string
-        permissions:
-          type: array
-          items:
-            type: string
+            enum:
+            - SUPER_ADMIN
     CheckInCreateRequest:
       type: object
       required:
