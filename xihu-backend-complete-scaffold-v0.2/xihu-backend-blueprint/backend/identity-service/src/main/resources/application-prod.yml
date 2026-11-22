@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: ${IDENTITY_PROD_DB_URL}
+    username: ${IDENTITY_PROD_DB_USERNAME}
+    password: ${IDENTITY_PROD_DB_PASSWORD}

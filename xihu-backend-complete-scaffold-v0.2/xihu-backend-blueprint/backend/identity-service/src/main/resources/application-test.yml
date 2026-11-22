@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: ${IDENTITY_TEST_DB_URL}
+    username: ${IDENTITY_TEST_DB_USERNAME}
+    password: ${IDENTITY_TEST_DB_PASSWORD}
+  flyway:
+    locations: classpath:db/migration,classpath:db/seed

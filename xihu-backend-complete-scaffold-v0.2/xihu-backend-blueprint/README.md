@@ -31,11 +31,11 @@ MVP 缩小首期交付范围，各项工程和安全约束仍适用。对未来�
 | Maven 模块 | 当前内容 | 默认端口 |
 | --- | --- | --- |
 | `gateway` | Spring Cloud Gateway 启动入口、健康检查和请求追踪 | 8080 |
-| `identity-service` | 身份服务启动入口、健康检查、请求追踪和 MVC 全局异常处理 | 8081 |
+| `identity-service` | 账号基础表与迁移、健康检查、请求追踪和 MVC 全局异常处理 | 8081 |
 | `activity-service` | 活动服务启动入口和健康检查 | 8082 |
 | `common` | 通用成功响应 `ApiEnvelope<T>`、失败类别 `FailureKind` 和业务异常 `BusinessException` | — |
 
-业务接口、网关转发规则、认证和数据库迁移随实际用例接入。三个服务各有独立启动入口，健康检查用于验证服务存活。历史演示的交付记录见 [VALIDATION.md](VALIDATION.md)。
+业务接口、网关转发规则和认证随实际用例接入。三个服务各有独立启动入口，健康检查用于验证服务存活。历史演示的交付记录见 [VALIDATION.md](VALIDATION.md)。
 
 本地验证需要 JDK 17 或以上版本和 Maven。在 `backend/` 执行：
 
@@ -47,8 +47,34 @@ mvn -B clean verify
 
 ```powershell
 mvn -pl gateway spring-boot:run
-mvn -pl identity-service spring-boot:run
+java -jar identity-service/target/identity-service-0.1.0-SNAPSHOT.jar --spring.profiles.active=dev
 mvn -pl activity-service spring-boot:run
 ```
 
 服务启动后，分别访问 `http://localhost:8080/actuator/health`、`http://localhost:8081/actuator/health` 和 `http://localhost:8082/actuator/health`。
+
+### Identity 数据库与首位管理员
+
+提前为各环境创建独立的 MySQL 8 数据库，选择一个 Spring Profile 并提供相应环境变量。
+
+| Profile | JDBC URL | 用户名 | 密码 |
+| --- | --- | --- | --- |
+| `dev` | `IDENTITY_DEV_DB_URL` | `IDENTITY_DEV_DB_USERNAME` | `IDENTITY_DEV_DB_PASSWORD` |
+| `test` | `IDENTITY_TEST_DB_URL` | `IDENTITY_TEST_DB_USERNAME` | `IDENTITY_TEST_DB_PASSWORD` |
+| `prod` | `IDENTITY_PROD_DB_URL` | `IDENTITY_PROD_DB_USERNAME` | `IDENTITY_PROD_DB_PASSWORD` |
+
+设置 `test` 的连接变量后，`mvn -B verify` 会运行真实 MySQL 集成测试。`dev` 和 `test` 的普通账号为 `13800000001`，密码 `LocalPortal-Only!2026`。测试管理员为 `13800000002`，密码 `LocalAdmin-Only!2026`。
+
+生产环境正式迁移完成后，在交互式终端离线生成管理员哈希。
+
+```powershell
+java -jar identity-service/target/identity-service-0.1.0-SNAPSHOT.jar --encode-password
+```
+
+把[生产预置模板](backend/identity-service/ops/sql/provision_super_admin.sql)复制到仓库外，填写负责人的手机号和刚生成的哈希。在 `cmd.exe` 使用 MySQL 批处理执行模板，`--no-defaults` 避免本机选项文件改变遇错退出行为。
+
+```bat
+mysql --no-defaults --host=PROD_DB_HOST --user=PROVISIONER --password --database=IDENTITY_DB < C:\secure\provision_super_admin.sql
+```
+
+表字段、约束及版本策略见[账号基础数据建模](../../docs/设计/登录设计/账号基础数据建模/账号基础数据建模_2026-11-22_16-20.md)。

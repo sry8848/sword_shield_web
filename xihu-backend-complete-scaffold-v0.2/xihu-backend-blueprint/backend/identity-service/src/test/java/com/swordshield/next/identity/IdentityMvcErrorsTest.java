@@ -43,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "spring.mvc.problemdetails.enabled=true",
+        "spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration",
         "APP_VERSION=identity-test"
 })
 @ActiveProfiles("test")

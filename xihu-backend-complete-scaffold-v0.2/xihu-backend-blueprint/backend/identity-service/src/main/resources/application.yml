@@ -3,6 +3,13 @@ server:
 spring:
   application:
     name: identity-service
+  datasource:
+    hikari:
+      data-source-properties:
+        connectionTimeZone: "+00:00"
+        forceConnectionTimeZoneToSession: true
+  flyway:
+    locations: classpath:db/migration
 management:
   endpoints:
     web:
