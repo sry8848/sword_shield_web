@@ -24,6 +24,10 @@ management:
     export:
       otlp:
         enabled: false
+logging:
+  pattern:
+    # 开发环境使用纯文本时也显示访问摘要的键值字段。
+    level: "%5p %kvp"
 
 ---
 spring:
@@ -37,6 +41,8 @@ spring:
           routes:
             - id: identity-health
               uri: "${gateway.identity-uri:http://localhost:8081}"
+              metadata:
+                target-service: identity-service
               predicates:
                 - Path=/api/internal/identity/health
                 - Method=GET

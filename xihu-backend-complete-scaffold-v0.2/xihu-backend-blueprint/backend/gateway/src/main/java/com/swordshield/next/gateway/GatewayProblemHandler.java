@@ -5,7 +5,9 @@ import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.Map;
 
+import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.handler.TracingObservationHandler.TracingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.webflux.error.ErrorWebExceptionHandler;
@@ -13,9 +15,11 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.PrematureCloseException;
 import tools.jackson.databind.json.JsonMapper;
@@ -43,30 +47,65 @@ final class GatewayProblemHandler implements ErrorWebExceptionHandler {
             return Mono.error(error);
         }
 
-        // WebFlux 恢复订阅上下文后，当前 span 才能稳定关联本次请求。
         return Mono.defer(() -> {
-            // 2. 读取 HTTP 状态与公开错误说明，关联真实请求追踪。
-            HttpStatusCode status = statusOf(error);
-            PublicError publicError = describe(status);
-            String traceId = tracer.currentSpan().context().traceId();
-            if (status.value() == 500) {
-                LOG.error("Gateway 请求发生内部异常", error);
-            } else if (status.is5xxServerError()) {
-                LOG.warn("Gateway 请求失败，错误码 {}", publicError.code());
+            // 2. 优先使用当前 span，线程作用域丢失时从 HTTP 入口的 Observation 恢复。
+            Span span = tracer.currentSpan();
+            if (span == null) {
+                span = ServerRequestObservationContext.findCurrent(exchange.getAttributes())
+                        .map(observation -> observation.<TracingContext>get(TracingContext.class))
+                        .map(TracingContext::getSpan)
+                        .orElse(null);
+            }
+            if (span != null) {
+                try (var scope = tracer.withSpan(span)) {
+                    return writeProblem(exchange, error, span.context().traceId());
+                }
             }
 
-            // 3. 保留框架错误携带的协议头，写入规范的错误响应。
-            response.setStatusCode(status);
-            if (error instanceof ErrorResponse frameworkError) {
-                response.getHeaders().putAll(frameworkError.getHeaders());
+            // 3. 入口上下文确实缺失时，由 Tracer 建立真实的错误处理 span。
+            var recovery = tracer.startScopedSpan("gateway.handle-error");
+            try {
+                LOG.warn("Gateway 请求追踪上下文缺失，已为错误处理建立追踪");
+                return writeProblem(exchange, error, recovery.context().traceId());
+            } finally {
+                recovery.end();
             }
-            response.getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
-            byte[] payload = jsonMapper.writeValueAsBytes(Map.of(
-                    "type", "about:blank", "title", publicError.title(), "status", status.value(),
-                    "detail", publicError.detail(), "code", publicError.code(), "traceId", traceId,
-                    "timestamp", Instant.now().toString()));
-            return response.writeWith(Mono.just(response.bufferFactory().wrap(payload)));
         });
+    }
+
+    /** 在真实追踪作用域内生成安全的公开错误响应。 */
+    private Mono<Void> writeProblem(ServerWebExchange exchange, Throwable error, String traceId) {
+        // 1. 识别实际失败并保留原始异常供未知故障排查。
+        Throwable cause = classifiedCause(error);
+        HttpStatusCode status = statusOf(cause);
+        PublicError publicError = describe(status);
+        if (status.value() == 500) {
+            LOG.error("Gateway 请求发生内部异常", error);
+        }
+
+        // 2. 保留框架错误携带的协议头，按契约写入响应。
+        var response = exchange.getResponse();
+        response.setStatusCode(status);
+        if (cause instanceof ErrorResponse frameworkError) {
+            response.getHeaders().putAll(frameworkError.getHeaders());
+        }
+        response.getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+        byte[] payload = jsonMapper.writeValueAsBytes(Map.of(
+                "type", "about:blank", "title", publicError.title(), "status", status.value(),
+                "detail", publicError.detail(), "code", publicError.code(), "traceId", traceId,
+                "timestamp", Instant.now().toString()));
+        return response.writeWith(Mono.just(response.bufferFactory().wrap(payload)));
+    }
+
+    /** 沿 Reactor 包装后的原因链寻找第一个有明确 HTTP 语义的异常。 */
+    private static Throwable classifiedCause(Throwable error) {
+        for (Throwable cause = Exceptions.unwrap(error); cause != null; cause = cause.getCause()) {
+            if (cause instanceof ErrorResponse || cause instanceof ConnectException
+                    || cause instanceof UnknownHostException || cause instanceof PrematureCloseException) {
+                return cause;
+            }
+        }
+        return error;
     }
 
     /** 已知连接异常转换为网关状态，WebFlux 自身的异常保留其状态。 */

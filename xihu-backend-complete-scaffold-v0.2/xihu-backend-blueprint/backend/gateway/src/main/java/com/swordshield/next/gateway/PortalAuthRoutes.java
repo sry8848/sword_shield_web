@@ -27,8 +27,10 @@ class PortalAuthRoutes {
                                     .build();
                             return chain.filter(exchange.mutate().request(request).build());
                         }))
+                        .metadata(GatewayAccessLog.TARGET_SERVICE, "identity-service")
                         .uri(identityUri))
                 .route("portal-identity", route -> route.path("/api/v1/auth/portal/me", "/api/v1/auth/jwks")
+                        .metadata(GatewayAccessLog.TARGET_SERVICE, "identity-service")
                         .uri(identityUri))
                 .build();
     }
