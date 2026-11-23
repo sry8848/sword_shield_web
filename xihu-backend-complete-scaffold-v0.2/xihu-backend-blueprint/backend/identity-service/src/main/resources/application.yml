@@ -14,6 +14,15 @@ spring:
       timeout: 2s
   flyway:
     locations: classpath:db/migration
+identity:
+  portal:
+    issuer: "${IDENTITY_PORTAL_ISSUER:http://localhost:8080}"
+    private-key: "${IDENTITY_PORTAL_PRIVATE_KEY}"
+    origin: "${IDENTITY_PORTAL_ORIGIN:http://localhost:5173}"
+    trusted-gateway-ip: "${IDENTITY_PORTAL_TRUSTED_GATEWAY_IP:127.0.0.1}"
+    login-phone-limit: 5
+    login-ip-limit: 30
+    login-window: 60s
 management:
   endpoints:
     web:

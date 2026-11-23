@@ -9,6 +9,7 @@ import java.time.Instant;
 import com.swordshield.next.common.ApiEnvelope;
 import com.swordshield.next.common.BusinessException;
 import com.swordshield.next.common.FailureKind;
+import com.swordshield.next.identity.application.PortalAuthentication;
 import io.micrometer.tracing.Tracer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -27,6 +28,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 })
 @ActiveProfiles("test")
 @Import(IdentityMvcErrorsTest.TestController.class)
+@MockitoBean(types = {PortalAuthentication.class, PortalAuthentication.Store.class})
 @ExtendWith(OutputCaptureExtension.class)
 class IdentityMvcErrorsTest {
 
@@ -62,6 +67,11 @@ class IdentityMvcErrorsTest {
 
     private final HttpClient client = HttpClient.newHttpClient();
     private final JsonMapper mapper = new JsonMapper();
+
+    @DynamicPropertySource
+    static void signingKey(DynamicPropertyRegistry registry) {
+        PortalTestSigningKey.configure(registry);
+    }
 
     /** 验证请求成功并带有本次请求的追踪标识。 */
     @Test

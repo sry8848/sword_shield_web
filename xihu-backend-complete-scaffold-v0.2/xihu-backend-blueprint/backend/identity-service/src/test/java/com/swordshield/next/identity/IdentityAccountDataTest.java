@@ -14,6 +14,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +38,11 @@ class IdentityAccountDataTest {
 
     @Autowired
     private Argon2PasswordEncoder passwordEncoder;
+
+    @DynamicPropertySource
+    static void signingKey(DynamicPropertyRegistry registry) {
+        PortalTestSigningKey.configure(registry);
+    }
 
     @Test
     void testProfileMigratesAndSeedsBothAccountsOnce() {

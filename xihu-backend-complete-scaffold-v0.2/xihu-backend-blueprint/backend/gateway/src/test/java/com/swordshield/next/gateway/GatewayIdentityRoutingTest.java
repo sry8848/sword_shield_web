@@ -60,6 +60,9 @@ class GatewayIdentityRoutingTest {
             assertThat(health.statusCode()).isEqualTo(200);
             assertThat(health.body()).matches("00-" + TRACE_ID + "-[0-9a-f]{16}-01")
                     .isNotEqualTo("00-" + TRACE_ID + "-00f067aa0ba902b7-01");
+            var login = request("/api/v1/auth/portal/login", "source-address");
+            assertThat(login.statusCode()).isEqualTo(200);
+            assertThat(login.body()).isEqualTo("127.0.0.1");
 
             // 2. 让上游直接返回 Problem Details，确认 Gateway 原样透传。
             var upstreamProblem = request("problem");
@@ -85,6 +88,7 @@ class GatewayIdentityRoutingTest {
         try {
             var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
             server.createContext("/actuator/health", GatewayIdentityRoutingTest::respond);
+            server.createContext("/api/v1/auth/portal/login", GatewayIdentityRoutingTest::respond);
             server.start();
             return server;
         } catch (IOException ex) {
@@ -111,7 +115,11 @@ class GatewayIdentityRoutingTest {
 
             // 2. 回传上游收到的 traceparent，或返回用于透传比对的响应。
             boolean problem = "problem".equals(scenario);
-            String body = problem ? UPSTREAM_PROBLEM : exchange.getRequestHeaders().getFirst("traceparent");
+            String body = switch (scenario) {
+                case "problem" -> UPSTREAM_PROBLEM;
+                case "source-address" -> exchange.getRequestHeaders().getFirst("X-Identity-Client-IP");
+                default -> exchange.getRequestHeaders().getFirst("traceparent");
+            };
             byte[] payload = body.getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().set("Content-Type", problem ? "application/problem+json" : "text/plain");
             exchange.sendResponseHeaders(problem ? 503 : 200, payload.length);
@@ -130,6 +138,8 @@ class GatewayIdentityRoutingTest {
                 .timeout(Duration.ofSeconds(5))
                 .header("traceparent", "00-" + TRACE_ID + "-00f067aa0ba902b7-01")
                 .header("X-Test-Upstream", scenario)
+                .header("X-Identity-Client-IP", "192.0.2.42")
+                .header("X-Forwarded-For", "192.0.2.43")
                 .build();
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }

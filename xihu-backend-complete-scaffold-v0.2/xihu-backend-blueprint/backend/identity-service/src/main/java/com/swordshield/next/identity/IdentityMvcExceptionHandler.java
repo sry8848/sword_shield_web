@@ -9,6 +9,8 @@ import java.util.Map;
 
 import com.swordshield.next.common.BusinessException;
 import com.swordshield.next.common.FailureKind;
+import com.swordshield.next.identity.application.PortalAuthentication;
+import com.swordshield.next.identity.interfaces.http.PortalAuthProblem;
 import io.micrometer.tracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +68,25 @@ class IdentityMvcExceptionHandler extends ResponseEntityExceptionHandler impleme
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
         return super.handleExceptionInternal(exception, problem, headers, status, request);
+    }
+
+    /** 将登录用例的拒绝原因映射到冻结的 401 或 429 响应。 */
+    @ExceptionHandler(PortalAuthentication.Rejected.class)
+    ResponseEntity<ProblemDetail> handlePortalRejection(PortalAuthentication.Rejected failure) {
+        // 1. 登录失败原因只用于内部选择响应，三类凭证错误返回相同说明。
+        ProblemDetail body = switch (failure.failure()) {
+            case INVALID_CREDENTIALS -> problem(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED", "未认证", "账号或密码错误");
+            case RATE_LIMITED -> problem(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", "请求过于频繁", "请求频率超过限制");
+        };
+        return ResponseEntity.status(body.getStatus()).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
+    }
+
+    /** Portal MVC 与 Bearer 过滤链共用项目的错误字段和同一请求的追踪上下文。 */
+    @ExceptionHandler(PortalAuthProblem.class)
+    ResponseEntity<ProblemDetail> handlePortalProblem(PortalAuthProblem failure) {
+        // 1. 使用接口入口选定的状态和公开说明生成标准响应。
+        var body = problem(failure.status(), failure.code(), failure.title(), failure.getMessage());
+        return ResponseEntity.status(failure.status()).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
     }
 
     /** 返回业务失败类别对应的 HTTP 状态。 */

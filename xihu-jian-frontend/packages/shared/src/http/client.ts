@@ -18,6 +18,7 @@ export class ApiError extends Error {
     public traceId?: string,
     public timestamp?: string,
     public details?: Record<string, unknown>,
+    public errors?: ApiErrorResponse['errors'],
   ) {
     super(message)
     this.name = 'ApiError'
@@ -104,9 +105,19 @@ export async function request<T>(client: AxiosInstance, config: AxiosRequestConf
   catch (error) {
     // 2. 保留服务端的业务错误，区分网络错误和非契约的 HTTP 响应。
     if (axios.isAxiosError<ApiErrorResponse>(error)) {
+      if (axios.isCancel(error))
+        throw error
       const response = error.response
       const payload = response?.data
-      throw new ApiError(payload?.code ?? (response ? 'INVALID_RESPONSE' : 'NETWORK_ERROR'), payload?.message ?? error.message, response?.status, payload?.traceId, payload?.timestamp, payload?.details)
+      throw new ApiError(
+        payload?.code ?? (response ? 'INVALID_RESPONSE' : 'NETWORK_ERROR'),
+        payload?.detail ?? payload?.message ?? (response ? '服务器返回了无法识别的数据' : '无法连接服务，请稍后重试'),
+        response?.status,
+        payload?.traceId,
+        payload?.timestamp,
+        payload?.details,
+        payload?.errors,
+      )
     }
     throw error
   }
