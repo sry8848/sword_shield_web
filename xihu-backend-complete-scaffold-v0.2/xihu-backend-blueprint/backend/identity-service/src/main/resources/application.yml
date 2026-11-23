@@ -8,6 +8,10 @@ spring:
       data-source-properties:
         connectionTimeZone: "+00:00"
         forceConnectionTimeZoneToSession: true
+  data:
+    redis:
+      connect-timeout: 2s
+      timeout: 2s
   flyway:
     locations: classpath:db/migration
 management:

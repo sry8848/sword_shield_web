@@ -6,6 +6,13 @@ spring:
   reactor:
     # WebFlux 切换执行线程后仍需让日志关联当前请求的追踪上下文。
     context-propagation: auto
+  cloud:
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 2000
+            response-timeout: 5s
 management:
   endpoints:
     web:
@@ -17,6 +24,24 @@ management:
     export:
       otlp:
         enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "dev | test"
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: identity-health
+              uri: "${gateway.identity-uri:http://localhost:8081}"
+              predicates:
+                - Path=/api/internal/identity/health
+                - Method=GET
+              filters:
+                - SetPath=/actuator/health
 
 ---
 spring:
