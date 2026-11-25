@@ -78,7 +78,7 @@ export interface paths {
         put?: never;
         /**
          * 前台退出
-         * @description 只撤销当前前台会话并清除 Cookie。Refresh Token 随即失效，旧 Access Token 保留剩余有效期，至多 600 秒。
+         * @description 校验浏览器来源。撤销当前 Portal 会话及 Refresh Token；凭证缺失、无法匹配或会话已经失效时也返回 200 并清除 Portal Cookie。旧 Access Token 保留剩余有效期，至多 600 秒。 无法确认退出结果时返回 503，保留 Cookie 供重试。
          */
         post: operations["logoutPortal"];
         delete?: never;
@@ -107,6 +107,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/admin/csrf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 获取后台 CSRF token
+         * @description 无需已登录；登录前或成功登录后调用，返回当前 Session 关联的 CSRF token，仅供写请求使用，不是身份凭证。
+         */
+        get: operations["getAdminCsrfToken"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/admin/login": {
         parameters: {
             query?: never;
@@ -118,29 +138,9 @@ export interface paths {
         put?: never;
         /**
          * 后台登录
-         * @description 使用手机号和密码建立当前应用的独立会话，校验浏览器请求来源。后台登录要求有效的 SUPER_ADMIN 角色。
+         * @description 使用手机号和密码建立 Redis Session，至少具有一个有效固定后台角色；须先获取 CSRF token。
          */
         post: operations["loginAdmin"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/admin/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 刷新后台会话
-         * @description 每个 Refresh Token 仅轮换一次。账号和会话仍有效时，自首次成功轮换提交起 3 秒内（含 3 秒）重复提交同一旧令牌返回 409。重复请求不签发令牌、不修改 Cookie、不撤销会话、不延长窗口，前端等待同一会话的刷新结果。超过窗口则判定为重放并撤销所属会话。每次成功刷新都更新 Cookie。空闲有效期为 7 天，绝对有效期为 30 天。
-         */
-        post: operations["refreshAdmin"];
         delete?: never;
         options?: never;
         head?: never;
@@ -158,7 +158,7 @@ export interface paths {
         put?: never;
         /**
          * 后台退出
-         * @description 确认当前会话的 Refresh Token 已失效且旧 Access Token 会被后续受保护请求拒绝后，才返回 200 并清除 Cookie。无法确认撤销时返回 503，保留 Cookie 供重试。
+         * @description 校验浏览器来源。命中认证 Session 时校验 CSRF 并删除当前 Session；Cookie 缺失或已确认没有有效 Session 时，无需 CSRF 即返回 200 并清除 Admin Cookie。 无法确认退出结果时返回 503，保留 Cookie 供重试。
          */
         post: operations["logoutAdmin"];
         delete?: never;
@@ -649,9 +649,32 @@ export interface paths {
         get?: never;
         /**
          * 替换后台账号角色
-         * @description PUT 表示将该账号的角色集合整体替换为请求中的 roleCodes；空数组表示撤销全部角色。只有具备用户角色管理权限的账号可操作。
+         * @description PUT 表示将该账号的角色集合整体替换为请求中的 roleCodes；空数组表示撤销全部角色。提交后新请求按当前角色鉴权；部分撤销后剩余角色仍可使用。只有具备用户角色管理权限的账号可操作。
          */
         put: operations["replaceAdminUserRoles"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{userId}/check-in-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        /** 查询账号的核验场次授权 */
+        get: operations["getAdminUserCheckInEvents"];
+        /**
+         * 整体替换账号的核验场次授权
+         * @description 空集合撤销全部场次。新增关联要求目标账号启用且持有 CHECKIN_STAFF；历史场次关联仍可移除。后续核验和查询按提交后的授权范围执行。
+         */
+        put: operations["replaceAdminUserCheckInEvents"];
         post?: never;
         delete?: never;
         options?: never;
@@ -697,6 +720,9 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CheckInEventAssignments: {
+            eventIds: string[];
+        };
         ApiResponseBase: {
             /** @example SUCCESS */
             code: string;
@@ -1035,7 +1061,7 @@ export interface components {
         };
         AdminProfile: {
             user: components["schemas"]["UserProfile"];
-            roles: "SUPER_ADMIN"[];
+            roles: ("SUPER_ADMIN" | "EVENT_OPERATOR" | "CHECKIN_STAFF")[];
         };
         CheckInCreateRequest: {
             eventId: string;
@@ -1085,11 +1111,11 @@ export interface components {
             pageInfo: components["schemas"]["PageInfo"];
         };
         AssignRolesRequest: {
-            roleCodes: ("SUPER_ADMIN" | "EVENT_OPERATOR" | "CHECKIN_STAFF" | "DATA_OPERATOR")[];
+            roleCodes: ("SUPER_ADMIN" | "EVENT_OPERATOR" | "CHECKIN_STAFF")[];
         };
         RoleSummary: {
             /** @enum {string} */
-            code: "SUPER_ADMIN" | "EVENT_OPERATOR" | "CHECKIN_STAFF" | "DATA_OPERATOR";
+            code: "SUPER_ADMIN" | "EVENT_OPERATOR" | "CHECKIN_STAFF";
             name: string;
             description?: string | null;
             permissionCodes: string[];
@@ -1138,12 +1164,34 @@ export interface components {
         };
     };
     responses: {
-        /** @description 后台访问令牌缺失、无效、已过期或版本已失效。 */
-        AdminAccessTokenUnauthorized: {
+        /** @description 账号保存的核验场次 ID 集合。 */
+        CheckInEventAssignments: {
             headers: {
                 [name: string]: unknown;
             };
             content: {
+                "application/json": components["schemas"]["ApiResponseBase"] & {
+                    data: components["schemas"]["CheckInEventAssignments"];
+                };
+            };
+        };
+        /** @description 后台 Session 缺失、无效、已过期或登录时的权限/凭证版本已失效。 */
+        AdminSessionUnauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "type": "about:blank",
+                 *       "title": "未认证",
+                 *       "status": 401,
+                 *       "detail": "后台 Session 缺失或无效",
+                 *       "code": "UNAUTHENTICATED",
+                 *       "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+                 *       "timestamp": "2026-11-06T14:00:00+08:00"
+                 *     }
+                 */
                 "application/problem+json": components["schemas"]["ProblemDetail"];
             };
         };
@@ -1153,26 +1201,6 @@ export interface components {
                 [name: string]: unknown;
             };
             content: {
-                "application/problem+json": components["schemas"]["ProblemDetail"];
-            };
-        };
-        /** @description 刷新令牌刚被轮换，请等待同一会话的刷新结果。 */
-        RefreshConcurrent: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                /**
-                 * @example {
-                 *       "type": "about:blank",
-                 *       "title": "状态冲突",
-                 *       "status": 409,
-                 *       "detail": "刷新令牌刚被轮换，请等待同一会话的刷新结果。",
-                 *       "code": "REFRESH_ALREADY_ROTATED",
-                 *       "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
-                 *       "timestamp": "2026-11-06T14:00:00+08:00"
-                 *     }
-                 */
                 "application/problem+json": components["schemas"]["ProblemDetail"];
             };
         };
@@ -1196,7 +1224,7 @@ export interface components {
                 "application/problem+json": components["schemas"]["ProblemDetail"];
             };
         };
-        /** @description 浏览器请求来源未获授权，或账号没有有效的后台角色。 */
+        /** @description 浏览器请求来源或 CSRF 校验未通过，或账号没有有效的后台角色。 */
         AdminAuthOriginOrAccessForbidden: {
             headers: {
                 [name: string]: unknown;
@@ -1413,10 +1441,10 @@ export interface components {
          */
         PortalRefreshCookie: string;
         /**
-         * @description 下发当前应用的刷新 Cookie。
-         * @example admin_refresh_token=opaque-refresh-token; Path=/api/v1/auth/admin; Secure; HttpOnly; SameSite=Lax
+         * @description 下发当前 Admin Session Cookie。
+         * @example admin_session=opaque-session-id; Path=/api/v1; Secure; HttpOnly; SameSite=Lax
          */
-        AdminRefreshCookie: string;
+        AdminSessionCookie: string;
     };
     pathItems: never;
 }
@@ -1707,7 +1735,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description 当前应用的会话已退出。 */
+            /** @description 当前应用的会话已退出或没有有效会话。 */
             200: {
                 headers: {
                     /**
@@ -1723,7 +1751,6 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["RefreshTokenUnauthorized"];
             403: components["responses"]["AuthOriginForbidden"];
             /** @description 服务器内部错误 */
             500: {
@@ -1745,6 +1772,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
+            503: components["responses"]["AuthStateUnavailable"];
         };
     };
     getPortalIdentity: {
@@ -1790,6 +1818,33 @@ export interface operations {
             };
         };
     };
+    getAdminCsrfToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 获取成功；必要时设置未认证的临时 Session Cookie。 */
+            200: {
+                headers: {
+                    /** @description 必要时下发 admin_session。 */
+                    "Set-Cookie"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiResponseBase"] & {
+                        data: {
+                            token: string;
+                        };
+                    };
+                };
+            };
+            503: components["responses"]["AuthStateUnavailable"];
+        };
+    };
     loginAdmin: {
         parameters: {
             query?: never;
@@ -1812,12 +1867,12 @@ export interface operations {
             /** @description 登录成功。 */
             200: {
                 headers: {
-                    "Set-Cookie": components["headers"]["AdminRefreshCookie"];
+                    "Set-Cookie": components["headers"]["AdminSessionCookie"];
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ApiResponseBase"] & {
-                        data: components["schemas"]["AuthSession"];
+                        data: components["schemas"]["AdminProfile"];
                     };
                 };
             };
@@ -1876,54 +1931,6 @@ export interface operations {
             503: components["responses"]["AuthStateUnavailable"];
         };
     };
-    refreshAdmin: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description 轮换成功。 */
-            200: {
-                headers: {
-                    "Set-Cookie": components["headers"]["AdminRefreshCookie"];
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiResponseBase"] & {
-                        data: components["schemas"]["AuthSession"];
-                    };
-                };
-            };
-            401: components["responses"]["SessionRefreshUnauthorized"];
-            403: components["responses"]["AdminAuthOriginOrAccessForbidden"];
-            409: components["responses"]["RefreshConcurrent"];
-            429: components["responses"]["TooManyRequests"];
-            /** @description 服务器内部错误 */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "type": "about:blank",
-                     *       "title": "服务器内部错误",
-                     *       "status": 500,
-                     *       "detail": "服务器内部错误",
-                     *       "code": "INTERNAL_ERROR",
-                     *       "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
-                     *       "timestamp": "2026-11-06T14:00:00+08:00"
-                     *     }
-                     */
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            503: components["responses"]["AuthStateUnavailable"];
-        };
-    };
     logoutAdmin: {
         parameters: {
             query?: never;
@@ -1933,12 +1940,12 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description 当前应用的会话已退出。 */
+            /** @description 当前应用的会话已退出或没有有效会话。 */
             200: {
                 headers: {
                     /**
-                     * @description 清除当前应用的刷新 Cookie。
-                     * @example admin_refresh_token=; Path=/api/v1/auth/admin; Max-Age=0; Secure; HttpOnly; SameSite=Lax
+                     * @description 清除当前 Admin Session Cookie。
+                     * @example admin_session=; Path=/api/v1; Max-Age=0; Secure; HttpOnly; SameSite=Lax
                      */
                     "Set-Cookie": string;
                     [name: string]: unknown;
@@ -1949,8 +1956,15 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["RefreshTokenUnauthorized"];
-            403: components["responses"]["AuthOriginForbidden"];
+            /** @description 来源校验失败，或仍有效的 Session 未通过 CSRF 校验。 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
             /** @description 服务器内部错误 */
             500: {
                 headers: {
@@ -1994,7 +2008,7 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminAccessRevoked"];
             /** @description 服务器内部错误 */
             500: {
@@ -3006,7 +3020,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 服务器内部错误 */
             500: {
@@ -3126,7 +3140,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 业务状态冲突，例如重复报名、活动已满或重复核验 */
             409: {
@@ -3215,7 +3229,7 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 目标资源不存在 */
             404: {
@@ -3312,7 +3326,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 目标资源不存在 */
             404: {
@@ -3421,7 +3435,7 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 目标资源不存在 */
             404: {
@@ -3529,7 +3543,7 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 目标资源不存在 */
             404: {
@@ -3665,7 +3679,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 服务器内部错误 */
             500: {
@@ -3713,7 +3727,7 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 目标资源不存在 */
             404: {
@@ -3809,7 +3823,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 服务器内部错误 */
             500: {
@@ -3906,7 +3920,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 目标资源不存在 */
             404: {
@@ -4015,7 +4029,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 服务器内部错误 */
             500: {
@@ -4091,7 +4105,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 服务器内部错误 */
             500: {
@@ -4139,7 +4153,7 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 目标资源不存在 */
             404: {
@@ -4235,7 +4249,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 服务器内部错误 */
             500: {
@@ -4283,7 +4297,7 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 目标资源不存在 */
             404: {
@@ -4383,7 +4397,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 目标资源不存在 */
             404: {
@@ -4449,6 +4463,81 @@ export interface operations {
             503: components["responses"]["AuthStateUnavailable"];
         };
     };
+    getAdminUserCheckInEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["CheckInEventAssignments"];
+            401: components["responses"]["AdminSessionUnauthorized"];
+            403: components["responses"]["AdminBusinessForbidden"];
+            /** @description 目标账号不存在（RESOURCE_NOT_FOUND）。 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            503: components["responses"]["AuthStateUnavailable"];
+        };
+    };
+    replaceAdminUserCheckInEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckInEventAssignments"];
+            };
+        };
+        responses: {
+            200: components["responses"]["CheckInEventAssignments"];
+            /** @description eventIds 缺失、格式错误或有重复值（INVALID_ARGUMENT）。 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            401: components["responses"]["AdminSessionUnauthorized"];
+            403: components["responses"]["AdminBusinessForbidden"];
+            /** @description 目标账号或场次不存在（RESOURCE_NOT_FOUND）。 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description 目标账号已禁用或未持有 CHECKIN_STAFF，不可新增关联（BUSINESS_CONFLICT）。 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            415: components["responses"]["UnsupportedMediaType"];
+            503: components["responses"]["AuthStateUnavailable"];
+        };
+    };
     listAdminRoles: {
         parameters: {
             query?: never;
@@ -4469,7 +4558,7 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 服务器内部错误 */
             500: {
@@ -4514,7 +4603,7 @@ export interface operations {
                     };
                 };
             };
-            401: components["responses"]["AdminAccessTokenUnauthorized"];
+            401: components["responses"]["AdminSessionUnauthorized"];
             403: components["responses"]["AdminBusinessForbidden"];
             /** @description 服务器内部错误 */
             500: {

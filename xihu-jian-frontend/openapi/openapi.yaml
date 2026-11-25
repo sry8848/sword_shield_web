@@ -22,7 +22,7 @@ tags:
 - name: 数据统计
   description: 报名人数、到场人数和基础场次统计
 - name: 后台与权限
-  description: 后台账号、内置角色、权限字典及角色分配
+  description: 后台账号、内置角色、权限字典、角色及核验场次分配
 paths:
   /auth/register:
     post:
@@ -282,12 +282,13 @@ paths:
       operationId: logoutPortal
       tags:
       - 账号认证
-      description: 只撤销当前前台会话并清除 Cookie。Refresh Token 随即失效，旧 Access Token 保留剩余有效期，至多 600 秒。
+      description: 校验浏览器来源。撤销当前 Portal 会话及 Refresh Token；凭证缺失、无法匹配或会话已经失效时也返回 200 并清除 Portal Cookie。旧 Access Token 保留剩余有效期，至多 600 秒。 无法确认退出结果时返回 503，保留 Cookie 供重试。
       security:
       - PortalRefreshCookie: []
+      - {}
       responses:
         '200':
-          description: 当前应用的会话已退出。
+          description: 当前应用的会话已退出或没有有效会话。
           content:
             application/json:
               schema:
@@ -306,8 +307,6 @@ paths:
               schema:
                 type: string
               example: portal_refresh_token=; Path=/api/v1/auth/portal; Max-Age=0; Secure; HttpOnly; SameSite=Lax
-        '401':
-          $ref: '#/components/responses/RefreshTokenUnauthorized'
         '403':
           $ref: '#/components/responses/AuthOriginForbidden'
         '500':
@@ -324,6 +323,8 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
   /auth/portal/me:
     get:
       summary: 获取当前前台身份
@@ -491,13 +492,14 @@ paths:
       operationId: logoutAdmin
       tags:
       - 账号认证
-      description: 确认当前 Redis Session 失效后返回 200 并清除 Cookie。无法确认时返回 503，保留 Cookie 供重试。
+      description: 校验浏览器来源。命中认证 Session 时校验 CSRF 并删除当前 Session；Cookie 缺失或已确认没有有效 Session 时，无需 CSRF 即返回 200 并清除 Admin Cookie。 无法确认退出结果时返回 503，保留 Cookie 供重试。
       security:
       - AdminSessionCookie: []
         AdminCsrfToken: []
+      - {}
       responses:
         '200':
-          description: 当前应用的会话已退出。
+          description: 当前应用的会话已退出或没有有效会话。
           content:
             application/json:
               schema:
@@ -516,10 +518,12 @@ paths:
               schema:
                 type: string
               example: admin_session=; Path=/api/v1; Max-Age=0; Secure; HttpOnly; SameSite=Lax
-        '401':
-          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
-          $ref: '#/components/responses/AdminAuthOriginOrAccessForbidden'
+          description: 来源校验失败，或仍有效的 Session 未通过 CSRF 校验。
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '500':
           description: 服务器内部错误
           content:
@@ -2938,7 +2942,7 @@ paths:
                 timestamp: '2026-11-06T14:00:00+08:00'
         '503':
           $ref: '#/components/responses/AuthStateUnavailable'
-      description: PUT 表示将该账号的角色集合整体替换为请求中的 roleCodes；空数组表示撤销全部角色。只有具备用户角色管理权限的账号可操作。
+      description: PUT 表示将该账号的角色集合整体替换为请求中的 roleCodes；空数组表示撤销全部角色。提交后新请求按当前角色鉴权；部分撤销后剩余角色仍可使用。只有具备用户角色管理权限的账号可操作。
       parameters:
       - name: userId
         in: path
@@ -2959,6 +2963,80 @@ paths:
       security:
       - AdminSessionCookie: []
         AdminCsrfToken: []
+  /admin/users/{userId}/check-in-events:
+    description: 仅 SUPER_ADMIN 可操作。Activity 持有核验员的场次授权；授权仅在目标账号启用且持有 CHECKIN_STAFF 时生效。
+    parameters:
+    - name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+    get:
+      summary: 查询账号的核验场次授权
+      operationId: getAdminUserCheckInEvents
+      tags:
+      - 后台与权限
+      security:
+      - AdminSessionCookie: []
+      responses:
+        '200':
+          $ref: '#/components/responses/CheckInEventAssignments'
+        '401':
+          $ref: '#/components/responses/AdminSessionUnauthorized'
+        '403':
+          $ref: '#/components/responses/AdminBusinessForbidden'
+        '404':
+          description: 目标账号不存在（RESOURCE_NOT_FOUND）。
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
+    put:
+      summary: 整体替换账号的核验场次授权
+      operationId: replaceAdminUserCheckInEvents
+      description: 空集合撤销全部场次。新增关联要求目标账号启用且持有 CHECKIN_STAFF；历史场次关联仍可移除。后续核验和查询按提交后的授权范围执行。
+      tags:
+      - 后台与权限
+      security:
+      - AdminSessionCookie: []
+        AdminCsrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckInEventAssignments'
+      responses:
+        '200':
+          $ref: '#/components/responses/CheckInEventAssignments'
+        '400':
+          description: eventIds 缺失、格式错误或有重复值（INVALID_ARGUMENT）。
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          $ref: '#/components/responses/AdminSessionUnauthorized'
+        '403':
+          $ref: '#/components/responses/AdminBusinessForbidden'
+        '404':
+          description: 目标账号或场次不存在（RESOURCE_NOT_FOUND）。
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: 目标账号已禁用或未持有 CHECKIN_STAFF，不可新增关联（BUSINESS_CONFLICT）。
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
   /admin/roles:
     description: 仅 SUPER_ADMIN 具有对应 MVP 管理权限；角色及权限字典为固定只读映射。
     get:
@@ -3056,12 +3134,12 @@ components:
       type: apiKey
       in: cookie
       name: portal_refresh_token
-      description: 用于前台刷新与退出。HttpOnly，生产使用 Secure，默认 SameSite=Lax，省略 Domain，Path=/api/v1/auth/portal。
+      description: 用于前台刷新与退出。HttpOnly，生产使用 Secure，默认 SameSite=Lax，省略 Domain，Path=/api/v1/auth/portal。生产只在 Portal 主机签发和读取。
     AdminSessionCookie:
       type: apiKey
       in: cookie
       name: admin_session
-      description: HttpOnly，生产 Secure，默认 SameSite=Lax，host-only，Path=/api/v1。
+      description: HttpOnly，生产 Secure，默认 SameSite=Lax，host-only，Path=/api/v1。生产只在独立的 Admin 主机签发和读取。
     AdminCsrfToken:
       type: apiKey
       in: header
@@ -3081,6 +3159,19 @@ components:
         type: string
       example: admin_session=opaque-session-id; Path=/api/v1; Secure; HttpOnly; SameSite=Lax
   responses:
+    CheckInEventAssignments:
+      description: 账号保存的核验场次 ID 集合。
+      content:
+        application/json:
+          schema:
+            allOf:
+            - $ref: '#/components/schemas/ApiResponseBase'
+            - type: object
+              required:
+              - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/CheckInEventAssignments'
     AdminSessionUnauthorized:
       description: 后台 Session 缺失、无效、已过期或登录时的权限/凭证版本已失效。
       content:
@@ -3378,6 +3469,17 @@ components:
             traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
             timestamp: '2026-11-06T14:00:00+08:00'
   schemas:
+    CheckInEventAssignments:
+      type: object
+      required:
+      - eventIds
+      properties:
+        eventIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
     ApiResponseBase:
       type: object
       required:

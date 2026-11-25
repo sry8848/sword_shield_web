@@ -63,7 +63,7 @@
 | 账号认证 | POST | `/auth/portal/login`、`/auth/admin/login` | 分别建立前后台会话 | 否 |
 | 账号认证 | POST | `/auth/portal/refresh` | 刷新 Portal Access Token | Portal Refresh Cookie |
 | 账号认证 | GET | `/auth/admin/csrf` | 获取 CSRF token | 无需已登录 |
-| 账号认证 | POST | `/auth/portal/logout`、`/auth/admin/logout` | 退出当前应用的会话 | Portal Refresh Cookie / Admin Session Cookie + CSRF |
+| 账号认证 | POST | `/auth/portal/logout`、`/auth/admin/logout` | 退出当前应用的会话 | Cookie 缺失或已失效时可重试，在线 Admin Session 需 CSRF |
 | 账号认证 | GET | `/auth/portal/me`、`/auth/admin/me` | 当前身份 | Portal Access Token / Admin Session Cookie |
 | 账号认证 | GET | `/auth/jwks` | 获取验签公钥 | 否 |
 | 普通报名 | POST | `/events/{eventId}/registrations` | 提交报名 | 是 |
@@ -86,6 +86,7 @@
 | 后台与权限 | GET | `/admin/users` | 后台账号列表 | 是 |
 | 后台与权限 | GET | `/admin/users/{userId}` | 后台账号详情 | 是 |
 | 后台与权限 | PUT | `/admin/users/{userId}/roles` | 替换账号角色集合 | 是 |
+| 后台与权限 | GET、PUT | `/admin/users/{userId}/check-in-events` | 查看、整体替换核验员场次授权 | 是 |
 | 后台与权限 | GET | `/admin/roles` | 内置角色列表 | 是 |
 | 后台与权限 | GET | `/admin/permissions` | 权限字典 | 是 |
 
@@ -106,7 +107,7 @@
 | B03 活动管理 | `/admin/events` 及发布/下线动作 |
 | B04 报名管理 | `/admin/registrations` |
 | B05 现场核验 | `/admin/check-ins` |
-| B27 运营账号与权限 | `/admin/users`、`/admin/roles`、`/admin/permissions` |
+| B27 运营账号与权限 | `/admin/users`、`/admin/users/{userId}/check-in-events`、`/admin/roles`、`/admin/permissions` |
 | B21 报名与参与报表 | `/admin/statistics/overview`、`/admin/statistics/events` |
 
 ## 5. 当前设计边界

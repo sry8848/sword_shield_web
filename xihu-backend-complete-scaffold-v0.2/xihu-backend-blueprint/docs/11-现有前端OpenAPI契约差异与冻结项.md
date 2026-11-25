@@ -7,8 +7,8 @@
 | 事项 | 现有资料与差异 | 待确认结论 |
 | --- | --- | --- |
 | 首期角色与权限配置 | 已确认三个固定角色 SUPER_ADMIN、EVENT_OPERATOR、CHECKIN_STAFF，不做动态配置。 | 参照现行登录业务设计与 03 固定角色矩阵。 |
-| 核验的场次范围 | 核验员仅操作明确授权场次；Activity 维护关系。 | 配置入口、授权操作者及领取点业务待确认。 |
-| 登录与会话 | Portal 维持 10 秒刷新宽限期；Admin 纯 Redis Session + Gateway ForwardAuth，无刷新接口。 | 见[当前业务设计](../../../docs/设计/登录设计/登录设计_2026-11-25_10-40.md)与[认证 OpenAPI](../../../xihu-jian-frontend/openapi/openapi.yaml)。 |
+| 核验的场次范围 | 核验员仅操作明确授权场次；Activity 维护关系。 | 系统管理员在 B27 通过 Activity 的场次授权接口查询、保存和撤销。领取点授权后置。 |
+| 登录与会话 | Portal 维持 10 秒刷新宽限期；Admin 纯 Redis Session + Gateway ForwardAuth，无刷新接口。 | 见[当前业务设计](../../../docs/设计/登录设计/登录设计_2026-11-25_16-17.md)与[认证 OpenAPI](../../../xihu-jian-frontend/openapi/openapi.yaml)。 |
 | 核验流程与指标口径 | 旧 v0.1 验收和 v0.2 的 11 提及预览与确认，OpenAPI 草案以一次 `POST /admin/check-ins` 完成核验。统计草案仍有口径待确认。 | 核验是否分步、凭证规则、名额与取消、报名及到场指标口径按[接口待确认事项 D05–D07、D10–D11、D17](../../../xihu-jian-frontend/docs/14-待确认事项.md)确认。 |
 | 显式拒绝和多来源授权 | MVP 不实现。 | 有真实需求再评审。 |
 | 未来领域交界 | 旧 v0.2 的 01 同时提到 Activity 和 Interaction 的场次订阅，将限量预约与支付合并列出。产品评审提出了[职责拆分建议](../../../docs/功能模块清单与微服务划分评审.md)。旧 01 将组织成员列在 Identity，Organization 骨架也包含成员职责。 | 在启用相关能力前，确认场次订阅、限量业务订单及组织成员存储的唯一所有者，以及 Organization 与 Identity 的部署关系。 |
