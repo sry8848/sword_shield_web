@@ -260,8 +260,6 @@ paths:
           $ref: '#/components/responses/SessionRefreshUnauthorized'
         '403':
           $ref: '#/components/responses/AuthOriginForbidden'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
         '500':
           description: 服务器内部错误
           content:

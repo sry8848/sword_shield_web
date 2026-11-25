@@ -1703,7 +1703,6 @@ export interface operations {
             };
             401: components["responses"]["SessionRefreshUnauthorized"];
             403: components["responses"]["AuthOriginForbidden"];
-            429: components["responses"]["TooManyRequests"];
             /** @description 服务器内部错误 */
             500: {
                 headers: {
