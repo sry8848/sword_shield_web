@@ -62,19 +62,19 @@ class PortalJwtConfiguration {
     @Bean
     PortalAuthentication.AccessTokens portalAccessTokens(JwtEncoder encoder, RSAKey key,
             @Value("${identity.portal.issuer}") String issuer) {
-        return (account, session) -> {
+        return (sessionId, accountId, credentialVersion, permissionVersion, issuedAt) -> {
             // 1. 构建身份和会话 Claim。后台角色不授予 Portal 凭证后台权限。
             var claims = JwtClaimsSet.builder()
                     .issuer(issuer)
-                    .subject(account.id())
+                    .subject(accountId)
                     .audience(List.of(AUDIENCE))
-                    .issuedAt(session.createdAt())
-                    .expiresAt(session.createdAt().plusSeconds(PortalAuthentication.ACCESS_SECONDS))
+                    .issuedAt(issuedAt)
+                    .expiresAt(issuedAt.plusSeconds(PortalAuthentication.ACCESS_SECONDS))
                     .id(UUID.randomUUID().toString())
-                    .claim("sid", session.id())
+                    .claim("sid", sessionId)
                     .claim("client_type", PortalAuthentication.CLIENT)
-                    .claim("credential_version", account.credentialVersion())
-                    .claim("permission_version", account.permissionVersion())
+                    .claim("credential_version", credentialVersion)
+                    .claim("permission_version", permissionVersion)
                     .claim("roles", List.of())
                     .build();
             var header = JwsHeader.with(SignatureAlgorithm.RS256).keyId(key.getKeyID()).build();

@@ -29,7 +29,8 @@ class PortalAuthRoutes {
                         }))
                         .metadata(GatewayAccessLog.TARGET_SERVICE, "identity-service")
                         .uri(identityUri))
-                .route("portal-identity", route -> route.path("/api/v1/auth/portal/me", "/api/v1/auth/jwks")
+                .route("portal-identity", route -> route.path("/api/v1/auth/portal/me", "/api/v1/auth/jwks",
+                                "/api/v1/auth/portal/refresh", "/api/v1/auth/portal/logout")
                         .metadata(GatewayAccessLog.TARGET_SERVICE, "identity-service")
                         .uri(identityUri))
                 .build();

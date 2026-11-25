@@ -1,5 +1,6 @@
 package com.swordshield.next.identity;
 
+import java.net.HttpCookie;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -7,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -14,6 +16,7 @@ import java.util.stream.IntStream;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -178,6 +181,233 @@ class PortalAuthHttpTest {
                     401, "UNAUTHENTICATED");
         }
         assertProblem(login("13790000030", PASSWORD, ip), 429, "TOO_MANY_REQUESTS");
+    }
+
+    @Test
+    void rotatesOnceForConcurrentRequestsAndRevokesOnlyTheReplayedSession() throws Exception {
+        var original = sessionLogin("192.0.2.101");
+        var anotherDevice = sessionLogin("192.0.2.102");
+        String oldCookie = refreshCookie(original);
+        String sessionId = accessClaims(original).getStringClaim("sid");
+
+        var request = cookieRequest("/refresh", oldCookie, ORIGIN);
+        var first = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        var second = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        var responses = List.of(first.join(), second.join());
+        assertThat(responses).allSatisfy(response -> {
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(json.readTree(response.body()).path("data").path("expiresIn").asInt()).isEqualTo(600);
+        });
+        assertThat(accessClaims(responses.get(0)).getJWTID()).isNotEqualTo(accessClaims(responses.get(1)).getJWTID());
+        var rotated = responses.stream().filter(response -> response.headers().firstValue("Set-Cookie").isPresent()).toList();
+        assertThat(rotated).hasSize(1);
+        String newCookie = refreshCookie(rotated.get(0));
+        assertThat(newCookie).isNotEqualTo(oldCookie);
+        assertThat(tokenCount(sessionId)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("""
+                SELECT idle_expires_at = DATE_ADD(last_used_at, INTERVAL 7 DAY)
+                   AND absolute_expires_at = DATE_ADD(created_at, INTERVAL 30 DAY)
+                   AND idle_expires_at > DATE_ADD(created_at, INTERVAL 7 DAY)
+                FROM identity_session WHERE id = ?
+                """, Boolean.class, sessionId)).isTrue();
+
+        var deadlines = jdbc.queryForMap(
+                "SELECT idle_expires_at, absolute_expires_at FROM identity_session WHERE id = ?", sessionId);
+        LocalDateTime consumedAt = jdbc.queryForObject("SELECT consumed_at FROM identity_refresh_token WHERE token_hash = ?",
+                LocalDateTime.class, cookieHash(oldCookie));
+        var duplicate = cookiePost("/refresh", oldCookie, ORIGIN);
+        assertThat(duplicate.statusCode()).isEqualTo(200);
+        assertThat(duplicate.headers().firstValue("Set-Cookie")).isEmpty();
+        assertThat(jdbc.queryForMap("SELECT idle_expires_at, absolute_expires_at FROM identity_session WHERE id = ?",
+                sessionId)).isEqualTo(deadlines);
+        assertThat(jdbc.queryForObject("SELECT consumed_at FROM identity_refresh_token WHERE token_hash = ?",
+                LocalDateTime.class, cookieHash(oldCookie))).isEqualTo(consumedAt);
+
+        jdbc.update("UPDATE identity_refresh_token SET consumed_at = UTC_TIMESTAMP(3) - INTERVAL 11 SECOND WHERE token_hash = ?",
+                cookieHash(oldCookie));
+        jdbc.update("""
+                INSERT INTO identity_portal_refresh_replay_audit (session_id, account_id, trace_id, occurred_at)
+                VALUES (?, ?, ?, UTC_TIMESTAMP(3))
+                """, sessionId, accessClaims(original).getSubject(), "0".repeat(32));
+        try {
+            var auditFailure = cookiePost("/refresh", oldCookie, ORIGIN);
+            assertProblem(auditFailure, 500, "INTERNAL_ERROR");
+            assertThat(auditFailure.headers().firstValue("Set-Cookie")).isEmpty();
+            assertThat(jdbc.queryForObject("SELECT revoked_at FROM identity_session WHERE id = ?",
+                    LocalDateTime.class, sessionId)).isNull();
+        } finally {
+            jdbc.update("DELETE FROM identity_portal_refresh_replay_audit WHERE session_id = ?", sessionId);
+        }
+        var replay = cookiePost("/refresh", oldCookie, ORIGIN);
+        var problem = assertProblem(replay, 401, "REFRESH_TOKEN_REPLAYED");
+        assertThat(replay.headers().firstValue("Set-Cookie")).isEmpty();
+        assertThat(jdbc.queryForObject("SELECT trace_id FROM identity_portal_refresh_replay_audit WHERE session_id = ?",
+                String.class, sessionId)).isEqualTo(problem.path("traceId").asString());
+        assertProblem(cookiePost("/refresh", newCookie, ORIGIN), 401, "UNAUTHENTICATED");
+        assertThat(cookiePost("/refresh", refreshCookie(anotherDevice), ORIGIN).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    void rejectsExpiredDisabledAndOldVersionSessions() throws Exception {
+        var idle = sessionLogin("192.0.2.103");
+        var absolute = sessionLogin("192.0.2.104");
+        String phone = "13990000004";
+        redis.delete(List.of(REDIS_PREFIX + "phone:" + phone, REDIS_PREFIX + "ip:192.0.2.105",
+                REDIS_PREFIX + "ip:192.0.2.106", REDIS_PREFIX + "ip:192.0.2.107"));
+        jdbc.update("INSERT INTO identity_account (phone, password_hash, status) SELECT ?, password_hash, 'ENABLED' FROM identity_account WHERE phone = ?",
+                phone, PHONE);
+        try {
+            var beforeDisable = login(phone, PASSWORD, "192.0.2.105");
+            var disabledDevice = login(phone, PASSWORD, "192.0.2.106");
+            String accountId = accessClaims(beforeDisable).getSubject();
+            var rotated = cookiePost("/refresh", refreshCookie(beforeDisable), ORIGIN);
+            String rotatedCookie = refreshCookie(rotated);
+            jdbc.update("UPDATE identity_account SET status = 'DISABLED', credential_version = credential_version + 1 WHERE id = ?",
+                    accountId);
+
+            assertProblem(login(phone, PASSWORD, "192.0.2.107"), 401, "UNAUTHENTICATED");
+            assertProblem(cookiePost("/refresh", refreshCookie(beforeDisable), ORIGIN), 401, "UNAUTHENTICATED");
+            assertProblem(cookiePost("/refresh", rotatedCookie, ORIGIN), 401, "UNAUTHENTICATED");
+            assertProblem(cookiePost("/refresh", refreshCookie(disabledDevice), ORIGIN), 401, "UNAUTHENTICATED");
+            assertThat(get(AUTH + "/me", accessToken(beforeDisable)).statusCode()).isEqualTo(200);
+            jdbc.update("UPDATE identity_account SET status = 'ENABLED', credential_version = credential_version + 1 WHERE id = ?",
+                    accountId);
+            assertProblem(cookiePost("/refresh", rotatedCookie, ORIGIN), 401, "UNAUTHENTICATED");
+            assertThat(login(phone, PASSWORD, "192.0.2.107").statusCode()).isEqualTo(200);
+        } finally {
+            jdbc.update("""
+                    DELETE t FROM identity_refresh_token t JOIN identity_session s ON s.id = t.session_id
+                    JOIN identity_account a ON a.id = s.account_id WHERE a.phone = ?
+                    """, phone);
+            jdbc.update("DELETE s FROM identity_session s JOIN identity_account a ON a.id = s.account_id WHERE a.phone = ?", phone);
+            jdbc.update("DELETE FROM identity_account WHERE phone = ?", phone);
+        }
+
+        jdbc.update("UPDATE identity_session SET idle_expires_at = UTC_TIMESTAMP(3) WHERE id = ?",
+                accessClaims(idle).getStringClaim("sid"));
+        assertProblem(cookiePost("/refresh", refreshCookie(idle), ORIGIN), 401, "REFRESH_TOKEN_EXPIRED");
+        String cappedSession = accessClaims(absolute).getStringClaim("sid");
+        jdbc.update("UPDATE identity_session SET absolute_expires_at = UTC_TIMESTAMP(3) + INTERVAL 1 DAY WHERE id = ?",
+                cappedSession);
+        var capped = cookiePost("/refresh", refreshCookie(absolute), ORIGIN);
+        assertThat(capped.statusCode()).isEqualTo(200);
+        var maxAge = HttpCookie.parse(capped.headers().firstValue("Set-Cookie").orElseThrow()).get(0).getMaxAge();
+        assertThat(maxAge).isPositive().isLessThanOrEqualTo(86_400);
+        assertThat(jdbc.queryForObject("""
+                SELECT idle_expires_at = absolute_expires_at FROM identity_session WHERE id = ?
+                """, Boolean.class, cappedSession)).isTrue();
+        jdbc.update("UPDATE identity_session SET absolute_expires_at = UTC_TIMESTAMP(3) WHERE id = ?", cappedSession);
+        assertProblem(cookiePost("/refresh", refreshCookie(capped), ORIGIN), 401, "REFRESH_TOKEN_EXPIRED");
+        assertLoggedOut(cookiePost("/logout", refreshCookie(capped), ORIGIN));
+        assertThat(jdbc.queryForObject("SELECT revoked_at FROM identity_session WHERE id = ?", LocalDateTime.class,
+                accessClaims(absolute).getStringClaim("sid"))).isNull();
+    }
+
+    @Test
+    void rejectsUntrustedOriginsAndLogsOutIdempotentlyWithoutAffectingAnotherDevice() throws Exception {
+        var original = sessionLogin("192.0.2.108");
+        var anotherDevice = sessionLogin("192.0.2.109");
+        String cookie = refreshCookie(original);
+        var untrustedRefresh = cookiePost("/refresh", cookie, "https://other.example");
+        assertProblem(untrustedRefresh, 403, "FORBIDDEN");
+        assertThat(untrustedRefresh.headers().firstValue("Set-Cookie")).isEmpty();
+        var untrustedLogout = cookiePost("/logout", cookie, null);
+        assertProblem(untrustedLogout, 403, "FORBIDDEN");
+        assertThat(untrustedLogout.headers().firstValue("Set-Cookie")).isEmpty();
+        assertProblem(cookiePost("/refresh", null, ORIGIN), 401, "UNAUTHENTICATED");
+
+        var rotated = cookiePost("/refresh", cookie, ORIGIN);
+        String successor = refreshCookie(rotated);
+        assertLoggedOut(cookiePost("/logout", cookie, ORIGIN));
+        assertLoggedOut(cookiePost("/logout", successor, ORIGIN));
+        assertLoggedOut(cookiePost("/logout", null, ORIGIN));
+        assertLoggedOut(cookiePost("/logout", "portal_refresh_token=unknown", ORIGIN));
+        assertLoggedOut(cookiePost("/logout", "portal_refresh_token=" + "a".repeat(43), ORIGIN));
+
+        assertProblem(cookiePost("/refresh", successor, ORIGIN), 401, "UNAUTHENTICATED");
+        assertThat(get(AUTH + "/me", accessToken(original)).statusCode()).isEqualTo(200);
+        assertThat(cookiePost("/refresh", refreshCookie(anotherDevice), ORIGIN).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    void rollsBackRotationAndKeepsLogoutCookieWhenTheSessionWriteFails() throws Exception {
+        var original = sessionLogin("192.0.2.110");
+        String cookie = refreshCookie(original);
+        String sessionId = accessClaims(original).getStringClaim("sid");
+        jdbc.execute("""
+                CREATE TRIGGER portal_test_reject_session_write BEFORE UPDATE ON identity_session
+                FOR EACH ROW
+                BEGIN
+                    IF OLD.id = '%s' THEN
+                        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Portal test rejected session write';
+                    END IF;
+                END
+                """.formatted(sessionId));
+        try {
+            var failed = cookiePost("/refresh", cookie, ORIGIN);
+            assertProblem(failed, 500, "INTERNAL_ERROR");
+            assertThat(failed.headers().firstValue("Set-Cookie")).isEmpty();
+            assertThat(tokenCount(sessionId)).isEqualTo(1);
+            assertThat(jdbc.queryForObject("SELECT consumed_at FROM identity_refresh_token WHERE token_hash = ?",
+                    LocalDateTime.class, cookieHash(cookie))).isNull();
+            var unavailable = cookiePost("/logout", cookie, ORIGIN);
+            assertProblem(unavailable, 503, "AUTH_STATE_UNAVAILABLE");
+            assertThat(unavailable.headers().firstValue("Set-Cookie")).isEmpty();
+        } finally {
+            jdbc.execute("DROP TRIGGER portal_test_reject_session_write");
+        }
+        assertThat(cookiePost("/refresh", cookie, ORIGIN).statusCode()).isEqualTo(200);
+    }
+
+    private HttpResponse<String> sessionLogin(String ip) throws Exception {
+        redis.delete(List.of(REDIS_PREFIX + "phone:" + PHONE, REDIS_PREFIX + "ip:" + ip));
+        var response = login(PHONE, PASSWORD, ip);
+        assertThat(response.statusCode()).isEqualTo(200);
+        return response;
+    }
+
+    private int tokenCount(String sessionId) {
+        return jdbc.queryForObject("SELECT COUNT(*) FROM identity_refresh_token WHERE session_id = ?", Integer.class, sessionId);
+    }
+
+    private String accessToken(HttpResponse<String> response) {
+        return json.readTree(response.body()).path("data").path("accessToken").asString();
+    }
+
+    private JWTClaimsSet accessClaims(HttpResponse<String> response) throws Exception {
+        return SignedJWT.parse(accessToken(response)).getJWTClaimsSet();
+    }
+
+    private static String refreshCookie(HttpResponse<String> response) {
+        return response.headers().firstValue("Set-Cookie").orElseThrow().split(";", 2)[0];
+    }
+
+    private static byte[] cookieHash(String cookie) throws Exception {
+        String token = cookie.substring("portal_refresh_token=".length());
+        return MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.US_ASCII));
+    }
+
+    private HttpResponse<String> cookiePost(String action, String cookie, String origin) throws Exception {
+        return client.send(cookieRequest(action, cookie, origin), HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpRequest cookieRequest(String action, String cookie, String origin) {
+        var request = HttpRequest.newBuilder(uri(AUTH + action)).POST(HttpRequest.BodyPublishers.noBody());
+        if (cookie != null) {
+            request.header("Cookie", cookie);
+        }
+        if (origin != null) {
+            request.header("Origin", origin);
+        }
+        return request.build();
+    }
+
+    private void assertLoggedOut(HttpResponse<String> response) {
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(json.readTree(response.body()).path("data").path("loggedOut").asBoolean()).isTrue();
+        assertThat(response.headers().firstValue("Set-Cookie").orElseThrow())
+                .startsWith("portal_refresh_token=;").contains("Max-Age=0", "HttpOnly", "SameSite=Lax",
+                        "Path=/api/v1/auth/portal");
     }
 
     /** 签发用于响应分类测试的同密钥 JWT。 */

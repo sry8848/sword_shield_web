@@ -70,13 +70,17 @@ class IdentityMvcExceptionHandler extends ResponseEntityExceptionHandler impleme
         return super.handleExceptionInternal(exception, problem, headers, status, request);
     }
 
-    /** 将登录用例的拒绝原因映射到冻结的 401 或 429 响应。 */
+    /** 将 Portal 登录和刷新用例的拒绝原因映射到接口契约。 */
     @ExceptionHandler(PortalAuthentication.Rejected.class)
     ResponseEntity<ProblemDetail> handlePortalRejection(PortalAuthentication.Rejected failure) {
         // 1. 登录失败原因只用于内部选择响应，三类凭证错误返回相同说明。
         ProblemDetail body = switch (failure.failure()) {
             case INVALID_CREDENTIALS -> problem(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED", "未认证", "账号或密码错误");
             case RATE_LIMITED -> problem(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", "请求过于频繁", "请求频率超过限制");
+            case INVALID_REFRESH -> problem(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED", "未认证", "刷新令牌缺失或无效");
+            case REFRESH_EXPIRED -> problem(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_EXPIRED", "未认证", "刷新令牌已过期");
+            case REFRESH_REPLAYED -> problem(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_REPLAYED", "未认证",
+                    "已用刷新令牌被重放，所属会话已撤销，请重新登录。");
         };
         return ResponseEntity.status(body.getStatus()).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(body);
     }
