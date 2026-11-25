@@ -10,7 +10,7 @@ tags:
 - name: 大会门户
   description: 游客可访问的大会基础信息、场次、嘉宾和会场信息
 - name: 账号认证
-  description: 前后台登录、会话刷新、退出和当前身份查询
+  description: 前后台登录、退出和当前身份查询；仅 Portal 刷新；Admin CSRF
 - name: 普通报名
   description: 参会用户提交报名、查询本人报名和获取凭证
 - name: 活动管理
@@ -363,14 +363,50 @@ paths:
                 code: INTERNAL_ERROR
                 traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
+  /auth/admin/csrf:
+    get:
+      summary: 获取后台 CSRF token
+      operationId: getAdminCsrfToken
+      tags:
+      - 账号认证
+      description: 无需已登录；登录前或成功登录后调用，返回当前 Session 关联的 CSRF token，仅供写请求使用，不是身份凭证。
+      security: []
+      responses:
+        '200':
+          description: 获取成功；必要时设置未认证的临时 Session Cookie。
+          headers:
+            Set-Cookie:
+              description: 必要时下发 admin_session。
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ApiResponseBase'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      type: object
+                      required:
+                      - token
+                      properties:
+                        token:
+                          type: string
+        '503':
+          $ref: '#/components/responses/AuthStateUnavailable'
   /auth/admin/login:
     post:
       summary: 后台登录
       operationId: loginAdmin
       tags:
       - 账号认证
-      description: 使用手机号和密码建立当前应用的独立会话，校验浏览器请求来源。后台登录要求有效的 SUPER_ADMIN 角色。
-      security: []
+      description: 使用手机号和密码建立 Redis Session，至少具有一个有效固定后台角色；须先获取 CSRF token。
+      security:
+      - AdminSessionCookie: []
+        AdminCsrfToken: []
       responses:
         '200':
           description: 登录成功。
@@ -384,10 +420,10 @@ paths:
                   - data
                   properties:
                     data:
-                      $ref: '#/components/schemas/AuthSession'
+                      $ref: '#/components/schemas/AdminProfile'
           headers:
             Set-Cookie:
-              $ref: '#/components/headers/AdminRefreshCookie'
+              $ref: '#/components/headers/AdminSessionCookie'
         '400':
           description: 请求参数格式错误或缺少必要参数
           content:
@@ -449,66 +485,16 @@ paths:
             example:
               phone: '13800000000'
               password: Password123
-  /auth/admin/refresh:
-    post:
-      summary: 刷新后台会话
-      operationId: refreshAdmin
-      tags:
-      - 账号认证
-      description: 每个 Refresh Token 仅轮换一次。账号和会话仍有效时，自首次成功轮换提交起 3 秒内（含 3 秒）重复提交同一旧令牌返回 409。重复请求不签发令牌、不修改 Cookie、不撤销会话、不延长窗口，前端等待同一会话的刷新结果。超过窗口则判定为重放并撤销所属会话。每次成功刷新都更新
-        Cookie。空闲有效期为 7 天，绝对有效期为 30 天。
-      security:
-      - AdminRefreshCookie: []
-      responses:
-        '200':
-          description: 轮换成功。
-          content:
-            application/json:
-              schema:
-                allOf:
-                - $ref: '#/components/schemas/ApiResponseBase'
-                - type: object
-                  required:
-                  - data
-                  properties:
-                    data:
-                      $ref: '#/components/schemas/AuthSession'
-          headers:
-            Set-Cookie:
-              $ref: '#/components/headers/AdminRefreshCookie'
-        '401':
-          $ref: '#/components/responses/SessionRefreshUnauthorized'
-        '403':
-          $ref: '#/components/responses/AdminAuthOriginOrAccessForbidden'
-        '409':
-          $ref: '#/components/responses/RefreshConcurrent'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
-        '500':
-          description: 服务器内部错误
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetail'
-              example:
-                type: about:blank
-                title: 服务器内部错误
-                status: 500
-                detail: 服务器内部错误
-                code: INTERNAL_ERROR
-                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
-                timestamp: '2026-11-06T14:00:00+08:00'
-        '503':
-          $ref: '#/components/responses/AuthStateUnavailable'
   /auth/admin/logout:
     post:
       summary: 后台退出
       operationId: logoutAdmin
       tags:
       - 账号认证
-      description: 确认当前会话的 Refresh Token 已失效且旧 Access Token 会被后续受保护请求拒绝后，才返回 200 并清除 Cookie。无法确认撤销时返回 503，保留 Cookie 供重试。
+      description: 确认当前 Redis Session 失效后返回 200 并清除 Cookie。无法确认时返回 503，保留 Cookie 供重试。
       security:
-      - AdminRefreshCookie: []
+      - AdminSessionCookie: []
+        AdminCsrfToken: []
       responses:
         '200':
           description: 当前应用的会话已退出。
@@ -525,15 +511,15 @@ paths:
                       $ref: '#/components/schemas/LogoutData'
           headers:
             Set-Cookie:
-              description: 清除当前应用的刷新 Cookie。
+              description: 清除当前 Admin Session Cookie。
               required: true
               schema:
                 type: string
-              example: admin_refresh_token=; Path=/api/v1/auth/admin; Max-Age=0; Secure; HttpOnly; SameSite=Lax
+              example: admin_session=; Path=/api/v1; Max-Age=0; Secure; HttpOnly; SameSite=Lax
         '401':
-          $ref: '#/components/responses/RefreshTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
-          $ref: '#/components/responses/AuthOriginForbidden'
+          $ref: '#/components/responses/AdminAuthOriginOrAccessForbidden'
         '500':
           description: 服务器内部错误
           content:
@@ -558,7 +544,7 @@ paths:
       - 账号认证
       description: 返回当前用户及后台角色。
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
       responses:
         '200':
           description: 获取成功。
@@ -574,7 +560,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/AdminProfile'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminAccessRevoked'
         '500':
@@ -1488,6 +1474,7 @@ paths:
       security:
       - PortalBearerAuth: []
   /admin/events:
+    description: 仅 EVENT_OPERATOR 具有对应 MVP 操作权限。
     get:
       summary: 后台分页查询场次
       operationId: listAdminEvents
@@ -1522,7 +1509,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
@@ -1577,7 +1564,7 @@ paths:
           - UNPUBLISHED
           - FINISHED
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
     post:
       summary: 创建场次
       operationId: createAdminEvent
@@ -1638,7 +1625,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '409':
@@ -1709,8 +1696,10 @@ paths:
               - 人工智能
               - 网络安全
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
+        AdminCsrfToken: []
   /admin/events/{eventId}:
+    description: 仅 EVENT_OPERATOR 具有对应 MVP 操作权限。
     get:
       summary: 查询后台场次详情
       operationId: getAdminEvent
@@ -1731,7 +1720,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventDetail'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
@@ -1772,7 +1761,7 @@ paths:
         schema:
           type: string
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
     patch:
       summary: 修改场次
       operationId: updateAdminEvent
@@ -1807,7 +1796,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
@@ -1887,8 +1876,10 @@ paths:
             example:
               title: 人工智能与网络安全论坛（更新）
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
+        AdminCsrfToken: []
   /admin/events/{eventId}/publish:
+    description: 仅 EVENT_OPERATOR 具有对应 MVP 操作权限。
     post:
       summary: 发布场次
       operationId: publishAdminEvent
@@ -1909,7 +1900,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventDetail'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
@@ -1978,8 +1969,10 @@ paths:
         schema:
           type: string
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
+        AdminCsrfToken: []
   /admin/events/{eventId}/unpublish:
+    description: 仅 EVENT_OPERATOR 具有对应 MVP 操作权限。
     post:
       summary: 下线场次
       operationId: unpublishAdminEvent
@@ -2000,7 +1993,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventDetail'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
@@ -2070,8 +2063,10 @@ paths:
         schema:
           type: string
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
+        AdminCsrfToken: []
   /admin/registrations:
+    description: 仅 EVENT_OPERATOR 具有对应 MVP 操作权限。
     get:
       summary: 后台分页查询报名记录
       operationId: listAdminRegistrations
@@ -2106,7 +2101,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
@@ -2166,8 +2161,9 @@ paths:
         schema:
           type: string
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
   /admin/registrations/{registrationId}:
+    description: 仅 EVENT_OPERATOR 具有对应 MVP 操作权限。
     get:
       summary: 后台查询报名详情
       operationId: getAdminRegistration
@@ -2188,7 +2184,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/RegistrationDetail'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
@@ -2229,8 +2225,9 @@ paths:
         schema:
           type: string
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
   /admin/check-ins:
+    description: CHECKIN_STAFF 仅访问明确授权场次的核验及记录；服务端从可信身份取得操作者。
     post:
       summary: 现场核验并登记到场
       operationId: createCheckIn
@@ -2282,7 +2279,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
@@ -2370,7 +2367,8 @@ paths:
               credentialCode: signed-opaque-credential-payload
               inputMode: QR_SCAN
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
+        AdminCsrfToken: []
     get:
       summary: 查询现场核验记录
       operationId: listAdminCheckIns
@@ -2405,7 +2403,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
@@ -2463,8 +2461,9 @@ paths:
           type: string
           format: date-time
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
   /admin/statistics/overview:
+    description: 仅 EVENT_OPERATOR 具有对应 MVP 操作权限。
     get:
       summary: 查询报名与到场概览
       operationId: getOverviewStatistics
@@ -2499,7 +2498,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
@@ -2534,8 +2533,9 @@ paths:
           type: string
           format: date
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
   /admin/statistics/events:
+    description: 仅 EVENT_OPERATOR 具有对应 MVP 操作权限。
     get:
       summary: 分页查询场次统计
       operationId: listEventStatistics
@@ -2570,7 +2570,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
@@ -2628,8 +2628,9 @@ paths:
         schema:
           type: string
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
   /admin/statistics/events/{eventId}:
+    description: 仅 EVENT_OPERATOR 具有对应 MVP 操作权限。
     get:
       summary: 查询单场统计
       operationId: getEventStatistics
@@ -2650,7 +2651,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/EventStatistics'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
@@ -2691,8 +2692,9 @@ paths:
         schema:
           type: string
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
   /admin/users:
+    description: 仅 SUPER_ADMIN 具有对应 MVP 管理权限；角色及权限字典为固定只读映射。
     get:
       summary: 查询后台账号列表
       operationId: listAdminUsers
@@ -2727,7 +2729,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
@@ -2786,8 +2788,9 @@ paths:
           - ENABLED
           - DISABLED
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
   /admin/users/{userId}:
+    description: 仅 SUPER_ADMIN 具有对应 MVP 管理权限；角色及权限字典为固定只读映射。
     get:
       summary: 查询后台账号详情
       operationId: getAdminUser
@@ -2808,7 +2811,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/StaffUserDetail'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
@@ -2849,8 +2852,9 @@ paths:
         schema:
           type: string
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
   /admin/users/{userId}/roles:
+    description: 仅 SUPER_ADMIN 具有对应 MVP 管理权限；角色及权限字典为固定只读映射。
     put:
       summary: 替换后台账号角色
       operationId: replaceAdminUserRoles
@@ -2885,7 +2889,7 @@ paths:
                 traceId: '4bf92f3577b34da6a3ce929d0e0e4736'
                 timestamp: '2026-11-06T14:00:00+08:00'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '404':
@@ -2953,8 +2957,10 @@ paths:
               - EVENT_OPERATOR
               - CHECKIN_STAFF
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
+        AdminCsrfToken: []
   /admin/roles:
+    description: 仅 SUPER_ADMIN 具有对应 MVP 管理权限；角色及权限字典为固定只读映射。
     get:
       summary: 查询系统内置角色
       operationId: listAdminRoles
@@ -2975,7 +2981,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/RoleListData'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
@@ -2995,8 +3001,9 @@ paths:
         '503':
           $ref: '#/components/responses/AuthStateUnavailable'
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
   /admin/permissions:
+    description: 仅 SUPER_ADMIN 具有对应 MVP 管理权限；角色及权限字典为固定只读映射。
     get:
       summary: 查询系统权限字典
       operationId: listAdminPermissions
@@ -3017,7 +3024,7 @@ paths:
                     data:
                       $ref: '#/components/schemas/PermissionListData'
         '401':
-          $ref: '#/components/responses/AdminAccessTokenUnauthorized'
+          $ref: '#/components/responses/AdminSessionUnauthorized'
         '403':
           $ref: '#/components/responses/AdminBusinessForbidden'
         '500':
@@ -3037,7 +3044,7 @@ paths:
         '503':
           $ref: '#/components/responses/AuthStateUnavailable'
       security:
-      - AdminBearerAuth: []
+      - AdminSessionCookie: []
 components:
   securitySchemes:
     PortalBearerAuth:
@@ -3050,16 +3057,16 @@ components:
       in: cookie
       name: portal_refresh_token
       description: 用于前台刷新与退出。HttpOnly，生产使用 Secure，默认 SameSite=Lax，省略 Domain，Path=/api/v1/auth/portal。
-    AdminBearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: 只接受签发给后台的访问令牌，校验对应 audience。
-    AdminRefreshCookie:
+    AdminSessionCookie:
       type: apiKey
       in: cookie
-      name: admin_refresh_token
-      description: 用于后台刷新与退出。HttpOnly，生产使用 Secure，默认 SameSite=Lax，省略 Domain，Path=/api/v1/auth/admin。
+      name: admin_session
+      description: HttpOnly，生产 Secure，默认 SameSite=Lax，host-only，Path=/api/v1。
+    AdminCsrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+      description: 后台写请求使用当前 Session 的 CSRF token。登录前通过 csrf 获取，登录后重新获取。
   headers:
     PortalRefreshCookie:
       description: 下发当前应用的刷新 Cookie。
@@ -3067,47 +3074,27 @@ components:
       schema:
         type: string
       example: portal_refresh_token=opaque-refresh-token; Path=/api/v1/auth/portal; Secure; HttpOnly; SameSite=Lax
-    AdminRefreshCookie:
-      description: 下发当前应用的刷新 Cookie。
+    AdminSessionCookie:
+      description: 下发当前 Admin Session Cookie。
       required: true
       schema:
         type: string
-      example: admin_refresh_token=opaque-refresh-token; Path=/api/v1/auth/admin; Secure; HttpOnly; SameSite=Lax
+      example: admin_session=opaque-session-id; Path=/api/v1; Secure; HttpOnly; SameSite=Lax
   responses:
-    AdminAccessTokenUnauthorized:
-      description: 后台访问令牌缺失、无效、已过期或版本已失效。
+    AdminSessionUnauthorized:
+      description: 后台 Session 缺失、无效、已过期或登录时的权限/凭证版本已失效。
       content:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetail'
-          examples:
-            UNAUTHENTICATED:
-              value:
-                type: about:blank
-                title: 未认证
-                status: 401
-                detail: 访问令牌缺失或无效
-                code: UNAUTHENTICATED
-                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
-                timestamp: '2026-11-06T14:00:00+08:00'
-            ACCESS_TOKEN_EXPIRED:
-              value:
-                type: about:blank
-                title: 未认证
-                status: 401
-                detail: 访问令牌已过期
-                code: ACCESS_TOKEN_EXPIRED
-                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
-                timestamp: '2026-11-06T14:00:00+08:00'
-            ACCESS_TOKEN_STALE:
-              value:
-                type: about:blank
-                title: 未认证
-                status: 401
-                detail: 后台访问令牌版本已过期，请刷新。
-                code: ACCESS_TOKEN_STALE
-                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
-                timestamp: '2026-11-06T14:00:00+08:00'
+          example:
+            type: about:blank
+            title: 未认证
+            status: 401
+            detail: 后台 Session 缺失或无效
+            code: UNAUTHENTICATED
+            traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+            timestamp: '2026-11-06T14:00:00+08:00'
     SessionRefreshUnauthorized:
       description: 刷新令牌缺失、无效、过期或被判定为重放。
       content:
@@ -3142,20 +3129,6 @@ components:
                 code: REFRESH_TOKEN_REPLAYED
                 traceId: 4bf92f3577b34da6a3ce929d0e0e4736
                 timestamp: '2026-11-06T14:00:00+08:00'
-    RefreshConcurrent:
-      description: 刷新令牌刚被轮换，请等待同一会话的刷新结果。
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/ProblemDetail'
-          example:
-            type: about:blank
-            title: 状态冲突
-            status: 409
-            detail: 刷新令牌刚被轮换，请等待同一会话的刷新结果。
-            code: REFRESH_ALREADY_ROTATED
-            traceId: 4bf92f3577b34da6a3ce929d0e0e4736
-            timestamp: '2026-11-06T14:00:00+08:00'
     AuthStateUnavailable:
       description: 暂时无法确认后台在线认证状态。
       content:
@@ -3171,7 +3144,7 @@ components:
             traceId: 4bf92f3577b34da6a3ce929d0e0e4736
             timestamp: '2026-11-06T14:00:00+08:00'
     AdminAuthOriginOrAccessForbidden:
-      description: 浏览器请求来源未获授权，或账号没有有效的后台角色。
+      description: 浏览器请求来源或 CSRF 校验未通过，或账号没有有效的后台角色。
       content:
         application/problem+json:
           schema:
@@ -4231,6 +4204,8 @@ components:
             type: string
             enum:
             - SUPER_ADMIN
+            - EVENT_OPERATOR
+            - CHECKIN_STAFF
     CheckInCreateRequest:
       type: object
       required:
@@ -4372,7 +4347,6 @@ components:
             - SUPER_ADMIN
             - EVENT_OPERATOR
             - CHECKIN_STAFF
-            - DATA_OPERATOR
     RoleSummary:
       type: object
       required:
@@ -4386,7 +4360,6 @@ components:
           - SUPER_ADMIN
           - EVENT_OPERATOR
           - CHECKIN_STAFF
-          - DATA_OPERATOR
         name:
           type: string
         description:

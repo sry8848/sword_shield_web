@@ -61,9 +61,10 @@
 | 大会门户 | GET | `/public/venues/{venueId}` | 会场指南 | 否 |
 | 账号认证 | POST | `/auth/register` | 用户注册（后续草案） | 否 |
 | 账号认证 | POST | `/auth/portal/login`、`/auth/admin/login` | 分别建立前后台会话 | 否 |
-| 账号认证 | POST | `/auth/portal/refresh`、`/auth/admin/refresh` | 刷新各自的访问令牌 | 各自的 Refresh Cookie |
-| 账号认证 | POST | `/auth/portal/logout`、`/auth/admin/logout` | 退出当前应用的会话 | 各自的 Refresh Cookie |
-| 账号认证 | GET | `/auth/portal/me`、`/auth/admin/me` | 当前身份 | 各自的 Access Token |
+| 账号认证 | POST | `/auth/portal/refresh` | 刷新 Portal Access Token | Portal Refresh Cookie |
+| 账号认证 | GET | `/auth/admin/csrf` | 获取 CSRF token | 无需已登录 |
+| 账号认证 | POST | `/auth/portal/logout`、`/auth/admin/logout` | 退出当前应用的会话 | Portal Refresh Cookie / Admin Session Cookie + CSRF |
+| 账号认证 | GET | `/auth/portal/me`、`/auth/admin/me` | 当前身份 | Portal Access Token / Admin Session Cookie |
 | 账号认证 | GET | `/auth/jwks` | 获取验签公钥 | 否 |
 | 普通报名 | POST | `/events/{eventId}/registrations` | 提交报名 | 是 |
 | 普通报名 | GET | `/me/registrations` | 我的报名列表 | 是 |
@@ -88,7 +89,7 @@
 | 后台与权限 | GET | `/admin/roles` | 内置角色列表 | 是 |
 | 后台与权限 | GET | `/admin/permissions` | 权限字典 | 是 |
 
-> 这里的“认证=是”表示需要访问令牌；是否具备具体操作权限还需服务端按权限码校验。
+> 这里的“认证=是”表示 Portal 使用 Access Token，Admin 使用 Session Cookie（写请求附 CSRF token）；服务端按固定角色和领域资源授权。
 
 ## 4. 页面与接口映射
 
@@ -114,7 +115,7 @@
 - 嘉宾和会场在 MVP 中只定义读取接口；其后台维护接口暂不纳入本版。
 - 普通报名不包含支付、候补、限量抢票，也暂不定义用户自主取消报名接口。
 - 核验接口采用一次请求完成“校验凭证 + 写入到场记录”的方案；是否需要先预览再确认待定。
-- RBAC 暂采用内置角色和角色分配，不包含自定义角色编辑、细粒度数据范围配置。
+- RBAC 暂采用内置角色和角色分配，不包含自定义角色编辑、通用数据范围配置；CHECKIN_STAFF 必须限制在已授权场次。
 - 统计暂提供基础数量和比例，不包含渠道归因、复杂图表和导出。
 - 上传文件接口暂不单独定义；封面字段先使用已上传文件 URL，上传方案后续单独确定。
 
