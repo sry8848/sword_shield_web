@@ -55,7 +55,10 @@ export interface paths {
         put?: never;
         /**
          * 刷新前台会话
-         * @description 每个 Refresh Token 仅轮换一次。账号和会话仍有效时，自首次成功轮换提交起 3 秒内（含 3 秒）重复提交同一旧令牌返回 409。重复请求不签发令牌、不修改 Cookie、不撤销会话、不延长窗口，前端等待同一会话的刷新结果。超过窗口则判定为重放并撤销所属会话。每次成功刷新都更新 Cookie。空闲有效期为 7 天，绝对有效期为 30 天。
+         * @description 每个 Refresh Token 仅轮换一次。有效且未消费的令牌首次轮换后返回 200、新的 Access Token 和 Set-Cookie。
+         *     账号与会话仍有效时，自该令牌首次成功轮换的事务提交起 10 秒内（含 10 秒）重复提交，返回 200 和新的 Access Token，响应省略 Set-Cookie。
+         *     重复请求保留唯一后继 Refresh Token、空闲期限、绝对期限和原宽限期。超过 10 秒再次使用旧令牌时，撤销该令牌所属会话并返回 401 REFRESH_TOKEN_REPLAYED。
+         *     账号或会话失效时拒绝刷新。空闲期限为 7 天，绝对期限为 30 天，仅实际轮换更新空闲期限。
          */
         post: operations["refreshPortal"];
         delete?: never;
@@ -1654,10 +1657,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description 轮换成功。 */
+            /** @description 刷新成功。首次轮换和宽限期内的重复请求都返回新 Access Token。 */
             200: {
                 headers: {
-                    "Set-Cookie": components["headers"]["PortalRefreshCookie"];
+                    /**
+                     * @description 首次成功轮换时下发新的 Portal Refresh Cookie。宽限期内的重复响应省略该响应头。
+                     * @example portal_refresh_token=opaque-refresh-token; Path=/api/v1/auth/portal; Secure; HttpOnly; SameSite=Lax
+                     */
+                    "Set-Cookie"?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -1668,7 +1675,6 @@ export interface operations {
             };
             401: components["responses"]["SessionRefreshUnauthorized"];
             403: components["responses"]["AuthOriginForbidden"];
-            409: components["responses"]["RefreshConcurrent"];
             429: components["responses"]["TooManyRequests"];
             /** @description 服务器内部错误 */
             500: {
