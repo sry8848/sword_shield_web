@@ -24,12 +24,13 @@ button, input { font: inherit; }
 .login-form { display: grid; gap: 0.5rem; }
 .login-form input { width: 100%; padding: 0.75rem; border: 1px solid #8a97a9; border-radius: 8px; }
 .login-form label:not(:first-child) { margin-top: 0.5rem; }
-.login-form button {
+.login-form button, .account-actions button {
   margin-top: 0.75rem; padding: 0.75rem; color: #fff; background: var(--color-primary);
   border: 0; border-radius: 8px; cursor: pointer;
 }
-.login-form button:disabled { opacity: 0.65; cursor: wait; }
+.login-form button:disabled, .account-actions button:disabled { opacity: 0.65; cursor: wait; }
 .login-error { margin: 0.25rem 0 0; color: #9c2020; }
+.account-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .identity-summary { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem 1rem; margin: 0; }
 .identity-summary dt { color: var(--color-muted); }
 .identity-summary dd { margin: 0; overflow-wrap: anywhere; }

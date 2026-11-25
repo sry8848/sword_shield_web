@@ -47,6 +47,9 @@ async function submit() {
     <h1 id="login-heading">
       登录大会门户
     </h1>
+    <p v-if="auth.sessionMessage" role="status">
+      {{ auth.sessionMessage }}
+    </p>
     <form class="login-form" @submit.prevent="submit">
       <label for="phone">手机号</label>
       <input

@@ -8,6 +8,7 @@ export interface HttpClientOptions {
   getAccessToken?: () => string | null
   refreshAccessToken?: (expiredToken: string) => Promise<string>
   onUnauthorized?: () => void
+  onRefreshError?: (error: unknown) => void
 }
 
 export class ApiError extends Error {
@@ -68,7 +69,7 @@ export function createHttpClient(options: HttpClientOptions = {}): AxiosInstance
       throw error
     }
 
-    // 3. 刷新成功后最多重试一次。刷新失败时清理对应会话并抛出错误。
+    // 3. 刷新成功后最多重试一次。由应用判断刷新错误是否结束会话。
     if (usesCurrentToken) {
       refreshing ??= options.refreshAccessToken(token)
         .then((current) => {
@@ -76,8 +77,10 @@ export function createHttpClient(options: HttpClientOptions = {}): AxiosInstance
           return current
         })
         .catch((refreshError: unknown) => {
-          if (options.getAccessToken?.() === token)
-            options.onUnauthorized?.()
+          if (options.getAccessToken?.() === token) {
+            const onRefreshError = options.onRefreshError ?? options.onUnauthorized
+            onRefreshError?.(refreshError)
+          }
           throw refreshError
         })
         .finally(() => { refreshing = undefined })

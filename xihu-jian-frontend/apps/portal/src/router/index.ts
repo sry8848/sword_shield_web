@@ -16,8 +16,20 @@ export const router = createRouter({
   ],
 })
 
-/** 访问受保护的页面时，把已匹配的站内目标交给登录页。 */
-router.beforeEach((to) => {
-  if (to.meta.requiresAuth && !useAuthStore().user)
-    return { name: 'login', query: { redirect: to.fullPath } }
+/** 访问受保护页面时等待会话恢复，未登录则保留已匹配的站内目标。 */
+router.beforeEach(async (to, from) => {
+  const auth = useAuthStore()
+  const hadIdentity = !!auth.user
+  const restoration = auth.initialize()
+  if (!to.meta.requiresAuth && to.name !== 'login')
+    return
+
+  await restoration
+  if (to.meta.requiresAuth) {
+    // 首次恢复或刚登录已经读取 me。后续进入时重新读取当前身份。
+    if (hadIdentity && from.name !== 'login')
+      await auth.loadIdentity()
+    if (!auth.user && !auth.accountError)
+      return { name: 'login', query: { redirect: to.fullPath } }
+  }
 })
