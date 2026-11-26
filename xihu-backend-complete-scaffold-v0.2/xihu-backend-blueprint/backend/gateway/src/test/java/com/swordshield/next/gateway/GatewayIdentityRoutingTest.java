@@ -87,6 +87,7 @@ class GatewayIdentityRoutingTest {
         upstream = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         upstream.createContext("/actuator/health", GatewayIdentityRoutingTest::respond);
         upstream.createContext("/api/v1/auth/portal/login", GatewayIdentityRoutingTest::respond);
+        upstream.createContext("/api/v1/auth/admin/csrf", GatewayIdentityRoutingTest::respond);
         // 超时用例会延迟响应，其他用例仍可使用同一个测试服务。
         upstreamRequests = Executors.newCachedThreadPool();
         upstream.setExecutor(upstreamRequests);
@@ -130,6 +131,22 @@ class GatewayIdentityRoutingTest {
         var upstreamProblem = request("problem");
         assertProblem(upstreamProblem, 503, "SERVICE_UNAVAILABLE");
         assertThat(upstreamProblem.body()).isEqualTo(UPSTREAM_PROBLEM);
+    }
+
+    /** 同一主机上的两种认证 Cookie 只进对应应用，其他 Cookie 原样保留。 */
+    @Test
+    void isolatesApplicationCookies() throws Exception {
+        for (String[] route : new String[][]{
+                {"/api/v1/auth/portal/login", "portal_refresh_token=portal; extra=keep"},
+                {"/api/v1/auth/admin/csrf", "admin_session=admin; extra=keep"}}) {
+            var request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + route[0]))
+                    .header("X-Test-Upstream", "cookies")
+                    .header("Cookie", "admin_session=admin; portal_refresh_token=portal; extra=keep")
+                    .build();
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.body()).isEqualTo(route[1]);
+        }
     }
 
     /** 验证当前 Gateway 版本的连接失败、提前关闭和超时行为。 */
@@ -232,6 +249,7 @@ class GatewayIdentityRoutingTest {
             boolean problem = "problem".equals(scenario);
             String body = switch (scenario) {
                 case "problem" -> UPSTREAM_PROBLEM;
+                case "cookies" -> exchange.getRequestHeaders().getFirst("Cookie");
                 case "source-address" -> exchange.getRequestHeaders().getFirst("X-Identity-Client-IP");
                 default -> exchange.getRequestHeaders().getFirst("traceparent");
             };

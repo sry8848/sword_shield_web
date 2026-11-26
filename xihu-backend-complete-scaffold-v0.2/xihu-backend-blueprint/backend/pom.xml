@@ -14,6 +14,7 @@
   <packaging>pom</packaging>
   <modules>
     <module>common</module>
+    <module>common-servlet-web</module>
     <module>gateway</module>
     <module>identity-service</module>
     <module>activity-service</module>
@@ -21,9 +22,21 @@
   <properties>
     <java.version>17</java.version>
     <spring-cloud.version>2025.1.4</spring-cloud.version>
+    <mybatis-plus.version>3.5.18.1</mybatis-plus.version>
+    <java-uuid-generator.version>5.2.0</java-uuid-generator.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.baomidou</groupId>
+        <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+        <version>${mybatis-plus.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.uuid</groupId>
+        <artifactId>java-uuid-generator</artifactId>
+        <version>${java-uuid-generator.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>

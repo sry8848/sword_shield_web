@@ -14,12 +14,26 @@ spring:
       timeout: 2s
   flyway:
     locations: classpath:db/migration
+mybatis-plus:
+  global-config:
+    banner: false
+    db-config:
+      id-type: assign_uuid
 identity:
   portal:
     issuer: "${IDENTITY_PORTAL_ISSUER:http://localhost:8080}"
     private-key: "${IDENTITY_PORTAL_PRIVATE_KEY}"
     origin: "${IDENTITY_PORTAL_ORIGIN:http://localhost:5173}"
     trusted-gateway-ip: "${IDENTITY_PORTAL_TRUSTED_GATEWAY_IP:127.0.0.1}"
+    login-phone-limit: 5
+    login-ip-limit: 30
+    login-window: 60s
+  admin:
+    origin: "${IDENTITY_ADMIN_ORIGIN:http://localhost:5174}"
+    trusted-gateway-ip: "${IDENTITY_ADMIN_TRUSTED_GATEWAY_IP:127.0.0.1}"
+    secure-cookie: "${IDENTITY_ADMIN_SECURE_COOKIE:false}"
+    session-namespace: "${IDENTITY_ADMIN_SESSION_NAMESPACE:xihu:admin:session}"
+    session-idle-timeout: 8h
     login-phone-limit: 5
     login-ip-limit: 30
     login-window: 60s

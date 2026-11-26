@@ -9,6 +9,7 @@ import java.time.Instant;
 import com.swordshield.next.common.ApiEnvelope;
 import com.swordshield.next.common.BusinessException;
 import com.swordshield.next.common.FailureKind;
+import com.swordshield.next.identity.application.AdminAuthentication;
 import com.swordshield.next.identity.application.PortalAuthentication;
 import io.micrometer.tracing.Tracer;
 import jakarta.validation.Valid;
@@ -52,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 })
 @ActiveProfiles("test")
 @Import(IdentityMvcErrorsTest.TestController.class)
-@MockitoBean(types = {PortalAuthentication.class, PortalAuthentication.Store.class})
+@MockitoBean(types = {PortalAuthentication.class, PortalAuthentication.Store.class, AdminAuthentication.Store.class})
 @ExtendWith(OutputCaptureExtension.class)
 class IdentityMvcErrorsTest {
 
@@ -288,7 +289,7 @@ class IdentityMvcErrorsTest {
         // 2. 取出该请求唯一的堆栈日志，核对 MDC 自动输出的追踪字段。
         var logs = output.getOut().lines()
                 .filter(line -> line.contains(traceId(body))
-                        && (line.contains("\"stack_trace\"") || line.contains("Identity MVC 未预期异常")))
+                        && (line.contains("\"stack_trace\"") || line.contains("MVC 未预期异常")))
                 .map(mapper::readTree)
                 .toList();
         assertThat(logs).hasSize(1);
@@ -299,6 +300,8 @@ class IdentityMvcErrorsTest {
         assertThat(logs.get(0).path("span.id").isString()).isTrue();
         assertThat(logs.get(0).path("trace.id").asString()).isEqualTo(traceId(body));
         assertThat(logs.get(0).path("span.id").asString()).matches("[0-9a-f]{16}");
+        assertThat(logs.get(0).path("http").path("response").path("status_code").asInt()).isEqualTo(500);
+        assertThat(logs.get(0).path("swordshield").path("error").path("code").asString()).isEqualTo("INTERNAL_ERROR");
         assertThat(logs.get(0).has("traceId") || logs.get(0).has("spanId")).isFalse();
         JsonNode error = logs.get(0).path("error");
         assertThat(error.path("type").asString()).isEqualTo("java.lang.IllegalStateException");

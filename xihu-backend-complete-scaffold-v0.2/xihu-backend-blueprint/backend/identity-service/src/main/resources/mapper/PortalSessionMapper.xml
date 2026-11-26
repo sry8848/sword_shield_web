@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.swordshield.next.identity.infrastructure.PortalSessionMapper">
+    <select id="lockSession" resultType="string">
+        SELECT id FROM identity_session
+        WHERE id = (SELECT session_id FROM identity_refresh_token WHERE token_hash = #{hash})
+            AND client_type = 'PORTAL'
+        FOR UPDATE
+    </select>
+
+    <!-- 锁定读可看到上次轮换刚提交的消费时间，避免使用等锁前的快照。 -->
+    <select id="selectRefreshState" resultType="com.swordshield.next.identity.infrastructure.PortalSessionMapper$LockedRefresh">
+        SELECT a.id AS account_id, a.phone, a.status = 'ENABLED' AS enabled,
+            a.credential_version AS account_version, s.credential_version AS session_version,
+            a.permission_version, s.revoked_at IS NOT NULL AS revoked, UTC_TIMESTAMP(3) AS current_utc,
+            s.idle_expires_at, s.absolute_expires_at, t.expires_at, t.consumed_at
+        FROM identity_session s
+        JOIN identity_account a ON a.id = s.account_id
+        JOIN identity_refresh_token t ON t.session_id = s.id
+        WHERE s.id = #{id} AND t.token_hash = #{hash}
+        FOR SHARE OF a, t
+    </select>
+
+    <insert id="insertRefreshToken">
+        INSERT INTO identity_refresh_token (token_hash, session_id, issued_at, expires_at)
+        VALUES (#{hash}, #{id}, #{issuedAt}, #{expiresAt})
+    </insert>
+
+    <update id="consumeRefreshToken">
+        UPDATE identity_refresh_token SET consumed_at = UTC_TIMESTAMP(3)
+        WHERE token_hash = #{hash}
+    </update>
+
+    <update id="updateLastUse">
+        UPDATE identity_session SET last_used_at = #{lastUsedAt}, idle_expires_at = #{idleDeadline}
+        WHERE id = #{id}
+    </update>
+
+    <update id="revokeActiveSession">
+        UPDATE identity_session SET revoked_at = UTC_TIMESTAMP(3)
+        WHERE id = #{id} AND revoked_at IS NULL
+            AND idle_expires_at &gt; UTC_TIMESTAMP(3) AND absolute_expires_at &gt; UTC_TIMESTAMP(3)
+    </update>
+
+    <insert id="insertReplayAudit">
+        INSERT INTO identity_portal_refresh_replay_audit (session_id, account_id, trace_id, occurred_at)
+        VALUES (#{sessionId}, #{accountId}, #{traceId}, UTC_TIMESTAMP(3))
+    </insert>
+</mapper>

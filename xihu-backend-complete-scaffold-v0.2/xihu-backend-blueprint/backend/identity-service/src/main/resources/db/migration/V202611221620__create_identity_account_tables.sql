@@ -1,5 +1,5 @@
 CREATE TABLE identity_account (
-    id BIGINT NOT NULL AUTO_INCREMENT,
+    id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     phone VARCHAR(11) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     status VARCHAR(16) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE identity_account (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_bin;
 
 CREATE TABLE identity_role (
-    id BIGINT NOT NULL AUTO_INCREMENT,
+    id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     code VARCHAR(64) NOT NULL,
     created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
@@ -27,8 +27,8 @@ CREATE TABLE identity_role (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_bin;
 
 CREATE TABLE identity_account_role (
-    account_id BIGINT NOT NULL,
-    role_id BIGINT NOT NULL,
+    account_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    role_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     PRIMARY KEY (account_id, role_id),
     INDEX idx_identity_account_role_role_id (role_id),
@@ -38,4 +38,5 @@ CREATE TABLE identity_account_role (
         REFERENCES identity_role (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_bin;
 
-INSERT INTO identity_role (code) VALUES ('SUPER_ADMIN');
+INSERT INTO identity_role (id, code)
+VALUES ('01935f3a-7b2c-7abc-8def-000000000001', 'SUPER_ADMIN');

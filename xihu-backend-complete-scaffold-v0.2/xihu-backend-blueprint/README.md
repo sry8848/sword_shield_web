@@ -30,12 +30,13 @@ MVP 缩小首期交付范围，各项工程和安全约束仍适用。对未来�
 
 | Maven 模块 | 当前内容 | 默认端口 |
 | --- | --- | --- |
-| `gateway` | Spring Cloud Gateway 启动入口、健康检查和请求追踪 | 8080 |
-| `identity-service` | 账号基础表与迁移、健康检查、请求追踪和 MVC 全局异常处理 | 8081 |
-| `activity-service` | 活动服务启动入口和健康检查 | 8082 |
-| `common` | 通用成功响应 `ApiEnvelope<T>`、失败类别 `FailureKind` 和业务异常 `BusinessException` | — |
+| `gateway` | WebFlux 网关、Portal 认证路由、健康检查和请求追踪 | 8080 |
+| `identity-service` | MyBatis-Plus 与 Flyway、Portal 登录和会话、Admin 服务内会话接口、健康检查和请求追踪 | 8081 |
+| `activity-service` | 启动入口、健康检查、MVC 错误响应和请求追踪 | 8082 |
+| `common` | 框架无关的成功响应、业务失败类型和 UUIDv7 生成入口 | — |
+| `common-servlet-web` | Identity 与 Activity 显式导入的 MVC 异常处理、校验和 TraceId | — |
 
-业务接口、网关转发规则和认证随实际用例接入。三个服务各有独立启动入口，健康检查用于验证服务存活。历史演示的交付记录见 [VALIDATION.md](VALIDATION.md)。
+Admin 的 Gateway ForwardAuth 及前端联调、Activity 的业务接口随用例落地。历史演示的交付记录见 [VALIDATION.md](VALIDATION.md)。
 
 本地验证需要 JDK 17 或以上版本和 Maven。在 `backend/` 执行：
 
@@ -46,9 +47,9 @@ mvn -B clean verify
 构建完成后可分别运行以下命令，每个进程占用一个终端：
 
 ```powershell
-mvn -pl gateway spring-boot:run
+java -jar gateway/target/gateway-0.1.0-SNAPSHOT.jar
 java -jar identity-service/target/identity-service-0.1.0-SNAPSHOT.jar --spring.profiles.active=dev
-mvn -pl activity-service spring-boot:run
+java -jar activity-service/target/activity-service-0.1.0-SNAPSHOT.jar
 ```
 
 服务启动后，分别访问 `http://localhost:8080/actuator/health`、`http://localhost:8081/actuator/health` 和 `http://localhost:8082/actuator/health`。
@@ -63,18 +64,21 @@ mvn -pl activity-service spring-boot:run
 | `test` | `IDENTITY_TEST_DB_URL` | `IDENTITY_TEST_DB_USERNAME` | `IDENTITY_TEST_DB_PASSWORD` |
 | `prod` | `IDENTITY_PROD_DB_URL` | `IDENTITY_PROD_DB_USERNAME` | `IDENTITY_PROD_DB_PASSWORD` |
 
+**UUIDv7 开发基线。** 若本地库已执行旧主键迁移，先确认 `dev` Profile、JDBC 主机和库名，停止连接该库的旧版 Identity，重新创建可丢弃的本地 Schema，或创建一个新的空 Schema 并调整 `IDENTITY_DEV_DB_URL`。启动新版后 Flyway 会重建表并写入固定测试种子。旧数据不做转换。验证用的 `test` 库也从空库初始化。发布后的库通过新增迁移版本演进。
+
 设置 `test` 的连接变量后，`mvn -B verify` 会运行真实 MySQL 集成测试。`dev` 和 `test` 的普通账号为 `13800000001`，密码 `LocalPortal-Only!2026`。测试管理员为 `13800000002`，密码 `LocalAdmin-Only!2026`。
 
-生产环境正式迁移完成后，在交互式终端离线生成管理员哈希。
+生产环境正式迁移完成后，在交互式终端离线生成管理员 UUIDv7 和哈希。
 
 ```powershell
+java -jar identity-service/target/identity-service-0.1.0-SNAPSHOT.jar --generate-id
 java -jar identity-service/target/identity-service-0.1.0-SNAPSHOT.jar --encode-password
 ```
 
-把[生产预置模板](backend/identity-service/ops/sql/provision_super_admin.sql)复制到仓库外，填写负责人的手机号和刚生成的哈希。在 `cmd.exe` 使用 MySQL 批处理执行模板，`--no-defaults` 避免本机选项文件改变遇错退出行为。
+把[生产预置模板](backend/identity-service/ops/sql/provision_super_admin.sql)复制到仓库外，填写刚生成的 UUIDv7、负责人手机号和哈希。在 `cmd.exe` 使用 MySQL 批处理执行模板，`--no-defaults` 避免本机选项文件改变遇错退出行为。
 
 ```bat
 mysql --no-defaults --host=PROD_DB_HOST --user=PROVISIONER --password --database=IDENTITY_DB < C:\secure\provision_super_admin.sql
 ```
 
-表字段、约束及版本策略见[账号基础数据建模](../../docs/设计/登录设计/账号基础数据建模/账号基础数据建模_2026-11-22_16-20.md)。
+表字段、约束及版本策略见[账号基础数据建模变更记录](../../docs/设计/登录设计/账号基础数据建模/账号基础数据建模变更记录.md)的最新版本。

@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.swordshield.next.common.UuidV7Ids;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
@@ -79,7 +80,8 @@ class IdentityAccountDataTest {
         assertCheckRejected(() -> insertAccount(TEST_PHONE, "plaintext"));
         assertCheckRejected(() -> insertAccount(TEST_PHONE, ""));
         for (String invalidCode : new String[]{"", " ", "super_admin", "SUPER_ADMIN ", "OPS\n"}) {
-            assertCheckRejected(() -> jdbc.update("INSERT INTO identity_role (code) VALUES (?)", invalidCode));
+            assertCheckRejected(() -> jdbc.update("INSERT INTO identity_role (id, code) VALUES (?, ?)",
+                    UuidV7Ids.next(), invalidCode));
         }
         assertThatThrownBy(() -> jdbc.update("""
                 INSERT INTO identity_account_role (account_id, role_id)
@@ -93,9 +95,9 @@ class IdentityAccountDataTest {
         // 1. 写入一个时间明确的账号，避免测试依赖睡眠和数据库时钟精度。
         LocalDateTime originalTime = LocalDateTime.of(2020, 1, 1, 0, 0);
         jdbc.update("""
-                INSERT INTO identity_account (phone, password_hash, status, created_at, updated_at)
-                VALUES (?, ?, 'ENABLED', ?, ?)
-                """, TEST_PHONE, hashOf(PORTAL_PHONE), originalTime, originalTime);
+                INSERT INTO identity_account (id, phone, password_hash, status, created_at, updated_at)
+                VALUES (?, ?, ?, 'ENABLED', ?, ?)
+                """, UuidV7Ids.next(), TEST_PHONE, hashOf(PORTAL_PHONE), originalTime, originalTime);
 
         // 2. 更新账号后，创建时间保留，更新时间由数据库生成。
         jdbc.update("UPDATE identity_account SET status = 'DISABLED' WHERE phone = ?", TEST_PHONE);
@@ -130,6 +132,7 @@ class IdentityAccountDataTest {
 
     /** 用给定手机号和哈希尝试插入启用账号。 */
     private void insertAccount(String phone, String hash) {
-        jdbc.update("INSERT INTO identity_account (phone, password_hash, status) VALUES (?, ?, 'ENABLED')", phone, hash);
+        jdbc.update("INSERT INTO identity_account (id, phone, password_hash, status) VALUES (?, ?, ?, 'ENABLED')",
+                UuidV7Ids.next(), phone, hash);
     }
 }

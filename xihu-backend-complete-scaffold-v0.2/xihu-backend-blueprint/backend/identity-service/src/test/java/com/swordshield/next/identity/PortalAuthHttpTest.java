@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -18,6 +19,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.swordshield.next.common.UuidV7Ids;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +100,11 @@ class PortalAuthHttpTest {
         assertThat(claims.getExpirationTime().toInstant()).isEqualTo(claims.getIssueTime().toInstant().plusSeconds(600));
         assertThat(claims.getAudience()).containsExactly("portal-api");
         String sessionId = claims.getStringClaim("sid");
+        assertThat(sessionId).hasSize(36);
+        UUID persistedSessionId = UUID.fromString(sessionId);
+        assertThat(persistedSessionId.toString()).isEqualTo(sessionId);
+        assertThat(persistedSessionId.version()).isEqualTo(7);
+        assertThat(persistedSessionId.variant()).isEqualTo(2);
         byte[] digest = MessageDigest.getInstance("SHA-256").digest(refresh.getBytes(StandardCharsets.US_ASCII));
         assertThat(jdbc.queryForObject("SELECT token_hash FROM identity_refresh_token WHERE session_id = ?",
                 byte[].class, sessionId)).isEqualTo(digest);
@@ -109,6 +116,9 @@ class PortalAuthHttpTest {
         assertThat(me.statusCode()).isEqualTo(200);
         assertThat(json.readTree(me.body()).path("data")).isEqualTo(session.path("user"));
         assertThat(session.path("user").path("maskedPhone").asString()).isEqualTo("138****0001");
+        assertThat(session.path("user").path("id").isString()).isTrue();
+        assertThat(session.path("user").path("id").asString())
+                .isEqualTo(claims.getSubject()).isEqualTo("01935f3a-7b2c-7abc-8def-000000000011");
         assertProblem(get(AUTH + "/me", null), 401, "UNAUTHENTICATED");
         assertProblem(get(AUTH + "/me", "invalid"), 401, "UNAUTHENTICATED");
         assertProblem(get(AUTH + "/me", fixtureToken(key, "admin-api", Instant.now().plusSeconds(60))),
@@ -125,8 +135,9 @@ class PortalAuthHttpTest {
         String ip = "192.0.2.81";
         redis.delete(List.of(REDIS_PREFIX + "phone:" + PHONE, REDIS_PREFIX + "phone:" + disabled,
                 REDIS_PREFIX + "phone:" + unknown, REDIS_PREFIX + "ip:" + ip));
-        jdbc.update("INSERT INTO identity_account (phone, password_hash, status) "
-                + "SELECT ?, password_hash, 'DISABLED' FROM identity_account WHERE phone = ?", disabled, PHONE);
+        jdbc.update("INSERT INTO identity_account (id, phone, password_hash, status) "
+                + "SELECT ?, ?, password_hash, 'DISABLED' FROM identity_account WHERE phone = ?",
+                UuidV7Ids.next(), disabled, PHONE);
         try {
             // 1. 三类凭证失败得到完全相同的公开语义。
             for (var response : List.of(login(PHONE, "wrong-password", ip), login(unknown, PASSWORD, ip),
@@ -254,8 +265,9 @@ class PortalAuthHttpTest {
         String phone = "13990000004";
         redis.delete(List.of(REDIS_PREFIX + "phone:" + phone, REDIS_PREFIX + "ip:192.0.2.105",
                 REDIS_PREFIX + "ip:192.0.2.106", REDIS_PREFIX + "ip:192.0.2.107"));
-        jdbc.update("INSERT INTO identity_account (phone, password_hash, status) SELECT ?, password_hash, 'ENABLED' FROM identity_account WHERE phone = ?",
-                phone, PHONE);
+        jdbc.update("INSERT INTO identity_account (id, phone, password_hash, status) "
+                + "SELECT ?, ?, password_hash, 'ENABLED' FROM identity_account WHERE phone = ?",
+                UuidV7Ids.next(), phone, PHONE);
         try {
             var beforeDisable = login(phone, PASSWORD, "192.0.2.105");
             var disabledDevice = login(phone, PASSWORD, "192.0.2.106");

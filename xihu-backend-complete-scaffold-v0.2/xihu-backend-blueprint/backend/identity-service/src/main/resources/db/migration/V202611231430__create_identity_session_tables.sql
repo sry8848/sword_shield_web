@@ -1,6 +1,6 @@
 CREATE TABLE identity_session (
-    id CHAR(36) NOT NULL,
-    account_id BIGINT NOT NULL,
+    id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    account_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     client_type VARCHAR(16) NOT NULL,
     credential_version INT NOT NULL,
     created_at DATETIME(3) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE identity_session (
 
 CREATE TABLE identity_refresh_token (
     token_hash BINARY(32) NOT NULL,
-    session_id CHAR(36) NOT NULL,
+    session_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     issued_at DATETIME(3) NOT NULL,
     expires_at DATETIME(3) NOT NULL,
     PRIMARY KEY (token_hash),

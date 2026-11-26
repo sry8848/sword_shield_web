@@ -8,4 +8,10 @@
     <version>0.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>common</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>com.fasterxml.uuid</groupId>
+      <artifactId>java-uuid-generator</artifactId>
+    </dependency>
+  </dependencies>
 </project>

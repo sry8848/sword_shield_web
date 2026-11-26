@@ -9,3 +9,6 @@ identity:
     origin: "${IDENTITY_PORTAL_ORIGIN}"
     trusted-gateway-ip: "${IDENTITY_PORTAL_TRUSTED_GATEWAY_IP}"
     secure-cookie: true
+  admin:
+    origin: "${IDENTITY_ADMIN_ORIGIN}"
+    secure-cookie: true

@@ -1,7 +1,19 @@
 spring:
+  config:
+    import:
+      - "optional:file:.env[.properties]"
+      - "optional:file:../.env[.properties]"
   datasource:
-    url: ${IDENTITY_DEV_DB_URL}
-    username: ${IDENTITY_DEV_DB_USERNAME}
-    password: ${IDENTITY_DEV_DB_PASSWORD}
+    url: ${IDENTITY_DEV_DB_URL:jdbc:mysql://127.0.0.1:3306/identitydev}
+    username: ${IDENTITY_DEV_DB_USERNAME:identity_dev_app}
+    password: ${IDENTITY_DEV_DB_PASSWORD:}
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:127.0.0.1}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
   flyway:
     locations: classpath:db/migration,classpath:db/seed
+identity:
+  portal:
+    private-key: "${IDENTITY_PORTAL_PRIVATE_KEY:file:./.local/identity-dev.pem}"

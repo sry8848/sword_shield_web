@@ -48,6 +48,9 @@ spring:
                 - Method=GET
               filters:
                 - SetPath=/actuator/health
+gateway:
+  admin:
+    enabled: true
 
 ---
 spring:

@@ -17,27 +17,36 @@ class PortalAuthRoutes {
     @Bean
     RouteLocator portalAuth(RouteLocatorBuilder routes,
             @Value("${gateway.identity-uri:http://127.0.0.1:8081}") String identityUri,
-            @Value("${gateway.portal.trusted-proxy-ip:}") String trustedProxyIp) {
+            @Value("${gateway.portal.trusted-proxy-ip:}") String trustedProxyIp,
+            @Value("${gateway.portal.host:}") String portalHost) {
         return routes.routes()
-                .route("portal-login", route -> route.path("/api/v1/auth/portal/login")
+                .route("portal-login", route -> AdminAuthRoutes.onHost(route.path("/api/v1/auth/portal/login"), portalHost)
                         .filters(filters -> filters.filter((exchange, chain) -> {
                             // 外部请求提供的同名地址头始终由网关重新设置。
                             var request = exchange.getRequest().mutate()
-                                    .headers(headers -> headers.set("X-Identity-Client-IP", clientIp(exchange, trustedProxyIp)))
+                                    .headers(headers -> {
+                                        AuthCookies.remove(headers, AuthCookies.ADMIN);
+                                        headers.set("X-Identity-Client-IP", clientIp(exchange, trustedProxyIp));
+                                    })
                                     .build();
                             return chain.filter(exchange.mutate().request(request).build());
                         }))
                         .metadata(GatewayAccessLog.TARGET_SERVICE, "identity-service")
                         .uri(identityUri))
-                .route("portal-identity", route -> route.path("/api/v1/auth/portal/me", "/api/v1/auth/jwks",
-                                "/api/v1/auth/portal/refresh", "/api/v1/auth/portal/logout")
+                .route("portal-identity", route -> AdminAuthRoutes.onHost(route.path("/api/v1/auth/portal/me", "/api/v1/auth/jwks",
+                                "/api/v1/auth/portal/refresh", "/api/v1/auth/portal/logout"), portalHost)
+                        .filters(filters -> filters.filter((exchange, chain) -> {
+                            var request = exchange.getRequest().mutate()
+                                    .headers(headers -> AuthCookies.remove(headers, AuthCookies.ADMIN)).build();
+                            return chain.filter(exchange.mutate().request(request).build());
+                        }))
                         .metadata(GatewayAccessLog.TARGET_SERVICE, "identity-service")
                         .uri(identityUri))
                 .build();
     }
 
     /** 取直接对端地址，或取明确配置的反向代理加在转发链尾部的地址。 */
-    private static String clientIp(ServerWebExchange exchange, String trustedProxyIp) {
+    static String clientIp(ServerWebExchange exchange, String trustedProxyIp) {
         // 1. 只有眼前的网络对端是受信代理，才读取其写入的地址。
         String peer = exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
         var forwarded = exchange.getRequest().getHeaders().getOrEmpty("X-Forwarded-For");

@@ -1,8 +1,8 @@
 ALTER TABLE identity_refresh_token ADD COLUMN consumed_at DATETIME(3);
 
 CREATE TABLE identity_portal_refresh_replay_audit (
-    session_id CHAR(36) NOT NULL,
-    account_id BIGINT NOT NULL,
+    session_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    account_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     trace_id CHAR(32) NOT NULL,
     occurred_at DATETIME(3) NOT NULL,
     PRIMARY KEY (session_id)

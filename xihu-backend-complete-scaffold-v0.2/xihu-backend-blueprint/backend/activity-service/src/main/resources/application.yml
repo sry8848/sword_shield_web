@@ -8,3 +8,29 @@ management:
     web:
       exposure:
         include: health
+  tracing:
+    propagation:
+      type: w3c
+    export:
+      otlp:
+        enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "test | prod"
+  main:
+    banner-mode: "off"
+
+logging:
+  structured:
+    format:
+      console: ecs
+    ecs:
+      service:
+        version: ${APP_VERSION:unknown}
+    json:
+      rename:
+        traceId: trace.id
+        spanId: span.id

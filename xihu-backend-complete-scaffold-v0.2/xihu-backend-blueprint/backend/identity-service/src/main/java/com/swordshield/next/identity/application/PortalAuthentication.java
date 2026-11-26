@@ -64,13 +64,12 @@ public class PortalAuthentication {
         // 3. 生成首个续期凭证和两项会话期限。
         String refreshToken = newRefreshToken();
         Instant createdAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        String sessionId = UUID.randomUUID().toString();
-        var session = new NewSession(sessionId, account.id(), account.credentialVersion(), createdAt,
+        var session = new NewSession(account.id(), account.credentialVersion(), createdAt,
                 createdAt.plus(REFRESH_IDLE), createdAt.plus(SESSION_MAX_AGE));
 
         // 4. 原子保存会话和凭证哈希。JWT 签发失败时也回滚此次会话写入。
         return transaction.execute(status -> {
-            store.createSession(session, hash(refreshToken));
+            String sessionId = store.createSession(session, hash(refreshToken));
             String accessToken = accessTokens.issue(sessionId, account.id(), account.credentialVersion(),
                     account.permissionVersion(), createdAt);
             return new SessionTokens(accessToken, refreshToken, REFRESH_IDLE, profile(account.id(), phone));
@@ -176,7 +175,7 @@ public class PortalAuthentication {
 
         Optional<String> findPhoneById(String id);
 
-        void createSession(NewSession session, byte[] tokenHash);
+        String createSession(NewSession session, byte[] tokenHash);
 
         Optional<String> lockSession(byte[] tokenHash);
 
@@ -200,7 +199,7 @@ public class PortalAuthentication {
     public record Account(String id, String passwordHash, boolean enabled, int credentialVersion, int permissionVersion) {
     }
 
-    public record NewSession(String id, String accountId, int credentialVersion, Instant createdAt,
+    public record NewSession(String accountId, int credentialVersion, Instant createdAt,
             Instant idleExpiresAt, Instant absoluteExpiresAt) {
     }
 
