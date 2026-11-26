@@ -9,6 +9,7 @@ const expiredMessage = '登录已失效，请重新登录'
 
 export const useAuthStore = defineStore('portal-auth', () => {
   const user = ref<UserProfile | null>(null)
+  const ready = ref(false)
   const accountError = ref('')
   const sessionMessage = ref('')
   const cookieClient = createHttpClient({ baseURL })
@@ -21,7 +22,9 @@ export const useAuthStore = defineStore('portal-auth', () => {
 
   /** 启动时每个标签页只尝试一次恢复，受保护路由等待同一个结果。 */
   function initialize() {
-    return restoration ??= restore()
+    return restoration ??= restore().finally(() => {
+      ready.value = true
+    })
   }
 
   /** 使用登录 Cookie 建立会话，确认身份后由登录页跳转。 */
@@ -143,7 +146,7 @@ export const useAuthStore = defineStore('portal-auth', () => {
     sessionMessage.value = message
   }
 
-  return { user, accountError, sessionMessage, initialize, loadIdentity, retryAccount, login, logout }
+  return { user, ready, accountError, sessionMessage, initialize, loadIdentity, retryAccount, login, logout }
 })
 
 /** 只有服务端确认刷新凭证失效时，才结束当前登录。 */
@@ -153,5 +156,5 @@ function isInvalidRefresh(error: unknown): error is ApiError {
 }
 
 function accountErrorMessage(error: unknown) {
-  return error instanceof ApiError ? error.message : '暂时无法读取账号，请稍后重试'
+  return error instanceof ApiError && error.status && error.status < 500 ? error.message : '暂时无法读取账号，请稍后重试'
 }

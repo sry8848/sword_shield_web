@@ -54,13 +54,13 @@ it('权限不足时保留 HTTP 状态、错误码和追踪信息', async () => {
     throw Object.assign(new Error('Forbidden'), {
       isAxiosError: true,
       config,
-      response: { status: 403, data: { code: 'FORBIDDEN', detail: '权限不足', traceId: 'trace-403' } },
+      response: { status: 403, data: { code: 'FORBIDDEN', title: '禁止访问', detail: '权限不足', traceId: 'trace-403' } },
     })
   }
 
   // 2. 验证错误转换保留排查信息，权限错误不触发认证刷新。
   await expect(request(client, { url: '/protected' }))
     .rejects
-    .toMatchObject({ status: 403, code: 'FORBIDDEN', traceId: 'trace-403', message: '权限不足' })
+    .toMatchObject({ status: 403, code: 'FORBIDDEN', traceId: 'trace-403', title: '禁止访问', message: '权限不足' })
   expect(refresh).not.toHaveBeenCalled()
 })

@@ -18,7 +18,7 @@ export class ApiError extends Error {
     public status?: number,
     public traceId?: string,
     public timestamp?: string,
-    public details?: Record<string, unknown>,
+    public title?: string,
     public errors?: ApiErrorResponse['errors'],
   ) {
     super(message)
@@ -118,7 +118,7 @@ export async function request<T>(client: AxiosInstance, config: AxiosRequestConf
         response?.status,
         payload?.traceId,
         payload?.timestamp,
-        payload?.details,
+        payload?.title,
         payload?.errors,
       )
     }

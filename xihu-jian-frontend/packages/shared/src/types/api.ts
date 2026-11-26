@@ -15,5 +15,4 @@ type ProblemDetail = components['schemas']['ProblemDetail']
 
 export interface ApiErrorResponse extends Partial<ProblemDetail> {
   message?: string
-  details?: Record<string, unknown>
 }

@@ -18,19 +18,19 @@ test('普通测试账号通过真实服务登录并返回受保护的身份页',
   // 1. 游客能看到公开页，进入账号页时返回登录表单。
   await page.goto('/')
   await expect(page.getByRole('heading', { name: '西湖论剑 · 大会门户' })).toBeVisible()
-  await page.getByRole('link', { name: '我的账号' }).click()
+  await page.goto('/account')
   await expect(page).toHaveURL(/\/login\?redirect=\/account/)
 
   // 2. 错误密码反馈来自真实 API，随后用同一测试账号完成登录。
   await page.getByLabel('手机号').fill('13800000001')
-  await page.getByLabel('密码').fill('wrong-password')
+  await page.getByLabel('密码', { exact: true }).fill('wrong-password')
   await page.getByRole('button', { name: '登录', exact: true }).click()
   await expect(page.getByRole('alert')).toHaveText('账号或密码错误')
-  await page.getByLabel('密码').fill('LocalPortal-Only!2026')
+  await page.getByLabel('密码', { exact: true }).fill('LocalPortal-Only!2026')
   const identity = page.waitForResponse(response => response.url().endsWith('/api/v1/auth/portal/me'))
   await page.getByRole('button', { name: '登录', exact: true }).click()
   expect((await identity).status()).toBe(200)
-  await expect(page).toHaveURL(/\/account$/)
+  await expect(page).toHaveURL('/account')
   await expect(page.getByText('138****0001')).toBeVisible()
 
   // 3. 浏览器持有专用续期 Cookie，JavaScript 无法读取该 Cookie。
@@ -41,10 +41,12 @@ test('普通测试账号通过真实服务登录并返回受保护的身份页',
   expect(refresh?.sameSite).toBe('Lax')
 })
 
-test('重开 Portal 后恢复身份，过期时自动续期，退出后回到登录页', async ({ page, context }) => {
+test('重开 Portal 后恢复身份，过期时自动续期，退出后回到大会首页', async ({ page, context }) => {
   const key = await testSigningKey()
   await signIn(page)
+  const restored = page.waitForResponse(response => response.url().endsWith('/refresh'))
   await page.reload()
+  expect((await restored).status()).toBe(200)
   await expect(page.getByText(portalAccount)).toBeVisible()
 
   const reopened = await context.newPage()
@@ -57,7 +59,8 @@ test('重开 Portal 后恢复身份，过期时自动续期，退出后回到登
   const expired = reopened.waitForResponse(response => response.url().endsWith('/me') && response.status() === 401)
   const refreshed = reopened.waitForResponse(response => response.url().endsWith('/refresh'))
   const retried = reopened.waitForResponse(response => response.url().endsWith('/me') && response.status() === 200)
-  await reopened.getByRole('link', { name: '我的账号' }).click()
+  await reopened.getByText('我的', { exact: true }).click()
+  await reopened.getByRole('link', { name: '个人概览' }).click()
   expect((await (await expired).json()).code).toBe('ACCESS_TOKEN_EXPIRED')
   expect((await refreshed).status()).toBe(200)
   expect((await retried).status()).toBe(200)
@@ -67,15 +70,17 @@ test('重开 Portal 后恢复身份，过期时自动续期，退出后回到登
   await peer.goto('/account')
   await expect(peer.getByText(portalAccount)).toBeVisible()
 
+  await reopened.getByText('我的', { exact: true }).click()
   await reopened.getByRole('button', { name: '退出登录' }).click()
-  await expect(reopened).toHaveURL(/\/login/)
+  await expect(reopened).toHaveURL(/5173\/$/)
   expect((await context.cookies(portalAuthUrl)).some(cookie => cookie.name === 'portal_refresh_token')).toBe(false)
 
   // 另一标签页持有自己的 Access Token，在下次续期失败时自行清理。
   await expect(peer.getByText(portalAccount)).toBeVisible()
   await peer.getByRole('link', { name: '西湖论剑', exact: true }).click()
   await expireNextIdentityRequest(peer, key)
-  await peer.getByRole('link', { name: '我的账号' }).click()
+  await peer.getByText('我的', { exact: true }).click()
+  await peer.getByRole('link', { name: '个人概览' }).click()
   await expect(peer).toHaveURL(/\/login/)
   await expect(peer.getByRole('status')).toHaveText('登录已失效，请重新登录')
   await reopened.goto('/account')
@@ -125,11 +130,14 @@ test('两个标签页用同一个旧 Cookie 恢复，只有一个换 Cookie，�
   await first.getByRole('link', { name: '西湖论剑', exact: true }).click()
   await expireNextIdentityRequest(first, key)
   const followUp = first.waitForResponse(response => response.url().endsWith('/refresh'))
-  await first.getByRole('link', { name: '我的账号' }).click()
+  await first.getByText('我的', { exact: true }).click()
+  await first.getByRole('link', { name: '个人概览' }).click()
   expect((await followUp).status()).toBe(200)
   await expect(first.getByText(portalAccount)).toBeVisible()
 
-  await second.goto('/login')
+  await second.getByText('我的', { exact: true }).click()
+  await second.getByRole('button', { name: '退出登录' }).click()
+  await expect(second).toHaveURL('http://localhost:5173/')
   await signIn(second, '13800000002', 'LocalAdmin-Only!2026')
   await expect(second.getByText('138****0002')).toBeVisible()
   await first.getByRole('link', { name: '西湖论剑', exact: true }).click()
@@ -139,7 +147,8 @@ test('两个标签页用同一个旧 Cookie 恢复，只有一个换 Cookie，�
     if (request.url().endsWith('/me'))
       identityRequests++
   })
-  await first.getByRole('link', { name: '我的账号' }).click()
+  await first.getByText('我的', { exact: true }).click()
+  await first.getByRole('link', { name: '个人概览' }).click()
   await expect(first).toHaveURL(/\/login/)
   await expect(first.getByRole('status')).toHaveText('登录账号已变更，请重新登录')
   await expect(first.getByText('138****0002')).toHaveCount(0)
@@ -156,8 +165,9 @@ test('刷新暂时失败时保留登录态，退出时取消迟到的私有请�
     contentType: 'application/problem+json',
     json: { code: 'SERVICE_UNAVAILABLE', detail: '服务暂不可用，请稍后重试' },
   }), { times: 1 })
-  await page.getByRole('link', { name: '我的账号' }).click()
-  await expect(page.getByRole('alert')).toHaveText('服务暂不可用，请稍后重试')
+  await page.getByText('我的', { exact: true }).click()
+  await page.getByRole('link', { name: '个人概览' }).click()
+  await expect(page.getByRole('alert')).toHaveText('暂时无法读取账号，请稍后重试')
   await expect(page.getByText(portalAccount)).toBeVisible()
 
   // 1. 退出结果暂时无法确认时，保留身份和 Cookie 供重试。
@@ -166,8 +176,9 @@ test('刷新暂时失败时保留登录态，退出时取消迟到的私有请�
     contentType: 'application/problem+json',
     json: { code: 'AUTH_STATE_UNAVAILABLE', detail: '暂时无法确认退出结果' },
   }), { times: 1 })
+  await page.getByText('我的', { exact: true }).click()
   await page.getByRole('button', { name: '退出登录' }).click()
-  await expect(page.getByRole('alert')).toHaveText('暂时无法确认退出结果')
+  await expect(page.getByText('暂时无法退出，请稍后重试', { exact: true })).toBeVisible()
   await expect(page.getByText(portalAccount)).toBeVisible()
   expect((await context.cookies(portalAuthUrl)).some(cookie => cookie.name === 'portal_refresh_token')).toBe(true)
 
@@ -194,7 +205,7 @@ test('刷新暂时失败时保留登录态，退出时取消迟到的私有请�
     }
     catch (error) {
       // Axios 取消旧请求后，浏览器可能已关闭拦截。
-      if (!page.url().includes('/login'))
+      if (!page.url().endsWith('5173/'))
         throw error
     }
     finally {
@@ -206,7 +217,7 @@ test('刷新暂时失败时保留登录态，退出时取消迟到的私有请�
     await responseHeld
     const canceled = page.waitForEvent('requestfailed', request => request.url().endsWith('/me'))
     await page.getByRole('button', { name: '退出登录' }).click()
-    await expect(page).toHaveURL(/\/login/)
+    await expect(page).toHaveURL(/5173\/$/)
     expect((await canceled).failure()?.errorText).toBe('net::ERR_ABORTED')
   }
   finally {
@@ -218,12 +229,12 @@ test('刷新暂时失败时保留登录态，退出时取消迟到的私有请�
 })
 
 async function signIn(page: Page, phone = '13800000001', password = 'LocalPortal-Only!2026') {
-  if (!page.url().includes('/login'))
-    await page.goto('/login')
+  if (!page.url().endsWith('/login?redirect=/account'))
+    await page.goto('/login?redirect=/account')
   await page.getByLabel('手机号').fill(phone)
-  await page.getByLabel('密码').fill(password)
+  await page.getByLabel('密码', { exact: true }).fill(password)
   await page.getByRole('button', { name: '登录', exact: true }).click()
-  await expect(page).toHaveURL(/\/account$/)
+  await expect(page).toHaveURL('/account')
 }
 
 /** 只读取运行本组用例的 Identity 测试实例专用签名私钥。 */
@@ -245,3 +256,19 @@ async function expireNextIdentityRequest(page: Page, signingKey: string) {
     await route.continue({ headers: { ...headers, authorization: `Bearer ${signedContent}.${signature}` } })
   }, { times: 1 })
 }
+
+test('从公开页登录后保留原地址，右上角切换为我的', async ({ page }) => {
+  test.skip(process.env.PORTAL_REAL_AUTH_E2E !== 'true', '需要运行真实 Gateway、Identity、MySQL 和 Redis')
+
+  await page.goto('/?from=conference')
+  await page.getByRole('link', { name: '登录', exact: true }).click()
+  await expect(page).toHaveURL(/\/login\?redirect=/)
+  await page.getByRole('button', { name: '登录', exact: true }).click()
+  await expect(page.getByText('请输入 11 位中国大陆手机号')).toBeVisible()
+  await page.getByLabel('手机号').fill('13800000002')
+  await page.getByLabel('密码', { exact: true }).fill('LocalAdmin-Only!2026')
+  await page.getByRole('button', { name: '登录', exact: true }).click()
+  await expect(page).toHaveURL(/5173\/\?from=conference$/)
+  await page.getByText('我的', { exact: true }).click()
+  await expect(page.getByRole('link', { name: '个人概览' })).toBeVisible()
+})
