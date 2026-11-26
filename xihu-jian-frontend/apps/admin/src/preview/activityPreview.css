@@ -1,0 +1,15 @@
+:root {
+  --color-primary: #155eef;
+  --color-text: #172b4d;
+  --color-muted: #566980;
+  --color-border: #e5eaf2;
+  --color-surface: #fff;
+  --color-error: #a22c35;
+  --color-info-bg: #edf4ff;
+  --color-table-heading: #f7f9fc;
+  --radius-md: 14px;
+  --content-width: 1320px;
+  --el-color-primary: var(--color-primary);
+  color: var(--color-text);
+  background: #f5f7fa;
+}
